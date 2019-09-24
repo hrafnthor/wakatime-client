@@ -1,2 +1,0 @@
-include ':sample', ':wakatimeclient'
-rootProject.name='WakatimeClient Sample'
