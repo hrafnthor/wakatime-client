@@ -1,9 +1,8 @@
+import org.gradle.api.JavaVersion
 
 object Properties {
 
-    object App {
-
-        const val applicationId: String = ""
+    object Common {
 
         const val minimumSdkVersion: Int = 15
 
@@ -11,9 +10,8 @@ object Properties {
 
         const val compileSdkVersion: Int = 29
 
-        const val versionCode: Int = 1
+        const val buildToolVersion: String = "29.0.2"
 
-        const val versionName: String = "0.0.1"
-
+        val javaCompatibility: JavaVersion = JavaVersion.VERSION_1_8
     }
 }

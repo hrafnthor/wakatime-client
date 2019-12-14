@@ -7,10 +7,6 @@ import kotlin.String
  *   `$ ./gradlew buildSrcVersions`
  */
 object Libs {
-    const val de_fayard_buildsrcversions_gradle_plugin: String =
-            "de.fayard.buildSrcVersions:de.fayard.buildSrcVersions.gradle.plugin:" +
-            Versions.de_fayard_buildsrcversions_gradle_plugin
-
     /**
      * https://developer.android.com/studio
      */
@@ -22,43 +18,60 @@ object Libs {
      */
     const val androidx_test_runner: String = "androidx.test:runner:" + Versions.androidx_test_runner
 
-    /**
-     * https://kotlinlang.org/
-     */
-    const val kotlin_android_extensions: String =
-            "org.jetbrains.kotlin:kotlin-android-extensions:" + Versions.org_jetbrains_kotlin
-
-    /**
-     * https://kotlinlang.org/
-     */
-    const val kotlin_android_extensions_runtime: String =
-            "org.jetbrains.kotlin:kotlin-android-extensions-runtime:" +
-            Versions.org_jetbrains_kotlin
+    const val de_fayard_buildsrcversions_gradle_plugin: String =
+            "de.fayard.buildSrcVersions:de.fayard.buildSrcVersions.gradle.plugin:" +
+            Versions.de_fayard_buildsrcversions_gradle_plugin
 
     /**
      * https://kotlinlang.org/
      */
     const val kotlin_annotation_processing_gradle: String =
             "org.jetbrains.kotlin:kotlin-annotation-processing-gradle:" +
-            Versions.org_jetbrains_kotlin
+            Versions.kotlin_annotation_processing_gradle
+
+    /**
+     * https://kotlinlang.org/
+     */
+    const val kotlin_android_extensions_runtime: String =
+            "org.jetbrains.kotlin:kotlin-android-extensions-runtime:" +
+            Versions.kotlin_android_extensions_runtime
+
+    /**
+     * http://r8.googlesource.com/r8
+     */
+    const val desugar_jdk_libs_configuration: String =
+            "com.android.tools:desugar_jdk_libs_configuration:" +
+            Versions.desugar_jdk_libs_configuration
+
+    /**
+     * https://kotlinlang.org/
+     */
+    const val kotlin_android_extensions: String =
+            "org.jetbrains.kotlin:kotlin-android-extensions:" + Versions.kotlin_android_extensions
 
     /**
      * https://kotlinlang.org/
      */
     const val kotlin_gradle_plugin: String = "org.jetbrains.kotlin:kotlin-gradle-plugin:" +
-            Versions.org_jetbrains_kotlin
+            Versions.kotlin_gradle_plugin
 
     /**
      * https://kotlinlang.org/
      */
     const val kotlin_stdlib_jdk7: String = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:" +
-            Versions.org_jetbrains_kotlin
+            Versions.kotlin_stdlib_jdk7
 
     /**
      * http://tools.android.com
      */
     const val constraintlayout: String = "androidx.constraintlayout:constraintlayout:" +
             Versions.constraintlayout
+
+    /**
+     * https://github.com/google/desugar_jdk_libs
+     */
+    const val desugar_jdk_libs: String = "com.android.tools:desugar_jdk_libs:" +
+            Versions.desugar_jdk_libs
 
     /**
      * https://developer.android.com/testing

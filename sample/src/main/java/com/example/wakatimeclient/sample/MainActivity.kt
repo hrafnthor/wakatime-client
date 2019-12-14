@@ -1,4 +1,4 @@
-package com.example.wakatimeclient
+package com.example.wakatimeclient.sample
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle

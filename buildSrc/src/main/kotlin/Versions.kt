@@ -12,34 +12,46 @@ import org.gradle.plugin.use.PluginDependencySpec
  * YOU are responsible for updating manually the dependency version.
  */
 object Versions {
-    const val de_fayard_buildsrcversions_gradle_plugin: String = "0.6.1"
+    const val com_android_tools_build_gradle: String = "4.0.0-alpha06"
 
-    const val com_android_tools_build_gradle: String = "3.5.0"
+    const val androidx_test_runner: String = "1.2.0"
 
-    const val androidx_test_runner: String = "1.1.1" // available: "1.2.0"
+    const val de_fayard_buildsrcversions_gradle_plugin: String = "0.7.0"
 
-    const val org_jetbrains_kotlin: String = "1.3.41" // available: "1.3.50"
+    const val kotlin_annotation_processing_gradle: String = "1.3.61"
+
+    const val kotlin_android_extensions_runtime: String = "1.3.61"
+
+    const val desugar_jdk_libs_configuration: String = "0.11.0"
+
+    const val kotlin_android_extensions: String = "1.3.61"
+
+    const val kotlin_gradle_plugin: String = "1.3.61"
+
+    const val kotlin_stdlib_jdk7: String = "1.3.61"
 
     const val constraintlayout: String = "1.1.3"
 
-    const val espresso_core: String = "3.1.1" // available: "3.2.0"
+    const val desugar_jdk_libs: String = "1.0.4"
 
-    const val lint_gradle: String = "26.5.0"
+    const val espresso_core: String = "3.2.0"
 
-    const val appcompat: String = "1.0.2" // available: "1.1.0"
+    const val lint_gradle: String = "27.0.0-alpha06"
 
-    const val core_ktx: String = "1.0.2" // available: "1.1.0"
+    const val appcompat: String = "1.1.0"
 
-    const val aapt2: String = "3.5.0-5435860"
+    const val core_ktx: String = "1.1.0"
+
+    const val aapt2: String = "4.0.0-alpha06-6040484"
 
     const val junit: String = "4.12"
 
     /**
-     * Current version: "5.4.1"
+     * Current version: "6.1-milestone-2"
      * See issue 19: How to update Gradle itself?
      * https://github.com/jmfayard/buildSrcVersions/issues/19
      */
-    const val gradleLatestVersion: String = "5.6.2"
+    const val gradleLatestVersion: String = "6.0.1"
 }
 
 /**
