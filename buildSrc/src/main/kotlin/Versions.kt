@@ -12,7 +12,7 @@ import org.gradle.plugin.use.PluginDependencySpec
  * YOU are responsible for updating manually the dependency version.
  */
 object Versions {
-    const val com_android_tools_build_gradle: String = "4.0.0-alpha06"
+    const val com_android_tools_build_gradle: String = "4.0.0-alpha07"
 
     const val androidx_test_runner: String = "1.2.0"
 
