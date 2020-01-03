@@ -30,11 +30,35 @@ android {
 }
 
 dependencies {
+    //
+    //  Local dependencies
+    //
     implementation(fileTree(Pair("dir", "libs"), Pair("include", listOf("*.jar"))))
+    //
+    //  Languages related dependencies
+    //
     implementation(Libs.kotlin_stdlib_jdk7)
+    //
+    //  Android Framework dependencies
+    //
     implementation(Libs.appcompat)
     implementation(Libs.core_ktx)
     implementation(Libs.constraintlayout)
+    //
+    //  DI dependencies
+    //
+    implementation(Libs.dagger)
+    implementation(Libs.dagger_android)
+    implementation(Libs.dagger_android_support)
+    kapt(Libs.dagger_compiler)
+    //
+    //
+    //  Third party utility dependencies
+    //
+    implementation("net.openid:appauth:0.7.1")
+    //
+    //  Testing dependencies
+    //
     testImplementation(Libs.junit)
     androidTestImplementation(Libs.androidx_test_runner)
     androidTestImplementation(Libs.espresso_core)

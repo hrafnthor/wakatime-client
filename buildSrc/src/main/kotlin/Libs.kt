@@ -8,6 +8,61 @@ import kotlin.String
  */
 object Libs {
     /**
+     * https://kotlinlang.org/
+     */
+    const val kotlin_android_extensions: String =
+            "org.jetbrains.kotlin:kotlin-android-extensions:" + Versions.org_jetbrains_kotlin
+
+    /**
+     * https://kotlinlang.org/
+     */
+    const val kotlin_android_extensions_runtime: String =
+            "org.jetbrains.kotlin:kotlin-android-extensions-runtime:" +
+            Versions.org_jetbrains_kotlin
+
+    /**
+     * https://kotlinlang.org/
+     */
+    const val kotlin_annotation_processing_gradle: String =
+            "org.jetbrains.kotlin:kotlin-annotation-processing-gradle:" +
+            Versions.org_jetbrains_kotlin
+
+    /**
+     * https://kotlinlang.org/
+     */
+    const val kotlin_gradle_plugin: String = "org.jetbrains.kotlin:kotlin-gradle-plugin:" +
+            Versions.org_jetbrains_kotlin
+
+    /**
+     * https://kotlinlang.org/
+     */
+    const val kotlin_stdlib_jdk7: String = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:" +
+            Versions.org_jetbrains_kotlin
+
+    /**
+     * https://github.com/google/dagger
+     */
+    const val dagger: String = "com.google.dagger:dagger:" + Versions.com_google_dagger
+
+    /**
+     * https://github.com/google/dagger
+     */
+    const val dagger_android: String = "com.google.dagger:dagger-android:" +
+            Versions.com_google_dagger
+
+    /**
+     * https://github.com/google/dagger
+     */
+    const val dagger_android_support: String = "com.google.dagger:dagger-android-support:" +
+            Versions.com_google_dagger
+
+    /**
+     * https://github.com/google/dagger
+     */
+    const val dagger_compiler: String = "com.google.dagger:dagger-compiler:" +
+            Versions.com_google_dagger
+
+    /**
      * https://developer.android.com/studio
      */
     const val com_android_tools_build_gradle: String = "com.android.tools.build:gradle:" +
@@ -23,55 +78,10 @@ object Libs {
             Versions.de_fayard_buildsrcversions_gradle_plugin
 
     /**
-     * https://kotlinlang.org/
-     */
-    const val kotlin_annotation_processing_gradle: String =
-            "org.jetbrains.kotlin:kotlin-annotation-processing-gradle:" +
-            Versions.kotlin_annotation_processing_gradle
-
-    /**
-     * https://kotlinlang.org/
-     */
-    const val kotlin_android_extensions_runtime: String =
-            "org.jetbrains.kotlin:kotlin-android-extensions-runtime:" +
-            Versions.kotlin_android_extensions_runtime
-
-    /**
-     * http://r8.googlesource.com/r8
-     */
-    const val desugar_jdk_libs_configuration: String =
-            "com.android.tools:desugar_jdk_libs_configuration:" +
-            Versions.desugar_jdk_libs_configuration
-
-    /**
-     * https://kotlinlang.org/
-     */
-    const val kotlin_android_extensions: String =
-            "org.jetbrains.kotlin:kotlin-android-extensions:" + Versions.kotlin_android_extensions
-
-    /**
-     * https://kotlinlang.org/
-     */
-    const val kotlin_gradle_plugin: String = "org.jetbrains.kotlin:kotlin-gradle-plugin:" +
-            Versions.kotlin_gradle_plugin
-
-    /**
-     * https://kotlinlang.org/
-     */
-    const val kotlin_stdlib_jdk7: String = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:" +
-            Versions.kotlin_stdlib_jdk7
-
-    /**
      * http://tools.android.com
      */
     const val constraintlayout: String = "androidx.constraintlayout:constraintlayout:" +
             Versions.constraintlayout
-
-    /**
-     * https://github.com/google/desugar_jdk_libs
-     */
-    const val desugar_jdk_libs: String = "com.android.tools:desugar_jdk_libs:" +
-            Versions.desugar_jdk_libs
 
     /**
      * https://developer.android.com/testing
@@ -93,6 +103,11 @@ object Libs {
      * http://developer.android.com/tools/extras/support-library.html
      */
     const val core_ktx: String = "androidx.core:core-ktx:" + Versions.core_ktx
+
+    /**
+     * https://github.com/openid/AppAuth-Android
+     */
+    const val appauth: String = "net.openid:appauth:" + Versions.appauth
 
     /**
      * https://developer.android.com/studio
