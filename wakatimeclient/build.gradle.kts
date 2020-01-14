@@ -3,6 +3,7 @@ plugins {
     id("kotlin-android")
     id("kotlin-android-extensions")
     id("kotlin-kapt")
+    id("de.mannodermaus.android-junit5")
 }
 
 android {
@@ -35,15 +36,19 @@ dependencies {
     //
     implementation(fileTree(Pair("dir", "libs"), Pair("include", listOf("*.jar"))))
     //
-    //  Languages related dependencies
+    //  Language related dependencies
     //
-    implementation(Libs.kotlin_stdlib_jdk7)
+    implementation(Libs.kotlin_stdlib_jdk8)
     //
-    //  Android Framework dependencies
+    //  Android framework dependencies
     //
     implementation(Libs.appcompat)
-    implementation(Libs.core_ktx)
     implementation(Libs.constraintlayout)
+    //
+    //  Androidx library dependencies
+    //
+    implementation(Libs.security_crypto)
+    implementation(Libs.core_ktx)
     //
     //  DI dependencies
     //
@@ -55,11 +60,19 @@ dependencies {
     //
     //  Third party utility dependencies
     //
-    implementation("net.openid:appauth:0.7.1")
+    implementation(Libs.appauth)
+    implementation(Libs.timber)
     //
     //  Testing dependencies
     //
-    testImplementation(Libs.junit)
+    testImplementation(Libs.junit_jupiter_api)
+    testRuntimeOnly(Libs.junit_jupiter_engine)
+    testImplementation(Libs.junit_jupiter_params)
+    testImplementation(Libs.mockk)
+    testImplementation(Libs.assertj_core)
+    //
+    //  Instrumented testing dependencies
+    //
     androidTestImplementation(Libs.androidx_test_runner)
     androidTestImplementation(Libs.espresso_core)
 }
