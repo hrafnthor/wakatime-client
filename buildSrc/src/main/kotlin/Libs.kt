@@ -46,29 +46,6 @@ object Libs {
             Versions.org_jetbrains_kotlin
 
     /**
-     * https://github.com/google/dagger
-     */
-    const val dagger: String = "com.google.dagger:dagger:" + Versions.com_google_dagger
-
-    /**
-     * https://github.com/google/dagger
-     */
-    const val dagger_android: String = "com.google.dagger:dagger-android:" +
-            Versions.com_google_dagger
-
-    /**
-     * https://github.com/google/dagger
-     */
-    const val dagger_android_support: String = "com.google.dagger:dagger-android-support:" +
-            Versions.com_google_dagger
-
-    /**
-     * https://github.com/google/dagger
-     */
-    const val dagger_compiler: String = "com.google.dagger:dagger-compiler:" +
-            Versions.com_google_dagger
-
-    /**
      * https://junit.org/junit5/
      */
     const val junit_jupiter_api: String = "org.junit.jupiter:junit-jupiter-api:" +
@@ -138,7 +115,7 @@ object Libs {
     const val appcompat: String = "androidx.appcompat:appcompat:" + Versions.appcompat
 
     /**
-     * http://developer.android.com/tools/extras/support-library.html
+     * https://developer.android.com/jetpack/androidx
      */
     const val core_ktx: String = "androidx.core:core-ktx:" + Versions.core_ktx
 
