@@ -1,4 +1,4 @@
-package `is`.hth.wakatimeclient.auth
+package `is`.hth.wakatimeclient.core.data.auth
 
 /**
  * The available OAuth access scopes for Wakatime

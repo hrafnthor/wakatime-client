@@ -1,6 +1,6 @@
-package `is`.hth.wakatimeclient.auth
+package `is`.hth.wakatimeclient.core.data.auth
 
-import `is`.hth.wakatimeclient.modify
+import `is`.hth.wakatimeclient.core.data.modify
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
@@ -55,8 +55,8 @@ internal class DefaultAuthStateStorage internal constructor(
             )
         }
 
-        private fun getSharedPreferences(context: Context, name: String): SharedPreferences {
-            return when {
+        private fun getSharedPreferences(context: Context, name: String): SharedPreferences =
+            when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> EncryptedSharedPreferences.create(
                     name,
                     MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
@@ -66,39 +66,39 @@ internal class DefaultAuthStateStorage internal constructor(
                 )
                 else -> {
                     Timber.e("API level is < 23. Using plain SharedPreferences for authentication storage!")
-                    context.getSharedPreferences(
-                        name,
-                        Context.MODE_PRIVATE
-                    )
+                    context.getSharedPreferences(name, Context.MODE_PRIVATE)
                 }
+            }
+    }
+
+    override fun getState(): AuthState {
+        return preferences.getString(KEY_AUTH_STATE, null)?.let {
+            try {
+                AuthState.jsonDeserialize(it)
+            } catch (e: JSONException) {
+                Timber.e(
+                    e.localizedMessage,
+                    "AuthState deserialization failed. Resetting auth storage"
+                )
+                null
+            }
+        } ?: run {
+            AuthState().also {
+                setState(it)
             }
         }
     }
 
-    override fun getState(): AuthState = preferences.getString(KEY_AUTH_STATE, null)?.let {
-        try {
-            AuthState.jsonDeserialize(it)
-        } catch (e: JSONException) {
-            Timber.e(e.localizedMessage, "AuthState deserialization failed. Resetting auth storage")
-            null
-        }
-    } ?: run {
-        AuthState().also {
-            setState(it)
-        }
-    }
-
     override fun setState(state: AuthState): AuthState {
-        return preferences.modify {
-            putString(KEY_AUTH_STATE, state.jsonSerializeString())
-        }.let { state }
+        return state.also {
+            preferences.modify {
+                putString(KEY_AUTH_STATE, it.jsonSerializeString())
+            }
+        }
     }
 
-    override fun update(func: (AuthState) -> Unit): AuthState {
-        return getState().apply(func).let(this::setState)
-    }
+    override fun update(func: (AuthState) -> Unit): AuthState =
+        getState().apply(func).let(this::setState)
 
-    override fun clear() {
-        preferences.modify { clear() }
-    }
+    override fun clear(): Unit = preferences.modify { clear() }
 }
