@@ -26,21 +26,21 @@ class DeEnvelopingConverter(private val gson: Gson) : Converter.Factory() {
         // if one is not supplied then return null to continue down the converter chain.
         val payloadName = getPayloadName(annotations) ?: return null
         val adapter: TypeAdapter<*> = gson.getAdapter(TypeToken.get(type))
-        return (Converter<ResponseBody, Any?> { body: ResponseBody ->
+        return Converter<ResponseBody, Any?> { body: ResponseBody ->
             body.use {
                 gson.newJsonReader(it.charStream()).use { jsonReader ->
                     jsonReader.beginObject()
                     while (jsonReader.hasNext()) {
                         if (payloadName == jsonReader.nextName()) {
-                            adapter.read(jsonReader)
+                            return@Converter adapter.read(jsonReader)
                         } else {
                             jsonReader.skipValue()
                         }
                     }
-                    null
+                    return@Converter null
                 }
             }
-        })
+        }
     }
 
 
