@@ -1,4 +1,4 @@
-package `is`.hth.wakatimeclient
+package `is`.hth.wakatimeclient.core.data
 
 import android.annotation.TargetApi
 import android.content.SharedPreferences
