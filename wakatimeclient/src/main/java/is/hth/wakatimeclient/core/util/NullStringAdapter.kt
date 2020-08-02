@@ -18,10 +18,13 @@ class NullStringAdapter : TypeAdapter<String>() {
     }
 
     override fun read(reader: JsonReader?): String {
-        return if (reader != null && reader.peek() != JsonToken.NULL) {
-            reader.nextString()
-        } else {
-            ""
-        }
+        return reader?.let {
+            if (it.peek() != JsonToken.NULL) {
+                it.nextString()
+            } else {
+                it.nextNull()
+                ""
+            }
+        } ?: ""
     }
 }
