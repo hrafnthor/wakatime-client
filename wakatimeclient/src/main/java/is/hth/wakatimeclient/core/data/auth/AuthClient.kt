@@ -7,7 +7,10 @@ import android.net.Uri
 import net.openid.appauth.*
 import net.openid.appauth.browser.AnyBrowserMatcher
 import net.openid.appauth.browser.BrowserMatcher
-import okhttp3.*
+import okhttp3.Authenticator
+import okhttp3.Request
+import okhttp3.Response
+import okhttp3.Route
 import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -123,9 +126,10 @@ internal class AuthClientImpl internal constructor(
 
     override fun authenticate(route: Route?, response: Response): Request? {
         return if(response.header(HTTP_HEADER_AUTHORIZATION) == null && isAuthorized()){
+            val header = getAuthorizationHeader()
             response.request()
                 .newBuilder()
-                .header(HTTP_HEADER_AUTHORIZATION, getAuthorizationHeader())
+                .header(HTTP_HEADER_AUTHORIZATION, header)
                 .build()
         } else null
     }
