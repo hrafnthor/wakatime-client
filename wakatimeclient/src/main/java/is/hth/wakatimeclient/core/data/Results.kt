@@ -1,17 +1,23 @@
 package `is`.hth.wakatimeclient.core.data
 
-sealed class Results<out T : Any> {
+/**
+ * A discriminating wrapper that encapsulates operational results
+ */
+sealed class Results<out T > {
 
-    object Loading : Results<Nothing>()
+    /**
+     * No resulting values were produced, but potentially an error was
+     */
+    class Empty(val error: Error? = null) : Results<Nothing>()
 
-    object Finished : Results<Nothing>()
+    /**
+     * Values were produced, but potentially an error was as well
+     */
+    class Values<out T>(val data: T, val error: Error? = null) : Results<T>()
 
-    object Empty : Results<Nothing>()
-
-    class Success<out T : Any>(val code: Int, val data: T) : Results<T>()
-
-    class Cache<out T : Any>(val data: T) : Results<T>()
-
-    class Error(val code: Int, val exception: Exception) : Results<Nothing>()
-
+    /**
+     * A complete failure happened due to the indicated [Error]
+     */
+    class Failure(val error: Error) : Results<Nothing>()
 }
+
