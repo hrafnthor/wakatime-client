@@ -12,7 +12,9 @@ import `is`.hth.wakatimeclient.wakatime.data.db.entities.toUser
 import `is`.hth.wakatimeclient.wakatime.model.CurrentUser
 import `is`.hth.wakatimeclient.wakatime.model.User
 
-
+/**
+ * Exposes local data operations related to user specific values
+ */
 interface UserLocalDataSource {
 
     /**
