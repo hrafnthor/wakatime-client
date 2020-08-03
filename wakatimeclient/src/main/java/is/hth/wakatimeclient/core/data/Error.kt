@@ -1,11 +1,11 @@
 package `is`.hth.wakatimeclient.core.data
 
-sealed class Error {
+sealed class Error(val message: String) {
 
     /**
-     * A generic catch all for network related errors that couldn't be pinpointed
+     * A network layer error occurred.
      */
-    sealed class Network : Error() {
+    sealed class Network(message: String = "") : Error(message) {
         /**
          * No network access was found
          */
@@ -24,39 +24,50 @@ sealed class Error {
         /**
          * The host's IP address could not be determined
          */
-        object UnknownHost: Network()
+        object UnknownHost : Network()
 
         /**
          * A 503 Service Unavailable error occurred
          */
-        object Unavailable: Network()
+        object Unavailable : Network()
 
         /**
          * Either a 504 Gateway Timeout, a 408 Client Timeout or a
          * socket timeout exception error occurred
          */
-        object Timeout: Network()
+        object Timeout : Network()
 
         /**
          * A 400 Bad Request error occurred
          */
-        object BadRequest: Network()
+        object BadRequest : Network()
 
         /**
          * Serialization of what ever payload was being processed failed
          */
-        object Serialization: Network()
+        object Serialization : Network()
 
         /**
-         * An unknown network error occurred
+         * An unknown network error occurred that couldn't be matched with a specific case
          */
-        object Unknown: Network()
+        object Unknown : Network()
     }
 
     /**
-     * An unknown error occurred that couldn't be matched with a generic layer case
+     * A database layer error occurred.
      */
-    object Unknown : Error()
+    sealed class Database(message: String = "") : Error(message) {
+
+        /**
+         * An unknown database error occurred that couldn't be matched with a specific case
+         */
+        class Unknown(message: String) : Database(message)
+    }
+
+    /**
+     * An unknown error occurred that couldn't be matched with a layer case
+     */
+    object Unknown : Error("")
 }
 
 
