@@ -28,25 +28,32 @@ class RateLimiter<in KEY>(timeout: Int, timeUnit: TimeUnit) {
     private val timestamps = ArrayMap<KEY, Long>()
     private val timeout = timeUnit.toMillis(timeout.toLong())
 
+    /**
+     * Determines if the supplied [key] should be considered to have expired
+     */
     @Synchronized
     fun shouldFetch(key: KEY): Boolean {
         val lastFetched = timestamps[key]
         val now = now()
-        if (lastFetched == null) {
-            timestamps[key] = now
-            return true
-        }
-        if (now - lastFetched > timeout) {
-            timestamps[key] = now
-            return true
-        }
-        return false
+        return lastFetched == null || now - lastFetched > timeout
     }
 
-    private fun now() = SystemClock.uptimeMillis()
+    /**
+     * Marks the supplied [key] timestamped as of now for the duration
+     * of the configured max timeout
+     */
+    @Synchronized
+    fun mark(key: KEY) {
+        timestamps[key] = now()
+    }
 
+    /**
+     * Resets the timestamp for the supplied [key]
+     */
     @Synchronized
     fun reset(key: KEY) {
         timestamps.remove(key)
     }
+
+    private fun now() = SystemClock.uptimeMillis()
 }
