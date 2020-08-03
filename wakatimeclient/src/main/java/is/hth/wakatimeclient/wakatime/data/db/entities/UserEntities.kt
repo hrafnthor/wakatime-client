@@ -9,9 +9,9 @@ import androidx.room.*
  * Stores publicly available user information
  */
 @Entity(tableName = "users")
-data class UserEntity(
+internal data class UserEntity(
     @PrimaryKey
-    @ColumnInfo(name = "user_id")
+    @ColumnInfo(name = "id")
     val id: String = "",
     @ColumnInfo(name = "display_name")
     val displayName: String = "",
@@ -37,10 +37,10 @@ data class UserEntity(
  * Stores the current user's wakatime configurations
  */
 @Entity(tableName = "config")
-data class ConfigEntity(
+internal data class ConfigEntity(
     @PrimaryKey
-    @ColumnInfo(name = "config_id")
-    val id: String = "",
+    @ColumnInfo(name = "user_id")
+    val userId: String = "",
     @ColumnInfo(name = "email_is_public")
     val emailIsPublic: Boolean = false,
     @ColumnInfo(name = "has_premium_features")
@@ -112,8 +112,8 @@ data class ConfigEntity(
 /**
  * A view combining the publicly visible information for the current user with its configuration
  */
-@DatabaseView("SELECT * FROM users u, config c WHERE c.config_id == u.user_id")
-data class CurrentUserView(
+@DatabaseView("SELECT * FROM users u, config c WHERE c.user_id == u.id")
+internal data class CurrentUserView(
     @Embedded
     val user: UserEntity,
     @Embedded
@@ -123,7 +123,7 @@ data class CurrentUserView(
 /**
  * Maps this [CurrentUserView] to a [CurrentUser]
  */
-fun CurrentUserView.toCurrentUser(): CurrentUser = CurrentUser(
+internal fun CurrentUserView.toCurrentUser(): CurrentUser = CurrentUser(
     user = user.toUser(),
     config = config.toConfig()
 )
@@ -131,7 +131,7 @@ fun CurrentUserView.toCurrentUser(): CurrentUser = CurrentUser(
 /**
  * Maps this [UserEntity] to a [User]
  */
-fun UserEntity.toUser(): User = User(
+internal fun UserEntity.toUser(): User = User(
     id = id,
     displayName = displayName,
     userName = userName,
@@ -163,7 +163,7 @@ internal fun User.toEntity(): UserEntity = UserEntity(
 /**
  * Maps this [ConfigEntity] to a [Config]
  */
-fun ConfigEntity.toConfig(): Config = Config(
+internal fun ConfigEntity.toConfig(): Config = Config(
     emailIsPublic = emailIsPublic,
     hasPremiumFeatures = hasPremiumFeatures,
     emailIsConfirmed = emailIsConfirmed,
@@ -178,15 +178,16 @@ fun ConfigEntity.toConfig(): Config = Config(
  * Maps this [Config] to a [ConfigEntity]
  * // TODO: 2.8.2020 finish adding the mappings to ConfigEntity once Config contains the fields.
  */
-internal fun Config.toEntity(): ConfigEntity = ConfigEntity(
-    emailIsPublic = emailIsPublic,
-    hasPremiumFeatures = hasPremiumFeatures,
-    emailIsConfirmed = emailIsConfirmed,
-    photoIsPublic = photoIsPublic,
-    loggedTimeIsPublic = loggedTimeIsPublic,
-    languagesArePublic = languagesArePublic,
-    colorScheme = colorScheme,
-    timezone = timezone,
+internal fun CurrentUser.toConfigEntity(): ConfigEntity = ConfigEntity(
+    userId = user.id,
+    emailIsPublic = config.emailIsPublic,
+    hasPremiumFeatures = config.hasPremiumFeatures,
+    emailIsConfirmed = config.emailIsConfirmed,
+    photoIsPublic = config.photoIsPublic,
+    loggedTimeIsPublic = config.loggedTimeIsPublic,
+    languagesArePublic = config.languagesArePublic,
+    colorScheme = config.colorScheme,
+    timezone = config.timezone,
     lastHeartbeat = "",
     lastPlugin = "",
     lastProject = "",
