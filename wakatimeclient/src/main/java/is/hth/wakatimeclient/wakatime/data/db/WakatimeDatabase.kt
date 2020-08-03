@@ -22,7 +22,7 @@ import androidx.room.migration.Migration
     version = 1,
     exportSchema = true
 )
-abstract class WakatimeDatabase : RoomDatabase() {
+internal abstract class WakatimeDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
 
@@ -33,15 +33,14 @@ abstract class WakatimeDatabase : RoomDatabase() {
         @Volatile
         private var instance: WakatimeDatabase? = null
 
+        @Synchronized
         fun getInstance(context: Context): WakatimeDatabase {
-            return instance ?: synchronized(this) {
-                getBuilder(context)
-                    .addMigrations(*MIGRATIONS.toTypedArray())
-                    .build()
-                    .also {
-                        instance = it
-                    }
-            }
+            return instance ?: getBuilder(context)
+                .addMigrations(*MIGRATIONS.toTypedArray())
+                .build()
+                .also {
+                    instance = it
+                }
         }
 
         private fun getBuilder(context: Context): Builder<WakatimeDatabase> {

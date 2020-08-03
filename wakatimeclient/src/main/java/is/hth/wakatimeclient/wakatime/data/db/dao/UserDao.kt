@@ -9,7 +9,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
-interface UserDao {
+internal interface UserDao {
 
     /**
      * Selects the current user if one exists, else null
@@ -20,7 +20,7 @@ interface UserDao {
     /**
      * Selects a user matching the supplied id if one exists, else null
      */
-    @Query("SELECT * FROM users WHERE user_id == :id")
+    @Query("SELECT * FROM users WHERE id == :id")
     suspend fun getUser(id: String): UserEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
