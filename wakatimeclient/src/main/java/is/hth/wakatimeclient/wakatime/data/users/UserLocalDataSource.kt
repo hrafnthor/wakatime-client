@@ -5,6 +5,7 @@ import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.util.safeOperation
 import `is`.hth.wakatimeclient.core.util.valuesOrEmpty
 import `is`.hth.wakatimeclient.wakatime.data.db.dao.UserDao
+import `is`.hth.wakatimeclient.wakatime.data.db.entities.toConfigEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.toCurrentUser
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.toEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.toUser
@@ -60,6 +61,6 @@ internal class UserLocalDataSourceImp(
 
     override suspend fun insert(currentUser: CurrentUser) {
         dao.insertReplace(currentUser.user.toEntity())
-        dao.insertReplace(currentUser.config.toEntity())
+        dao.insertReplace(currentUser.toConfigEntity())
     }
 }

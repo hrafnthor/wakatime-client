@@ -42,7 +42,7 @@ class UserRepositoryImpl(
             remote.getCurrentUser()
         }.update {
             local.insert(it)
-            limiter.reset(keyCurrentUser)
+            limiter.mark(keyCurrentUser)
         }
 
     override suspend fun getCurrentUser(): Results<CurrentUser> = currentUserLoader.execute()
