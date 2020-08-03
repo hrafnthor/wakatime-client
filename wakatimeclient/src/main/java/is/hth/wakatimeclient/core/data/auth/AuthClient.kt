@@ -1,6 +1,5 @@
 package `is`.hth.wakatimeclient.core.data.auth
 
-import `is`.hth.wakatimeclient.core.data.api.HTTP_HEADER_AUTHORIZATION
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -125,11 +124,13 @@ internal class AuthClientImpl internal constructor(
     //////////////////////////////////////////////////////////////////////////
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        return if(response.header(HTTP_HEADER_AUTHORIZATION) == null && isAuthorized()){
+        val authorizationHeader = "Authorization"
+        return if(response.header(authorizationHeader) == null && isAuthorized()){
+            // Authorization exists and has not been attempted for this request yet
             val header = getAuthorizationHeader()
             response.request()
                 .newBuilder()
-                .header(HTTP_HEADER_AUTHORIZATION, header)
+                .header(authorizationHeader, header)
                 .build()
         } else null
     }

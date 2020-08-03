@@ -43,7 +43,6 @@ class DeEnvelopingConverter(private val gson: Gson) : Converter.Factory() {
         }
     }
 
-
     @Nullable
     private fun getPayloadName(annotations: Array<Annotation>?): String? {
         if (annotations == null) return null
