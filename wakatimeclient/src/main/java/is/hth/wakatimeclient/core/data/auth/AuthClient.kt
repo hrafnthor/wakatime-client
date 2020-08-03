@@ -14,7 +14,7 @@ import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-interface AuthClient  {
+interface AuthClient {
 
     /**
      * Indicates if the client is currently authorized
@@ -114,10 +114,7 @@ internal class AuthClientImpl internal constructor(
 
     override fun getAuthenticator(): Authenticator = this
 
-    override fun clear() {
-        // TODO: 21.5.2020 Clear browser authentication as well
-        storage.clear()
-    }
+    override fun clear(): Unit = storage.clear()
 
     //
     //                      OKHttp.Authenticator implementation
@@ -125,7 +122,7 @@ internal class AuthClientImpl internal constructor(
 
     override fun authenticate(route: Route?, response: Response): Request? {
         val authorizationHeader = "Authorization"
-        return if(response.header(authorizationHeader) == null && isAuthorized()){
+        return if (response.header(authorizationHeader) == null && isAuthorized()) {
             // Authorization exists and has not been attempted for this request yet
             val header = getAuthorizationHeader()
             response.request()
@@ -175,7 +172,7 @@ internal class AuthClientImpl internal constructor(
             clientId = clientId,
             redirectUri = Uri.parse(redirectUri),
             authorizationEndpoint = Uri.parse("https://wakatime.com/oauth/authorize"),
-            tokenEndpoint =  Uri.parse("https://wakatime.com/oauth/token")
+            tokenEndpoint = Uri.parse("https://wakatime.com/oauth/token")
         )
         private var storage: AuthStateStorage? = null
         private var matcher: BrowserMatcher = AnyBrowserMatcher.INSTANCE
