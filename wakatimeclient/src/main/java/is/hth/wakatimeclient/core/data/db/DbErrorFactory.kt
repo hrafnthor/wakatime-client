@@ -1,4 +1,7 @@
-package `is`.hth.wakatimeclient.core.data
+package `is`.hth.wakatimeclient.core.data.db
+
+import `is`.hth.wakatimeclient.core.data.Error
+import `is`.hth.wakatimeclient.core.data.ErrorFactory
 
 /**
  * Produces database related [Error]s based on the given inputs
