@@ -1,9 +1,10 @@
 package `is`.hth.wakatimeclient
 
-import `is`.hth.wakatimeclient.core.data.DbErrorFactory
+import `is`.hth.wakatimeclient.core.data.db.DbErrorFactory
 import `is`.hth.wakatimeclient.core.data.NetworkClient
 import `is`.hth.wakatimeclient.core.data.NetworkClientImpl
 import `is`.hth.wakatimeclient.core.data.NetworkErrorFactory
+import `is`.hth.wakatimeclient.core.data.Reset
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.auth.AuthClientImpl
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeDatabase
@@ -15,11 +16,19 @@ import kotlin.math.abs
 /**
  *
  */
+@Suppress("unused")
 class WakatimeClient private constructor(
     private val authClient: AuthClient,
     private val netClient: NetworkClient,
-    private val users: UserRepository
+    private val users: UserRepository,
+    private val resets: List<Reset>
 ) : AuthClient by authClient, UserRepository by users {
+
+    suspend fun logout() {
+        resets.forEach {
+            it.reset()
+        }
+    }
 
     /**
      *
@@ -60,10 +69,10 @@ class WakatimeClient private constructor(
             val networkFactory = NetworkErrorFactory()
             val dbErrorFactory = DbErrorFactory()
 
+            val db = WakatimeDatabase.getInstance(context.applicationContext)
             val authClient = authBuilder.build(context.applicationContext)
             val netClient = netBuilder.build(authClient.getAuthenticator())
             val service = netClient.getService()
-            val db = WakatimeDatabase.getInstance(context.applicationContext)
 
             val users = UserInjector.provideRepository(
                 cacheLifetimeMinutes,
@@ -73,7 +82,14 @@ class WakatimeClient private constructor(
                 dbErrorFactory
             )
 
-            return WakatimeClient(authClient, netClient, users)
+            return WakatimeClient(
+                authClient,
+                netClient,
+                users,
+                listOf(
+                    authClient.getReset(),
+                    db.getReset())
+            )
         }
     }
 }

@@ -1,5 +1,7 @@
 package `is`.hth.wakatimeclient.core.data.auth
 
+import `is`.hth.wakatimeclient.core.data.Reset
+import `is`.hth.wakatimeclient.core.data.Resettable
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -14,7 +16,7 @@ import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-interface AuthClient {
+interface AuthClient : Resettable {
 
     /**
      * Indicates if the client is currently authorized
@@ -44,11 +46,6 @@ interface AuthClient {
     /**
      *
      */
-    fun clear()
-
-    /**
-     *
-     */
     interface Builder {
 
         /**
@@ -63,7 +60,6 @@ interface AuthClient {
     }
 }
 
-
 /**
  *
  */
@@ -72,6 +68,8 @@ internal class AuthClientImpl internal constructor(
     private val storage: AuthStateStorage,
     private val service: AuthorizationService
 ) : AuthClient, Authenticator {
+
+    private val authReset: Reset by lazy { AuthReset(storage) }
 
     override fun isAuthorized(): Boolean = storage.getState().isAuthorized
 
@@ -114,7 +112,7 @@ internal class AuthClientImpl internal constructor(
 
     override fun getAuthenticator(): Authenticator = this
 
-    override fun clear(): Unit = storage.clear()
+    override fun getReset(): Reset = authReset
 
     //
     //                      OKHttp.Authenticator implementation
@@ -156,6 +154,15 @@ internal class AuthClientImpl internal constructor(
                 receiver(Result.failure(exception))
             }
         }
+    }
+
+    //
+    //                      Internal class definitions
+    //////////////////////////////////////////////////////////////////////////
+
+    private class AuthReset(private val storage: AuthStateStorage) : Reset {
+
+        override suspend fun reset(): Unit = storage.clear()
     }
 
     /**
