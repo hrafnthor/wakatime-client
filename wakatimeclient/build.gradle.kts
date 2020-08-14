@@ -40,27 +40,25 @@ dependencies {
     //
     implementation(Libs.kotlin_stdlib_jdk8)
     //
-    //  Android framework dependencies
-    //
-    implementation(Libs.appcompat)
-    implementation(Libs.constraintlayout)
-    //
     //  Androidx library dependencies
     //
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
+    implementation(Libs.appcompat)
+    implementation(Libs.constraintlayout)
     implementation(Libs.security_crypto)
     implementation(Libs.core_ktx)
-    //
-    //  DI dependencies
-    //
-    implementation(Libs.dagger)
-    implementation(Libs.dagger_android)
-    implementation(Libs.dagger_android_support)
-    kapt(Libs.dagger_compiler)
+    implementation(Libs.room_common)
+    implementation(Libs.room_runtime)
+    implementation("androidx.room:room-ktx:2.2.5")
+    kapt(Libs.room_compiler)
     //
     //
     //  Third party utility dependencies
     //
-    implementation(Libs.appauth)
+    api(Libs.appauth)
+    implementation("com.google.code.gson:gson:2.8.5")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation(Libs.timber)
     //
     //  Testing dependencies
