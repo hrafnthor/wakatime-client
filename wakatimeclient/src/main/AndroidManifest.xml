@@ -1,2 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="is.hth.wakatimeclient" />
+    xmlns:tools="http://schemas.android.com/tools"
+    package="is.hth.wakatimeclient">
+
+    <uses-sdk tools:overrideLibrary="androidx.security" />
+</manifest>

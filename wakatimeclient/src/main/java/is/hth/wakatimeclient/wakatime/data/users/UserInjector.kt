@@ -1,6 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.users
 
-import `is`.hth.wakatimeclient.core.data.DbErrorFactory
+import `is`.hth.wakatimeclient.core.data.db.DbErrorFactory
 import `is`.hth.wakatimeclient.core.data.ErrorFactory
 import `is`.hth.wakatimeclient.core.data.NetworkErrorFactory
 import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeService
