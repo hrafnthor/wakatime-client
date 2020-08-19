@@ -74,7 +74,7 @@ internal class AuthClientImpl internal constructor(
     override fun isAuthorized(): Boolean = storage.getState().isAuthorized
 
     override fun authorizedScopes(): List<Scope> =
-        storage.getState().scopeSet?.map { Scope.valueOf(it) } ?: listOf()
+        storage.getState().scopeSet?.map { Scope.scopes.getValue(it) } ?: listOf()
 
     override fun createAuthenticationIntent(scopes: List<Scope>): Intent {
         val serviceConfig = AuthorizationServiceConfiguration(

@@ -6,6 +6,7 @@ import `is`.hth.wakatimeclient.core.data.Resettable
 import `is`.hth.wakatimeclient.wakatime.data.db.dao.UserDao
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.ConfigEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.CurrentUserView
+import `is`.hth.wakatimeclient.wakatime.data.db.entities.TotalRecordEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.UserEntity
 import android.content.Context
 import androidx.room.Database
@@ -16,7 +17,8 @@ import androidx.room.migration.Migration
 @Database(
     entities = [
         UserEntity::class,
-        ConfigEntity::class
+        ConfigEntity::class,
+        TotalRecordEntity::class
     ],
     views = [
         CurrentUserView::class

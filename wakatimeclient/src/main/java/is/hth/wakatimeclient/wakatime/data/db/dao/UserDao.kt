@@ -2,6 +2,7 @@ package `is`.hth.wakatimeclient.wakatime.data.db.dao
 
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.ConfigEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.CurrentUserView
+import `is`.hth.wakatimeclient.wakatime.data.db.entities.TotalRecordEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.UserEntity
 import androidx.room.Dao
 import androidx.room.Insert
@@ -23,9 +24,19 @@ internal interface UserDao {
     @Query("SELECT * FROM users WHERE id == :id")
     suspend fun getUser(id: String): UserEntity?
 
+    /**
+     * Selects the total reported time record for the current user
+     */
+    @Query("SELECT * FROM total_record WHERE id == 1")
+    suspend fun getTotalRecord(): TotalRecordEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReplace(user: UserEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReplace(configEntity: ConfigEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertReplace(totalRecord: TotalRecordEntity)
+
 }

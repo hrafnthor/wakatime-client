@@ -1,20 +1,28 @@
 package `is`.hth.wakatimeclient.core.data
 
+import `is`.hth.wakatimeclient.core.data.auth.Scope
+
 sealed class Error(val message: String) {
 
     /**
      * A network layer error occurred.
      */
     sealed class Network(message: String = "") : Error(message) {
+
+        /**
+         * The required scopes for the network operation are not present
+         */
+        class Forbidden(val requiredScopes: Set<Scope> = emptySet()) : Network()
+
         /**
          * No network access was found
          */
-        object NoAccess : Network()
+        object NoNetwork : Network()
 
         /**
          * Authentication is not present or has expired
          */
-        object AccessDenied : Network()
+        object Unauthorized : Network()
 
         /**
          * A 404 Not Found error occurred
@@ -71,12 +79,17 @@ sealed class Error(val message: String) {
 }
 
 
-interface ErrorFactory {
+interface ErrorFactory<T> {
 
     /**
      * Converts the supplied [code] to a corresponding [Error]
      */
     fun onCode(code: Int): Error
+
+    /**
+     * Converts the supplied [value] to a corresponding [Error]
+     */
+    fun onValue(value: T): Error = Error.Unknown
 
     /**
      * Converts the supplied [throwable] to a corresponding [Error]

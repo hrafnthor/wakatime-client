@@ -1,8 +1,7 @@
 package `is`.hth.wakatimeclient.wakatime.data.users
 
-import `is`.hth.wakatimeclient.core.data.db.DbErrorFactory
-import `is`.hth.wakatimeclient.core.data.ErrorFactory
 import `is`.hth.wakatimeclient.core.data.NetworkErrorFactory
+import `is`.hth.wakatimeclient.core.data.db.DbErrorFactory
 import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeService
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeDatabase
 import `is`.hth.wakatimeclient.wakatime.data.db.dao.UserDao
@@ -25,14 +24,14 @@ internal object UserInjector {
 
     private fun remoteDataSource(
         service: WakatimeService,
-        errors: ErrorFactory
+        errors: NetworkErrorFactory
     ): UserRemoteDataSource {
         return UserRemoteDataSourceImpl(errors, service)
     }
 
     private fun localDataSource(
         dao: UserDao,
-        errors: ErrorFactory
+        errors: DbErrorFactory
     ): UserLocalDataSource {
         return UserLocalDataSourceImp(dao, errors)
     }

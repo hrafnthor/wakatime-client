@@ -1,12 +1,12 @@
 package `is`.hth.wakatimeclient
 
-import `is`.hth.wakatimeclient.core.data.db.DbErrorFactory
 import `is`.hth.wakatimeclient.core.data.NetworkClient
 import `is`.hth.wakatimeclient.core.data.NetworkClientImpl
-import `is`.hth.wakatimeclient.core.data.NetworkErrorFactory
 import `is`.hth.wakatimeclient.core.data.Reset
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.auth.AuthClientImpl
+import `is`.hth.wakatimeclient.core.data.db.DbErrorFactory
+import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeNetworkErrorFactory
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeDatabase
 import `is`.hth.wakatimeclient.wakatime.data.users.UserInjector
 import `is`.hth.wakatimeclient.wakatime.data.users.UserRepository
@@ -66,7 +66,7 @@ class WakatimeClient private constructor(
          * Constructs a [WakatimeClient] based on the current configuration
          */
         fun build(context: Context): WakatimeClient {
-            val networkFactory = NetworkErrorFactory()
+            val networkFactory = WakatimeNetworkErrorFactory(netBuilder.gson)
             val dbErrorFactory = DbErrorFactory()
 
             val db = WakatimeDatabase.getInstance(context.applicationContext)

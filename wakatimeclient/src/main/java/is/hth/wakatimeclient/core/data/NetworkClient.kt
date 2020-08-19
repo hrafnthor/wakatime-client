@@ -51,16 +51,16 @@ internal class NetworkClientImpl private constructor(
         private val host: String
     ) : NetworkClient.Builder {
 
-        private val client = OkHttpClient.Builder()
-        private val retrofit = Retrofit.Builder()
+        private val clientBuilder = OkHttpClient.Builder()
+        private val retrofitBuilder = Retrofit.Builder()
         private var authenticator: Authenticator? = null
-        private val gson: Gson = GsonBuilder()
-            .registerTypeAdapter("".javaClass, NullStringAdapter())
+        val gson: Gson = GsonBuilder()
+            .registerTypeAdapter(String::class.java, NullStringAdapter())
             .create()
 
-        override fun getOKHttpBuilder(): OkHttpClient.Builder = client
+        override fun getOKHttpBuilder(): OkHttpClient.Builder = clientBuilder
 
-        override fun getRetrofitBuilder(): Retrofit.Builder = retrofit
+        override fun getRetrofitBuilder(): Retrofit.Builder = retrofitBuilder
 
         override fun setAuthenticator(authenticator: Authenticator): NetworkClient.Builder {
             return apply { this.authenticator = authenticator }
@@ -69,16 +69,16 @@ internal class NetworkClientImpl private constructor(
         internal fun build(
             authenticator: Authenticator
         ): NetworkClient {
-            val builtClient = client.authenticator(this.authenticator ?: authenticator).build()
-            val builtRetrofit = retrofit
+            val client = clientBuilder.authenticator(this.authenticator ?: authenticator).build()
+            val retrofit = retrofitBuilder
                 .baseUrl(host)
-                .client(builtClient)
+                .client(client)
                 .addConverterFactory(DeEnvelopingConverter(gson))
                 .build()
-            val service = builtRetrofit.create(WakatimeService::class.java)
+            val service = retrofit.create(WakatimeService::class.java)
             return NetworkClientImpl(
-                builtClient,
-                builtRetrofit,
+                client,
+                retrofit,
                 service
             )
         }

@@ -6,7 +6,7 @@ import `is`.hth.wakatimeclient.core.data.ErrorFactory
 /**
  * Produces database related [Error]s based on the given inputs
  */
-class DbErrorFactory : ErrorFactory {
+class DbErrorFactory : ErrorFactory<Unit> {
 
     override fun onCode(code: Int): Error {
         return Error.Database.Unknown("")
