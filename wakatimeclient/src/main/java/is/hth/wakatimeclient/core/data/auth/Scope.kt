@@ -8,17 +8,16 @@ sealed class Scope(val name: String) {
 
     companion object {
 
-        fun valueOf(name: String): Scope {
-            return when(name){
-                Email.name -> Email
-                ReadLoggedTime.name -> ReadLoggedTime
-                WriteLoggedTime.name -> WriteLoggedTime
-                ReadStats.name -> ReadStats
-                ReadOrgs.name -> ReadOrgs
-                ReadPrivateLeaderboards.name -> ReadPrivateLeaderboards
-                WritePrivateLeaderboards.name -> WritePrivateLeaderboards
-                else -> throw IllegalArgumentException("Unknown scope name $name")
-            }
+        val scopes: HashMap<String, Scope> by lazy {
+            hashMapOf(
+                Email.name to Email,
+                ReadLoggedTime.name to ReadLoggedTime,
+                WriteLoggedTime.name to WriteLoggedTime,
+                ReadStats.name to ReadStats,
+                ReadOrganization.name to ReadOrganization,
+                ReadPrivateLeaderboards.name to ReadPrivateLeaderboards,
+                WritePrivateLeaderboards.name to WritePrivateLeaderboards
+            )
         }
     }
 
@@ -41,7 +40,7 @@ sealed class Scope(val name: String) {
     /**
      * Access user’s organizations, and coding activity for dashboard members.
      */
-    object ReadOrgs: Scope("read_orgs")
+    object ReadOrganization: Scope("read_orgs")
     /**
      * Access user’s private leaderboards.
      */

@@ -5,11 +5,13 @@ import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.util.safeOperation
 import `is`.hth.wakatimeclient.core.util.valuesOrEmpty
 import `is`.hth.wakatimeclient.wakatime.data.db.dao.UserDao
+import `is`.hth.wakatimeclient.wakatime.data.db.entities.*
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.toConfigEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.toCurrentUser
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.toEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.toUser
 import `is`.hth.wakatimeclient.wakatime.model.CurrentUser
+import `is`.hth.wakatimeclient.wakatime.model.TotalRecord
 import `is`.hth.wakatimeclient.wakatime.model.User
 
 /**
@@ -27,14 +29,22 @@ interface UserLocalDataSource {
      */
     suspend fun getUser(id: String): Results<User>
 
+    /**
+     * Attempts to retrieve the [TotalRecord] information for the current user
+     * from the local storage
+     */
+    suspend fun getTotalRecord(): Results<TotalRecord>
+
     suspend fun insert(user: User)
 
     suspend fun insert(currentUser: CurrentUser)
+
+    suspend fun insert(totalRecord: TotalRecord)
 }
 
 internal class UserLocalDataSourceImp(
     private val dao: UserDao,
-    private val errors: ErrorFactory
+    private val errors: ErrorFactory<*>
 ) : UserLocalDataSource {
 
     override suspend fun getCurrentUser(): Results<CurrentUser> = safeOperation(
@@ -59,10 +69,25 @@ internal class UserLocalDataSourceImp(
         }
     )
 
+    override suspend fun getTotalRecord(): Results<TotalRecord> = safeOperation(
+        operation = {
+            valuesOrEmpty {
+                dao.getTotalRecord()?.toTotalRecord()
+            }
+        },
+        error = {
+            errors.onThrowable(it)
+        }
+    )
+
     override suspend fun insert(user: User): Unit = dao.insertReplace(user.toEntity())
 
     override suspend fun insert(currentUser: CurrentUser) {
         dao.insertReplace(currentUser.user.toEntity())
         dao.insertReplace(currentUser.toConfigEntity())
+    }
+
+    override suspend fun insert(totalRecord: TotalRecord) {
+        dao.insertReplace(totalRecord.toTotalRecordEntity())
     }
 }

@@ -4,6 +4,7 @@ import `is`.hth.wakatimeclient.core.data.Loader
 import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.util.RateLimiter
 import `is`.hth.wakatimeclient.wakatime.model.CurrentUser
+import `is`.hth.wakatimeclient.wakatime.model.TotalRecord
 import `is`.hth.wakatimeclient.wakatime.model.User
 import java.util.concurrent.TimeUnit
 
@@ -21,6 +22,18 @@ interface UserRepository {
      * Retrieves the public user information for a user matching the supplied id
      */
     suspend fun getUser(id: String): Results<User>
+
+    /**
+     * Retrieves the total recorded time for the currently authenticated user.
+     *
+     * In case the total recorded time has not been calculated, or is out of date, on
+     * the server side this call will spawn a processing task which, depending on
+     * how out of date the record is, can take a while to process.
+     *
+     * Repeated calls to this endpoint will fetch the calculation progress, and at the point
+     * of it finishing the results will be cached for the duration of the set cache limit.
+     */
+    suspend fun getTotalRecord(): Results<TotalRecord>
 }
 
 class UserRepositoryImpl(
@@ -29,7 +42,10 @@ class UserRepositoryImpl(
     private val local: UserLocalDataSource
 ) : UserRepository {
 
-    private val keyCurrentUser = "current"
+    companion object {
+        private const val keyCurrentUser = "current"
+        private const val keyTotalRecord = "totalRecord"
+    }
 
     private val limiter: RateLimiter<String> = RateLimiter(cacheLimit, TimeUnit.MINUTES)
     private val userLoader: Loader<User> = Loader()
@@ -43,6 +59,21 @@ class UserRepositoryImpl(
         }.update {
             local.insert(it)
             limiter.mark(keyCurrentUser)
+        }
+    private val totalRecordLoader: Loader<TotalRecord> = Loader<TotalRecord>()
+        .local {
+            local.getTotalRecord()
+        }.expired {
+            limiter.shouldFetch(keyTotalRecord)
+        }.remote {
+            remote.getTotalRecord()
+        }.update {
+            local.insert(it)
+            if (it.isUpToDate) {
+                // Total record processing has finished service side, and
+                // no more progress updates will be emitted for a while
+                limiter.mark(keyTotalRecord)
+            }
         }
 
     override suspend fun getCurrentUser(): Results<CurrentUser> = currentUserLoader.execute()
@@ -60,6 +91,8 @@ class UserRepositoryImpl(
             // currently not allowed through the API
             Results.Empty()
         }.execute()
+
+    override suspend fun getTotalRecord(): Results<TotalRecord> = totalRecordLoader.execute()
 }
 
 

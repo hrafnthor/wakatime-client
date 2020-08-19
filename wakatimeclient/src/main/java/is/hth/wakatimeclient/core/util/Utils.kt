@@ -34,7 +34,7 @@ suspend fun <T : Any, R : Any> networkOperation(
      * In case the response does not indicate success attempt
      * to convert the response's code to an [Error]
      */
-    error: (Int) -> Error
+    error: (Response<T>) -> Error
 ): Results<R> {
     val response = operation()
     return when {
@@ -43,7 +43,7 @@ suspend fun <T : Any, R : Any> networkOperation(
                 Results.Values(convert(it))
             } ?: Results.Empty()
         }
-        else -> Results.Failure(error(response.code()))
+        else -> Results.Failure(error(response))
     }
 }
 
