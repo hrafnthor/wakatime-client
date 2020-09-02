@@ -1,15 +1,16 @@
 package `is`.hth.wakatimeclient.wakatime.data.users
 
-import `is`.hth.wakatimeclient.core.data.ErrorFactory
+import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
+import `is`.hth.wakatimeclient.core.data.net.RemoteDataSource
 import `is`.hth.wakatimeclient.core.data.Results
-import `is`.hth.wakatimeclient.core.util.networkOperation
-import `is`.hth.wakatimeclient.core.util.safeOperation
-import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeService
+import `is`.hth.wakatimeclient.core.data.auth.AuthClient
+import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeApi
+import `is`.hth.wakatimeclient.wakatime.data.api.dto.FullUserDto
+import `is`.hth.wakatimeclient.wakatime.data.api.dto.TotalRecordDto
 import `is`.hth.wakatimeclient.wakatime.data.api.dto.toCurrentUser
 import `is`.hth.wakatimeclient.wakatime.data.api.dto.toTotalRecord
 import `is`.hth.wakatimeclient.wakatime.model.CurrentUser
 import `is`.hth.wakatimeclient.wakatime.model.TotalRecord
-import retrofit2.Response
 
 /**
  * Exposes remote data load operations related to user specific values
@@ -33,30 +34,19 @@ interface UserRemoteDataSource {
 }
 
 internal class UserRemoteDataSourceImpl(
-    private val errors: ErrorFactory<Response<*>>,
-    private val service: WakatimeService
-) : UserRemoteDataSource {
+    session: AuthClient.Session,
+    processor: NetworkErrorProcessor,
+    private val api: WakatimeApi
+) : RemoteDataSource(session, processor), UserRemoteDataSource {
 
-    override suspend fun getCurrentUser(): Results<CurrentUser> = safeOperation(
-        operation = {
-            networkOperation(
-                operation = { service.getCurrentUser() },
-                convert = { it.toCurrentUser() },
-                error = { errors.onValue(it) }
-            )
-        },
-        error = { errors.onThrowable(it) }
-    )
+    override suspend fun getCurrentUser(): Results<CurrentUser> =
+        makeCall(FullUserDto::toCurrentUser) {
+            api.getCurrentUser()
+        }
 
-    override suspend fun getTotalRecord(): Results<TotalRecord> = safeOperation(
-        operation = {
-            networkOperation(
-                operation = { service.getTotalRecord() },
-                convert = { it.toTotalRecord() },
-                error = { errors.onCode(it.code()) }
-            )
-        },
-        error = { errors.onThrowable(it) }
-    )
+    override suspend fun getTotalRecord(): Results<TotalRecord> =
+        makeCall(TotalRecordDto::toTotalRecord) {
+            api.getTotalRecord()
+        }
 }
 

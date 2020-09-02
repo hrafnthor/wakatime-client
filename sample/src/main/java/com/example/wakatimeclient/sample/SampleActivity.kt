@@ -1,12 +1,14 @@
 package com.example.wakatimeclient.sample
 
 import `is`.hth.wakatimeclient.WakatimeClient
+import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.Scope
 import `is`.hth.wakatimeclient.wakatime.model.CurrentUser
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -68,7 +70,15 @@ class SampleActivity : AppCompatActivity(),
         }
 
         model.authentication.observe(this, Observer { authenticated ->
-            if (authenticated) loadCurrentUser()
+            if (authenticated) {
+                loadCurrentUser()
+            } else {
+                Toast.makeText(this, "Not authenticated!", Toast.LENGTH_LONG).show()
+            }
+        })
+
+        model.error.observe(this, Observer {
+
         })
     }
 
@@ -98,8 +108,8 @@ class SampleActivity : AppCompatActivity(),
         if (BrowserSelector.getAllBrowsers(view.context).isEmpty()) {
             longToast("No browsers found")
         } else {
-            val intent =
-                model.getAuthenticationRequest(listOf(Scope.Email, Scope.ReadPrivateLeaderboards))
+            val scopes = listOf(Scope.Email, Scope.ReadPrivateLeaderboards)
+            val intent = model.getAuthenticationRequest(scopes)
             startActivityForResult(intent, AUTHENTICATION_REQUEST_CODE)
         }
     }
@@ -129,11 +139,15 @@ class SampleViewModel(
 
     private var job = Job()
 
-    private val _authenticated: MutableLiveData<Boolean> = MutableLiveData(client.isAuthorized())
+    private val _authenticated: MutableLiveData<Boolean> =
+        MutableLiveData(client.session().isAuthorized())
     val authentication: LiveData<Boolean> = _authenticated
 
     private val _currentUser: MutableLiveData<CurrentUser> = MutableLiveData()
     val currentUser: LiveData<CurrentUser> = _currentUser
+
+    private val _error: MutableLiveData<Error> = MutableLiveData()
+    val error: LiveData<Error> = _error
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.IO + job
@@ -155,17 +169,20 @@ class SampleViewModel(
 
     fun logout() {
         launch(context = coroutineContext) {
-            client.logout()
+            when(val results = client.logout(false)) {
+                is Results.Success -> _authenticated.postValue(false)
+                is Results.Failure -> _error.postValue(results.error)
+            }
         }
     }
 
     fun loadCurrentUser() {
         launch(context = coroutineContext) {
-            when (val results = client.getCurrentUser()) {
+            when (val results = client.users.getCurrentUser()) {
                 is Results.Failure -> {
 
                 }
-                is Results.Values -> {
+                is Results.Success.Values -> {
                     _currentUser.postValue(results.data)
                 }
             }
@@ -185,11 +202,22 @@ class SampleViewModelFactory(
 
 object Injector {
 
-    private fun providesClient(context: Context): WakatimeClient {
+    private fun getApiClient(context: Context): WakatimeClient {
+        return WakatimeClient.Builder(base64EncodedApiKey = "")
+            .authenticator {
+
+            }.network {
+                val interceptor = HttpLoggingInterceptor()
+                interceptor.level = HttpLoggingInterceptor.Level.BODY
+                getOKHttpBuilder().addInterceptor(interceptor)
+            }.build(context)
+    }
+
+    private fun getOauthClient(context: Context): WakatimeClient {
         return WakatimeClient.Builder(
-            "sec_qyQkp5sDduZubb4WCZQk3pelLYDHUDHILSZbdiivii0Ri9Tfz9OHjSDcZLnUnwjUBzvaDKI2BSEHYaza",
-            "ExpoVG2FuEHvIH6regUiasgX",
-            "vakta://grant-callback"
+            secret = "sec_qyQkp5sDduZubb4WCZQk3pelLYDHUDHILSZbdiivii0Ri9Tfz9OHjSDcZLnUnwjUBzvaDKI2BSEHYaza",
+            clientId = "ExpoVG2FuEHvIH6regUiasgX",
+            redirectUri = Uri.parse("vakta://grant-callback")
         ).authenticator {
 
         }.network {
@@ -200,6 +228,6 @@ object Injector {
     }
 
     fun providesViewModelFactory(context: Context): SampleViewModelFactory {
-        return SampleViewModelFactory(providesClient(context))
+        return SampleViewModelFactory(getOauthClient(context))
     }
 }

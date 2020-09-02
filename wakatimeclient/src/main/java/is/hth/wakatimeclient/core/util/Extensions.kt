@@ -16,6 +16,8 @@
 
 package `is`.hth.wakatimeclient.core.util
 
+import `is`.hth.wakatimeclient.core.data.Results
+
 /**
  * Helper to force a when statement to assert all options are matched in a when statement.
  *
@@ -34,3 +36,11 @@ package `is`.hth.wakatimeclient.core.util
  */
 val <T> T.exhaustive: T
     get() = this
+
+/**
+ * Helper to returning the value in the correct [Results] wrapper, depending on if
+ * it is null or not.
+ */
+fun <T : Any> T?.valueOrEmpty(): Results<T> = if (this == null) {
+    Results.Success.Empty
+} else Results.Success.Values(this)

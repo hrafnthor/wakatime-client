@@ -1,8 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.db
 
 import `is`.hth.wakatimeclient.BuildConfig
-import `is`.hth.wakatimeclient.core.data.Reset
-import `is`.hth.wakatimeclient.core.data.Resettable
 import `is`.hth.wakatimeclient.wakatime.data.db.dao.UserDao
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.ConfigEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.CurrentUserView
@@ -26,9 +24,7 @@ import androidx.room.migration.Migration
     version = 1,
     exportSchema = true
 )
-internal abstract class WakatimeDatabase : RoomDatabase(), Resettable {
-
-    abstract fun userDao(): UserDao
+internal abstract class WakatimeDatabase : RoomDatabase(), MasterDao {
 
     companion object {
 
@@ -55,14 +51,14 @@ internal abstract class WakatimeDatabase : RoomDatabase(), Resettable {
             }
         }
     }
+}
 
-    private val dbReset: Reset by lazy { DbReset(this) }
+internal interface MasterDao {
 
-    override fun getReset(): Reset = dbReset
-
-    private class DbReset(private val db: RoomDatabase) : Reset {
-        override suspend fun reset() = db.clearAllTables()
-    }
+    /**
+     * The user domain dao
+     */
+    fun userDao(): UserDao
 }
 
 /**

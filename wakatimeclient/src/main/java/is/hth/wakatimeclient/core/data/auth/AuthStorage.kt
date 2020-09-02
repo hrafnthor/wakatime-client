@@ -13,7 +13,7 @@ import timber.log.Timber
 /**
  * Handles the safe storage of the resulting [AuthState] from the OAuth flow
  */
-interface AuthStateStorage {
+interface AuthStorage {
 
     /**
      * Retrieves the current [AuthState], returning a new instance if none exists
@@ -31,23 +31,45 @@ interface AuthStateStorage {
     fun update(func: (AuthState) -> Unit): AuthState
 
     /**
-     * Clears stored [AuthState] information
+     * Configures the storage for a supplied [method]. Calling this method clears the storage
      */
-    fun clear()
+    fun setMethod(method: Method)
+
+    /**
+     * The authentication method being used
+     */
+    fun getMethod(): Method
+
+    /**
+     * Stores the api key being used for [Method.ApiKey] authentication
+     */
+    fun setKey(key: String)
+
+    /**
+     * Retrieves the stored API key if configured to use [Method.ApiKey] and one is stored
+     */
+    fun getKey(): String?
+
+    /**
+     * Resets the any stored OAuth information
+     */
+    fun resetAuthState()
 }
 
 /**
- * Library's default implementation of [AuthStateStorage]
+ * Library's default implementation of [AuthStorage]
  */
-internal class DefaultAuthStateStorage internal constructor(
+internal class DefaultAuthStorage private constructor(
     private val preferences: SharedPreferences
-) : AuthStateStorage {
+) : AuthStorage {
 
     companion object {
         private const val KEY_AUTH_STATE = "auth_state"
+        private const val KEY_API_KEY = "api_key"
+        private const val KEY_METHOD = "method"
 
-        fun construct(context: Context): AuthStateStorage {
-            return DefaultAuthStateStorage(
+        fun construct(context: Context): AuthStorage {
+            return DefaultAuthStorage(
                 getSharedPreferences(
                     context,
                     "${context.packageName}_auth_prefs"
@@ -100,5 +122,29 @@ internal class DefaultAuthStateStorage internal constructor(
     override fun update(func: (AuthState) -> Unit): AuthState =
         getState().apply(func).let(this::setState)
 
-    override fun clear(): Unit = preferences.modify { clear() }
+    override fun getMethod(): Method {
+        val value = preferences.getString(KEY_METHOD, "") ?: ""
+        return if (value.isNotEmpty()) {
+            Method.convert(value)
+        } else throw IllegalStateException("No authentication method set!")
+    }
+
+    override fun setMethod(method: Method) {
+        preferences.modify {
+            clear()
+            putString(KEY_METHOD, method.name)
+        }
+    }
+
+    override fun setKey(key: String) {
+        preferences.modify {
+            putString(KEY_API_KEY, key)
+        }
+    }
+
+    override fun getKey(): String? = preferences.getString(KEY_API_KEY, null)
+
+    override fun resetAuthState() {
+        setState(AuthState())
+    }
 }

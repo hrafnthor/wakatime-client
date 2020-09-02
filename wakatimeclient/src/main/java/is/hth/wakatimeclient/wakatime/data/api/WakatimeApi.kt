@@ -1,8 +1,8 @@
 package `is`.hth.wakatimeclient.wakatime.data.api
 
-import `is`.hth.wakatimeclient.core.data.api.EnvelopePayload
-import `is`.hth.wakatimeclient.wakatime.data.api.dto.TotalRecordDto
+import `is`.hth.wakatimeclient.core.data.net.EnvelopePayload
 import `is`.hth.wakatimeclient.wakatime.data.api.dto.FullUserDto
+import `is`.hth.wakatimeclient.wakatime.data.api.dto.TotalRecordDto
 import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.GET
@@ -11,7 +11,7 @@ import retrofit2.http.GET
  * Wakatime API interface as defined here https://wakatime.com/developer
  */
 @Suppress("unused")
-interface WakatimeService {
+interface WakatimeApi {
 
     companion object {
         private const val API_ENDPOINT = "/api/v1"

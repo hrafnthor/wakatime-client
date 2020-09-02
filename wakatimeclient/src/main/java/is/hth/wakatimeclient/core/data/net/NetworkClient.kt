@@ -1,18 +1,18 @@
-package `is`.hth.wakatimeclient.core.data
+package `is`.hth.wakatimeclient.core.data.net
 
-import `is`.hth.wakatimeclient.core.data.api.DeEnvelopingConverter
 import `is`.hth.wakatimeclient.core.util.NullStringAdapter
-import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeService
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import okhttp3.Authenticator
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 
-
 interface NetworkClient {
 
-    fun getService(): WakatimeService
+    /**
+     * Creates a network service interface through the use of a backing [Retrofit] client
+     */
+    fun <T> createService(clazz: Class<T>): T
 
     interface Builder {
 
@@ -39,47 +39,47 @@ interface NetworkClient {
     }
 }
 
+@Suppress("unused")
 internal class NetworkClientImpl private constructor(
     private val client: OkHttpClient,
-    private val retrofit: Retrofit,
-    private val service: WakatimeService
+    private val retrofit: Retrofit
 ) : NetworkClient {
 
-    override fun getService(): WakatimeService = service
+    override fun <T> createService(clazz: Class<T>): T = retrofit.create(clazz)
 
     internal class Builder(
         private val host: String
     ) : NetworkClient.Builder {
 
-        private val clientBuilder = OkHttpClient.Builder()
-        private val retrofitBuilder = Retrofit.Builder()
-        private var authenticator: Authenticator? = null
-        val gson: Gson = GsonBuilder()
+        private val gson: Gson = GsonBuilder()
             .registerTypeAdapter(String::class.java, NullStringAdapter())
             .create()
+
+        private val clientBuilder = OkHttpClient.Builder()
+        private val retrofitBuilder = Retrofit.Builder()
+        private lateinit var authenticator: Authenticator
 
         override fun getOKHttpBuilder(): OkHttpClient.Builder = clientBuilder
 
         override fun getRetrofitBuilder(): Retrofit.Builder = retrofitBuilder
 
-        override fun setAuthenticator(authenticator: Authenticator): NetworkClient.Builder {
-            return apply { this.authenticator = authenticator }
-        }
+        override fun setAuthenticator(authenticator: Authenticator): NetworkClient.Builder =
+            apply { this.authenticator = authenticator }
 
-        internal fun build(
-            authenticator: Authenticator
-        ): NetworkClient {
-            val client = clientBuilder.authenticator(this.authenticator ?: authenticator).build()
+        fun setAuthenticatorIfNeeded(authenticator: Authenticator): Builder =
+            apply { if (!this::authenticator.isInitialized) setAuthenticator(authenticator) }
+
+        internal fun build(): NetworkClient {
+            val client = clientBuilder.authenticator(authenticator).build()
             val retrofit = retrofitBuilder
                 .baseUrl(host)
                 .client(client)
                 .addConverterFactory(DeEnvelopingConverter(gson))
                 .build()
-            val service = retrofit.create(WakatimeService::class.java)
+
             return NetworkClientImpl(
                 client,
-                retrofit,
-                service
+                retrofit
             )
         }
     }

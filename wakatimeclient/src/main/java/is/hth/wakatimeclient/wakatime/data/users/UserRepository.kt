@@ -48,9 +48,19 @@ class UserRepositoryImpl(
     }
 
     private val limiter: RateLimiter<String> = RateLimiter(cacheLimit, TimeUnit.MINUTES)
-    private val userLoader: Loader<User> = Loader()
+    private val userLoader: Loader<User> = Loader<User>()
+        .expired {
+            // As remote fetch for specific users is not possible
+            // due to access restrictions in the API, if the local
+            // value is found it is considered to be valid.
+            false
+        }.remote {
+            // Remotely fetching users based on their id is
+            // currently not allowed through the API
+            Results.Success.Empty
+        }
     private val currentUserLoader: Loader<CurrentUser> = Loader<CurrentUser>()
-        .local {
+        .cache {
             local.getCurrentUser()
         }.expired {
             limiter.shouldFetch(keyCurrentUser)
@@ -61,7 +71,7 @@ class UserRepositoryImpl(
             limiter.mark(keyCurrentUser)
         }
     private val totalRecordLoader: Loader<TotalRecord> = Loader<TotalRecord>()
-        .local {
+        .cache {
             local.getTotalRecord()
         }.expired {
             limiter.shouldFetch(keyTotalRecord)
@@ -79,17 +89,8 @@ class UserRepositoryImpl(
     override suspend fun getCurrentUser(): Results<CurrentUser> = currentUserLoader.execute()
 
     override suspend fun getUser(id: String): Results<User> = userLoader
-        .local {
+        .cache {
             local.getUser(id)
-        }.expired {
-            // As remote fetch for specific users is not possible
-            // due to access restrictions in the API, if the local
-            // value is found it is considered to be valid.
-            false
-        }.remote {
-            // Remotely fetching users based on their id is
-            // currently not allowed through the API
-            Results.Empty()
         }.execute()
 
     override suspend fun getTotalRecord(): Results<TotalRecord> = totalRecordLoader.execute()

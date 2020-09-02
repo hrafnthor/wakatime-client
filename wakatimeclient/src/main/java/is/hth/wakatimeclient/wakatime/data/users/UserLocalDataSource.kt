@@ -1,15 +1,10 @@
 package `is`.hth.wakatimeclient.wakatime.data.users
 
-import `is`.hth.wakatimeclient.core.data.ErrorFactory
 import `is`.hth.wakatimeclient.core.data.Results
-import `is`.hth.wakatimeclient.core.util.safeOperation
-import `is`.hth.wakatimeclient.core.util.valuesOrEmpty
+import `is`.hth.wakatimeclient.core.data.db.DbErrorProcessor
+import `is`.hth.wakatimeclient.core.data.db.LocalDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.dao.UserDao
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.*
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.toConfigEntity
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.toCurrentUser
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.toEntity
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.toUser
 import `is`.hth.wakatimeclient.wakatime.model.CurrentUser
 import `is`.hth.wakatimeclient.wakatime.model.TotalRecord
 import `is`.hth.wakatimeclient.wakatime.model.User
@@ -44,41 +39,20 @@ interface UserLocalDataSource {
 
 internal class UserLocalDataSourceImp(
     private val dao: UserDao,
-    private val errors: ErrorFactory<*>
-) : UserLocalDataSource {
+    processor: DbErrorProcessor
+) : LocalDataSource(processor), UserLocalDataSource {
 
-    override suspend fun getCurrentUser(): Results<CurrentUser> = safeOperation(
-        operation = {
-            valuesOrEmpty {
-                dao.getCurrentUser()?.toCurrentUser()
-            }
-        },
-        error = {
-            errors.onThrowable(it)
-        }
-    )
+    override suspend fun getCurrentUser(): Results<CurrentUser> = load {
+        dao.getCurrentUser()?.toCurrentUser()
+    }
 
-    override suspend fun getUser(id: String): Results<User> = safeOperation(
-        operation = {
-            valuesOrEmpty {
-                dao.getUser(id)?.toUser()
-            }
-        },
-        error = {
-            errors.onThrowable(it)
-        }
-    )
+    override suspend fun getUser(id: String): Results<User> = load {
+        dao.getUser(id)?.toUser()
+    }
 
-    override suspend fun getTotalRecord(): Results<TotalRecord> = safeOperation(
-        operation = {
-            valuesOrEmpty {
-                dao.getTotalRecord()?.toTotalRecord()
-            }
-        },
-        error = {
-            errors.onThrowable(it)
-        }
-    )
+    override suspend fun getTotalRecord(): Results<TotalRecord> = load {
+        dao.getTotalRecord()?.toTotalRecord()
+    }
 
     override suspend fun insert(user: User): Unit = dao.insertReplace(user.toEntity())
 
