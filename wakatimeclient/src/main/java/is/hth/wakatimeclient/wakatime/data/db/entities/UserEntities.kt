@@ -9,7 +9,7 @@ import androidx.room.*
  * Stores publicly available user information
  */
 @Entity(tableName = "users")
-internal data class UserEntity(
+data class UserEntity(
     @PrimaryKey
     @ColumnInfo(name = "id")
     val id: String = "",
@@ -37,7 +37,7 @@ internal data class UserEntity(
  * Stores the current user's wakatime configurations
  */
 @Entity(tableName = "config")
-internal data class ConfigEntity(
+data class ConfigEntity(
     @PrimaryKey
     @ColumnInfo(name = "user_id")
     val userId: String = "",
@@ -113,7 +113,7 @@ internal data class ConfigEntity(
  * A view combining the publicly visible information for the current user with its configuration
  */
 @DatabaseView("SELECT * FROM users u, config c WHERE c.user_id == u.id")
-internal data class CurrentUserView(
+data class CurrentUserView(
     @Embedded
     val user: UserEntity,
     @Embedded

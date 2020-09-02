@@ -19,35 +19,54 @@ sealed class Scope(val name: String) {
                 WritePrivateLeaderboards.name to WritePrivateLeaderboards
             )
         }
+
+        /**
+         * Attempts to parse any scope values that might be in the input and convert them to [Scope]s
+         */
+        fun extractScopes(value: String): Set<Scope> {
+            return mutableSetOf<Scope>().apply {
+                scopes.forEach { scope ->
+                    if (value.contains(other = scope.key, ignoreCase = true)) {
+                        add(scope.value)
+                    }
+                }
+            }
+        }
     }
 
     /**
      * Access user’s email and identity information
      */
-    object Email: Scope("email")
+    object Email : Scope("email")
+
     /**
      * Access user’s coding activity and other stats.
      */
     object ReadLoggedTime : Scope("read_logged_time")
+
     /**
      * Modify user’s coding activity
      */
-    object WriteLoggedTime: Scope("write_logged_time")
+    object WriteLoggedTime : Scope("write_logged_time")
+
     /**
      * Access user’s languages, editors, and operating systems used
      */
-    object ReadStats: Scope("read_stats")
+    object ReadStats : Scope("read_stats")
+
     /**
      * Access user’s organizations, and coding activity for dashboard members.
      */
-    object ReadOrganization: Scope("read_orgs")
+    object ReadOrganization : Scope("read_orgs")
+
     /**
      * Access user’s private leaderboards.
      */
-    object ReadPrivateLeaderboards: Scope("read_private_leaderboards")
+    object ReadPrivateLeaderboards : Scope("read_private_leaderboards")
+
     /**
      * Modify user’s private leaderboards, including adding/removing members when
      * current user had Admin or Owner role.
      */
-    object WritePrivateLeaderboards: Scope("write_private_leaderboards")
+    object WritePrivateLeaderboards : Scope("write_private_leaderboards")
 }

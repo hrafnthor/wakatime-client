@@ -1,4 +1,4 @@
-package `is`.hth.wakatimeclient.core.data.api
+package `is`.hth.wakatimeclient.core.data.net
 
 /**
  * An annotation for identifying the payload that we want to extract from an API response wrapped in

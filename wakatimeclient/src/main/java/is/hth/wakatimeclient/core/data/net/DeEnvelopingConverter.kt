@@ -1,4 +1,4 @@
-package `is`.hth.wakatimeclient.core.data.api
+package `is`.hth.wakatimeclient.core.data.net
 
 import androidx.annotation.Nullable
 import com.google.gson.Gson

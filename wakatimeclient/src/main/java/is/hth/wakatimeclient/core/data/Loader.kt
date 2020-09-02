@@ -6,8 +6,12 @@ package `is`.hth.wakatimeclient.core.data
 class Loader<T> {
 
     private var expired: () -> Boolean = { true }
-    private var local: suspend () -> Results<T> = { Results.Failure(Error.Unknown) }
-    private var remote: suspend () -> Results<T> = { Results.Failure(Error.Unknown) }
+    private var local: suspend () -> Results<T> = {
+        Results.Failure(Error.Unknown(-1, "No local data source defined"))
+    }
+    private var remote: suspend () -> Results<T> = {
+        Results.Failure(Error.Unknown(-1, "No remote data source defined"))
+    }
     private var update: suspend (T) -> Unit = {}
 
     /**
@@ -18,7 +22,7 @@ class Loader<T> {
     /**
      * Loads the locally cached values
      */
-    fun local(action: suspend () -> Results<T>) = apply { local = action }
+    fun cache(action: suspend () -> Results<T>) = apply { local = action }
 
     /**
      * Fetches the remote values over the network
@@ -35,9 +39,9 @@ class Loader<T> {
      */
     suspend fun execute(): Results<T> {
         return when (val localData = local()) {
-            is Results.Values -> if (expired()) {
+            is Results.Success.Values -> if (expired()) {
                 fetchRemote {
-                    Results.Values(data = localData.data, error = it)
+                    Results.Success.Values(data = localData.data, error = it)
                 }
             } else localData
             else -> fetchRemote {
@@ -49,8 +53,8 @@ class Loader<T> {
     private suspend fun fetchRemote(onFailure: (Error) -> Results<T>): Results<T> {
         return when (val remoteData = remote()) {
             is Results.Failure -> onFailure(remoteData.error)
-            is Results.Empty -> remoteData
-            is Results.Values -> remoteData.also {
+            is Results.Success.Empty -> remoteData
+            is Results.Success.Values -> remoteData.also {
                 update(it.data)
             }
         }

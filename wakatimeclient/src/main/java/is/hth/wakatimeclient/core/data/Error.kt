@@ -1,64 +1,91 @@
 package `is`.hth.wakatimeclient.core.data
 
-import `is`.hth.wakatimeclient.core.data.auth.Scope
-
+@Suppress("unused")
 sealed class Error(val message: String) {
 
     /**
-     * A network layer error occurred.
+     * A authentication layer error occurred. This category of errors only happen during
+     * initial authentication, token refresh and remote token revoke operations.
      */
-    sealed class Network(message: String = "") : Error(message) {
+    sealed class Authentication(message: String): Error(message) {
 
         /**
-         * The required scopes for the network operation are not present
+         * User is not authenticated and so the operation was not possible
          */
-        class Forbidden(val requiredScopes: Set<Scope> = emptySet()) : Network()
+        class Unauthorized(message: String): Authentication(message)
+
+        /**
+         * A error occurred during token refresh operation
+         */
+        class TokenRefresh(message: String): Authentication(message)
+    }
+
+    /**
+     * A network layer error occurred. This category of errors relate to interactions with the
+     * public api surface of the network service
+     */
+    sealed class Network(message: String) : Error(message) {
+
+        /**
+         * You are authenticated, but do not have permission to access the resource.
+         */
+        class Forbidden(message: String) : Network(message)
 
         /**
          * No network access was found
          */
-        object NoNetwork : Network()
+        class NoNetwork(message: String) : Network(message)
 
         /**
          * Authentication is not present or has expired
          */
-        object Unauthorized : Network()
+        class Unauthorized(message: String) : Network(message)
 
         /**
          * A 404 Not Found error occurred
          */
-        object NotFound : Network()
+        class NotFound(message: String) : Network(message)
 
         /**
          * The host's IP address could not be determined
          */
-        object UnknownHost : Network()
+        class UnknownHost(message: String) : Network(message)
 
         /**
-         * A 503 Service Unavailable error occurred
+         * A 500/503 Service Unavailable error occurred, try again later.
          */
-        object Unavailable : Network()
+        class Unavailable(message: String) : Network(message)
 
         /**
          * Either a 504 Gateway Timeout, a 408 Client Timeout or a
          * socket timeout exception error occurred
          */
-        object Timeout : Network()
+        class Timeout(message: String) : Network(message)
 
         /**
          * A 400 Bad Request error occurred
          */
-        object BadRequest : Network()
+        class BadRequest(message: String) : Network(message)
 
         /**
          * Serialization of what ever payload was being processed failed
          */
-        object Serialization : Network()
+        class Serialization(message: String) : Network(message)
+
+        /**
+         * You are being rate limited, try making fewer than 5 requests per second.
+         */
+        class TooManyRequests(message: String) : Network(message)
+
+        /**
+         * The error originates within the internals of the libraries configuration
+         */
+        class Internal(message: String) : Network(message)
 
         /**
          * An unknown network error occurred that couldn't be matched with a specific case
          */
-        object Unknown : Network()
+        class Unknown(val code: Int, message: String) : Network(message)
     }
 
     /**
@@ -69,30 +96,25 @@ sealed class Error(val message: String) {
         /**
          * An unknown database error occurred that couldn't be matched with a specific case
          */
-        class Unknown(message: String) : Database(message)
+        class Unknown(val code: Int, message: String) : Database(message)
     }
 
     /**
      * An unknown error occurred that couldn't be matched with a layer case
      */
-    object Unknown : Error("")
+    class Unknown(val code: Int, message: String) : Error(message)
 }
 
 
-interface ErrorFactory<T> {
+interface ErrorProcessor {
 
     /**
      * Converts the supplied [code] to a corresponding [Error]
      */
-    fun onCode(code: Int): Error
-
-    /**
-     * Converts the supplied [value] to a corresponding [Error]
-     */
-    fun onValue(value: T): Error = Error.Unknown
+    fun onError(code: Int, message: String): Error
 
     /**
      * Converts the supplied [throwable] to a corresponding [Error]
      */
-    fun onThrowable(throwable: Throwable): Error
+    fun onError(throwable: Throwable): Error
 }

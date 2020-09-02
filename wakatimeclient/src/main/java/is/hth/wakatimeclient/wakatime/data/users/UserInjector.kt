@@ -1,38 +1,34 @@
 package `is`.hth.wakatimeclient.wakatime.data.users
 
-import `is`.hth.wakatimeclient.core.data.NetworkErrorFactory
-import `is`.hth.wakatimeclient.core.data.db.DbErrorFactory
-import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeService
-import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeDatabase
+import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
+import `is`.hth.wakatimeclient.core.data.auth.AuthClient
+import `is`.hth.wakatimeclient.core.data.db.DbErrorProcessor
+import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeApi
+import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeNetworkClient
+import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeDbClient
 import `is`.hth.wakatimeclient.wakatime.data.db.dao.UserDao
 
 internal object UserInjector {
 
     fun provideRepository(
         cacheLimit: Int,
-        service: WakatimeService,
-        db: WakatimeDatabase,
-        networkErrorFactory: NetworkErrorFactory,
-        dbErrorFactory: DbErrorFactory
-    ): UserRepository {
-        return UserRepositoryImpl(
-            cacheLimit,
-            remoteDataSource(service, networkErrorFactory),
-            localDataSource(db.userDao(), dbErrorFactory)
-        )
-    }
+        dbClient: WakatimeDbClient,
+        session: AuthClient.Session,
+        netClient: WakatimeNetworkClient
+    ): UserRepository = UserRepositoryImpl(
+        cacheLimit,
+        remoteDataSource(netClient.api(), session, netClient.processor()),
+        localDataSource(dbClient.userDao(), dbClient.processor)
+    )
 
     private fun remoteDataSource(
-        service: WakatimeService,
-        errors: NetworkErrorFactory
-    ): UserRemoteDataSource {
-        return UserRemoteDataSourceImpl(errors, service)
-    }
+        api: WakatimeApi,
+        session: AuthClient.Session,
+        processor: NetworkErrorProcessor
+    ): UserRemoteDataSource = UserRemoteDataSourceImpl(session, processor, api)
 
     private fun localDataSource(
         dao: UserDao,
-        errors: DbErrorFactory
-    ): UserLocalDataSource {
-        return UserLocalDataSourceImp(dao, errors)
-    }
+        errors: DbErrorProcessor
+    ): UserLocalDataSource = UserLocalDataSourceImp(dao, errors)
 }

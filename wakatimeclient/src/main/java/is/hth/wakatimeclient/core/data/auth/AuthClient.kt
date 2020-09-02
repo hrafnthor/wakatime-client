@@ -1,10 +1,9 @@
 package `is`.hth.wakatimeclient.core.data.auth
 
-import `is`.hth.wakatimeclient.core.data.Reset
-import `is`.hth.wakatimeclient.core.data.Resettable
+import `is`.hth.wakatimeclient.core.data.Error
+import `is`.hth.wakatimeclient.core.data.Results
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import net.openid.appauth.*
 import net.openid.appauth.browser.AnyBrowserMatcher
 import net.openid.appauth.browser.BrowserMatcher
@@ -16,32 +15,70 @@ import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-interface AuthClient : Resettable {
+interface AuthClient {
 
     /**
-     * Indicates if the client is currently authorized
-     */
-    fun isAuthorized(): Boolean
-
-    /**
-     * The list of scopes that the user has authorized the client to have access to, if any.
-     */
-    fun authorizedScopes(): List<Scope>
-
-    /**
-     *
+     * Creates a new [Intent] for starting a new OAuth flow against Wakatime.
+     * The [scopes] determine what access level the resulting authentication will have.
      */
     fun createAuthenticationIntent(scopes: List<Scope>): Intent
 
     /**
-     *
+     * Processes the received [Intent] results from the OAuth flow started
+     * with calling [createAuthenticationIntent]
      */
     suspend fun onAuthenticationResult(result: Intent): Boolean
 
     /**
      *
      */
-    fun getAuthenticator(): Authenticator
+    fun authenticator(): Authenticator
+
+    /**
+     *
+     */
+    fun session(): Session
+
+    /**
+     * Exposes utility functionality for the ongoing session
+     */
+    interface Session {
+
+        /**
+         * Indicates if the client is currently authorized
+         */
+        fun isAuthorized(): Boolean
+
+        /**
+         * Indicates if the client is configured to use OAuth.
+         */
+        fun authenticationMethod(): Method
+
+        /**
+         * The list of scopes that the user has authorized the client to have access to, if any.
+         */
+        fun authorizedScopes(): Set<Scope>
+
+        /**
+         * The session's access token if any exists
+         */
+        fun accessToken(): String
+
+        /**
+         * The session's refresh token if any exists
+         */
+        fun refreshToken(): String
+
+        /**
+         * The API key being used if any exists
+         */
+        fun apiKey(): String
+
+        /**
+         * Updates the access token if needed for the current session
+         */
+        suspend fun update(force: Boolean): Results<Unit>
+    }
 
     /**
      *
@@ -56,7 +93,7 @@ interface AuthClient : Resettable {
         /**
          *
          */
-        fun setStorage(storage: AuthStateStorage): Builder
+        fun setStorage(storage: AuthStorage): Builder
     }
 }
 
@@ -65,16 +102,12 @@ interface AuthClient : Resettable {
  */
 internal class AuthClientImpl internal constructor(
     private val config: AuthConfig,
-    private val storage: AuthStateStorage,
-    private val service: AuthorizationService
-) : AuthClient, Authenticator {
+    internal val storage: AuthStorage,
+    private val authService: AuthorizationService
+) : AuthClient {
 
-    private val authReset: Reset by lazy { AuthReset(storage) }
-
-    override fun isAuthorized(): Boolean = storage.getState().isAuthorized
-
-    override fun authorizedScopes(): List<Scope> =
-        storage.getState().scopeSet?.map { Scope.scopes.getValue(it) } ?: listOf()
+    private val session: AuthClient.Session = SessionImpl(storage, authService)
+    private val authenticator: Authenticator = AuthenticatorImpl(session)
 
     override fun createAuthenticationIntent(scopes: List<Scope>): Intent {
         val serviceConfig = AuthorizationServiceConfiguration(
@@ -89,8 +122,8 @@ internal class AuthClientImpl internal constructor(
             config.redirectUri
         ).setScopes(joined).build()
 
-        val intent = service.createCustomTabsIntentBuilder(request.toUri()).build()
-        return service.getAuthorizationRequestIntent(request, intent)
+        val intent = authService.createCustomTabsIntentBuilder(request.toUri()).build()
+        return authService.getAuthorizationRequestIntent(request, intent)
     }
 
     override suspend fun onAuthenticationResult(result: Intent): Boolean =
@@ -110,31 +143,13 @@ internal class AuthClientImpl internal constructor(
             }
         }
 
-    override fun getAuthenticator(): Authenticator = this
+    override fun authenticator(): Authenticator = authenticator
 
-    override fun getReset(): Reset = authReset
-
-    //
-    //                      OKHttp.Authenticator implementation
-    //////////////////////////////////////////////////////////////////////////
-
-    override fun authenticate(route: Route?, response: Response): Request? {
-        val authorizationHeader = "Authorization"
-        return if (response.header(authorizationHeader) == null && isAuthorized()) {
-            // Authorization exists and has not been attempted for this request yet
-            val header = getAuthorizationHeader()
-            response.request()
-                .newBuilder()
-                .header(authorizationHeader, header)
-                .build()
-        } else null
-    }
+    override fun session(): AuthClient.Session = session
 
     //
     //                      Private API implementation
     //////////////////////////////////////////////////////////////////////////
-
-    private fun getAuthorizationHeader(): String = "Bearer ${storage.getState().accessToken}"
 
     private fun fetchAuthorizationToken(
         config: AuthConfig,
@@ -143,7 +158,7 @@ internal class AuthClientImpl internal constructor(
     ) {
         val map = hashMapOf(Pair("client_secret", config.clientSecret))
         val request = response.createTokenExchangeRequest(map)
-        service.performTokenRequest(request) { result, exception ->
+        authService.performTokenRequest(request) { result, exception ->
             val state = storage.update {
                 it.update(result, exception)
             }
@@ -160,69 +175,115 @@ internal class AuthClientImpl internal constructor(
     //                      Internal class definitions
     //////////////////////////////////////////////////////////////////////////
 
-    private class AuthReset(private val storage: AuthStateStorage) : Reset {
+    private class AuthenticatorImpl(
+        private val session: AuthClient.Session
+    ) : Authenticator {
 
-        override suspend fun reset(): Unit = storage.clear()
+        override fun authenticate(route: Route?, response: Response): Request? {
+            val authorizationHeader = "Authorization"
+            return if (response.header(authorizationHeader) == null && session.isAuthorized()) {
+                // Authorization exists and has not been attempted for this request yet
+                val header = when (session.authenticationMethod()) {
+                    is Method.OAuth -> "Bearer ${session.accessToken()}"
+                    is Method.ApiKey -> "Basic ${session.apiKey()}"
+                }
+                response.request()
+                    .newBuilder()
+                    .header(authorizationHeader, header)
+                    .build()
+            } else null
+        }
+    }
+
+    private class SessionImpl(
+        private val storage: AuthStorage,
+        private val service: AuthorizationService
+    ) : AuthClient.Session {
+
+        override fun isAuthorized(): Boolean = if (authenticationMethod() is Method.OAuth) {
+            getState().isAuthorized
+        } else apiKey().isNotEmpty()
+
+        override fun authorizedScopes(): Set<Scope> {
+            val scopes = getState().scopeSet?.joinToString(separator = ",") { it } ?: ""
+            return Scope.extractScopes(scopes)
+        }
+
+        override fun accessToken(): String = getState().accessToken ?: ""
+
+        override fun refreshToken(): String = getState().refreshToken ?: ""
+
+        override fun apiKey(): String = storage.getKey() ?: ""
+
+        override suspend fun update(force: Boolean): Results<Unit> = suspendCoroutine {
+            if (storage.getMethod() is Method.OAuth) {
+                with(storage.getState()) {
+                    needsTokenRefresh = force
+                    when {
+                        needsTokenRefresh -> performActionWithFreshTokens(service) { _, _, exception ->
+                            val results: Results<Unit> = if (exception == null) {
+                                Results.Success.Empty
+                            } else {
+                                val message = exception.message ?: ""
+                                val error = Error.Authentication.TokenRefresh(message)
+                                Results.Failure(error)
+                            }
+                            it.resumeWith(Result.success(results))
+                        }
+                        isAuthorized -> {
+                            // Authentication is valid and does not need refreshing
+                            it.resumeWith(Result.success(Results.Success.Empty))
+                        }
+                        else -> {
+                            // No authentication was found
+                            val msg = "No authentication found! Halting token refresh operation"
+                            val result = Results.Failure(Error.Authentication.Unauthorized(msg))
+                            it.resumeWith(Result.success(result))
+                        }
+                    }
+                }
+            } else it.resumeWith(Result.success(Results.Success.Empty))
+        }
+
+        private fun getState(): AuthState = storage.getState()
+
+        override fun authenticationMethod(): Method = storage.getMethod()
     }
 
     /**
      *
      */
     internal class Builder(
-        clientSecret: String,
-        clientId: String,
-        redirectUri: String
+        private val apiKey: String,
+        private val config: AuthConfig
     ) : AuthClient.Builder {
 
-        private val config: AuthConfig = AuthConfig(
-            clientSecret = clientSecret,
-            clientId = clientId,
-            redirectUri = Uri.parse(redirectUri),
-            authorizationEndpoint = Uri.parse("https://wakatime.com/oauth/authorize"),
-            tokenEndpoint = Uri.parse("https://wakatime.com/oauth/token")
-        )
-        private var storage: AuthStateStorage? = null
+        private lateinit var storage: AuthStorage
         private var matcher: BrowserMatcher = AnyBrowserMatcher.INSTANCE
 
         override fun setBrowserMatcher(matcher: BrowserMatcher): AuthClient.Builder =
             apply { this.matcher = matcher }
 
-        override fun setStorage(storage: AuthStateStorage): AuthClient.Builder =
+        override fun setStorage(storage: AuthStorage): AuthClient.Builder =
             apply { this.storage = storage }
 
-        internal fun build(context: Context): AuthClient {
-            val appauthConfig = AppAuthConfiguration.Builder().setBrowserMatcher(matcher).build()
+        internal fun build(context: Context): AuthClientImpl {
+            if (!this::storage.isInitialized) {
+                storage = DefaultAuthStorage.construct(context.applicationContext)
+            }
+
+            storage.setMethod(config.method)
+            storage.setKey(apiKey)
+
+            val appauthConfig = AppAuthConfiguration.Builder()
+                .setBrowserMatcher(matcher)
+                .build()
+
             return AuthClientImpl(
                 config = config,
-                storage = storage ?: DefaultAuthStateStorage.construct(context),
-                service = AuthorizationService(context, appauthConfig)
+                storage = storage,
+                authService = AuthorizationService(context.applicationContext, appauthConfig)
             )
         }
     }
 }
-
-/**
- *
- */
-internal data class AuthConfig(
-    /**
-     *
-     */
-    val clientSecret: String,
-    /**
-     *
-     */
-    val clientId: String,
-    /**
-     *
-     */
-    val redirectUri: Uri,
-    /**
-     *
-     */
-    val authorizationEndpoint: Uri,
-    /**
-     *
-     */
-    val tokenEndpoint: Uri
-)

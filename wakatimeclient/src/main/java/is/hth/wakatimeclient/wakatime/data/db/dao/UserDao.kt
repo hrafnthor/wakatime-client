@@ -10,7 +10,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
-internal interface UserDao {
+interface UserDao {
 
     /**
      * Selects the current user if one exists, else null

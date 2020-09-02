@@ -9,7 +9,7 @@ import androidx.room.PrimaryKey
  * Stores the total recorded time for the current user
  */
 @Entity(tableName = "total_record")
-internal data class TotalRecordEntity(
+data class TotalRecordEntity(
     /**
      * Static primary key for easier insert with conflict replacement
      */
