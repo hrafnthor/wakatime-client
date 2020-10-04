@@ -71,7 +71,7 @@ class SampleActivity : AppCompatActivity(),
 
         model.authentication.observe(this, Observer { authenticated ->
             if (authenticated) {
-                loadCurrentUser()
+                onRefresh()
             } else {
                 Toast.makeText(this, "Not authenticated!", Toast.LENGTH_LONG).show()
             }
@@ -98,6 +98,7 @@ class SampleActivity : AppCompatActivity(),
     override fun onRefresh() {
         binding.refreshLayout.isRefreshing = false
         loadCurrentUser()
+        model.loadPublicLeaders()
     }
 
     //
@@ -108,7 +109,7 @@ class SampleActivity : AppCompatActivity(),
         if (BrowserSelector.getAllBrowsers(view.context).isEmpty()) {
             longToast("No browsers found")
         } else {
-            val scopes = listOf(Scope.Email, Scope.ReadPrivateLeaderboards)
+            val scopes = listOf(Scope.Email, Scope.ReadPrivateLeaderboards, Scope.ReadLoggedTime, Scope.ReadStats)
             val intent = model.getAuthenticationRequest(scopes)
             startActivityForResult(intent, AUTHENTICATION_REQUEST_CODE)
         }
@@ -184,6 +185,19 @@ class SampleViewModel(
                 }
                 is Results.Success.Values -> {
                     _currentUser.postValue(results.data)
+                }
+            }
+        }
+    }
+
+    fun loadPublicLeaders() {
+        launch(context = coroutineContext) {
+            when (val results = client.leaderboards.getPublicLeaders("", 1)) {
+                is Results.Failure -> {
+
+                }
+                is Results.Success.Values -> {
+
                 }
             }
         }

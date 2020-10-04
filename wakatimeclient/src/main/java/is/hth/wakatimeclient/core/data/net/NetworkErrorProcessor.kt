@@ -3,7 +3,6 @@ package `is`.hth.wakatimeclient.core.data.net
 import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.Error.Network
 import `is`.hth.wakatimeclient.core.data.ErrorProcessor
-import com.google.gson.Gson
 import com.google.gson.JsonParseException
 import retrofit2.HttpException
 import retrofit2.Response
@@ -15,7 +14,7 @@ import java.net.UnknownHostException
 /**
  * Produces network related [Error]s based on the given inputs
  */
-open class NetworkErrorProcessor(val gson: Gson) : ErrorProcessor {
+open class NetworkErrorProcessor : ErrorProcessor {
 
     override fun onError(code: Int, message: String): Error {
         return when (code) {

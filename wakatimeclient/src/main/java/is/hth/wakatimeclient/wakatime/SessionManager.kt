@@ -1,4 +1,4 @@
-package `is`.hth.wakatimeclient.wakatime.data.auth
+package `is`.hth.wakatimeclient.wakatime
 
 import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient

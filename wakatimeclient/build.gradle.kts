@@ -3,6 +3,7 @@ plugins {
     id("kotlin-android")
     id("kotlin-android-extensions")
     id("kotlin-kapt")
+    id("kotlinx-serialization")
     id("de.mannodermaus.android-junit5")
 }
 
@@ -36,29 +37,31 @@ dependencies {
     //
     implementation(fileTree(Pair("dir", "libs"), Pair("include", listOf("*.jar"))))
     //
-    //  Language related dependencies
+    //  Language and compiler related dependencies
     //
     implementation(Libs.kotlin_stdlib_jdk8)
+    implementation(Libs.kotlinx_serialization_core)
     //
     //  Androidx library dependencies
     //
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
+    implementation(Libs.lifecycle_livedata_ktx)
     implementation(Libs.appcompat)
     implementation(Libs.constraintlayout)
     implementation(Libs.security_crypto)
     implementation(Libs.core_ktx)
     implementation(Libs.room_common)
     implementation(Libs.room_runtime)
-    implementation("androidx.room:room-ktx:2.2.5")
+    implementation(Libs.room_ktx)
     kapt(Libs.room_compiler)
     //
     //
     //  Third party utility dependencies
     //
     api(Libs.appauth)
-    implementation("com.google.code.gson:gson:2.8.5")
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(Libs.gson)
+    implementation(Libs.retrofit)
+    implementation(Libs.converter_gson)
+    implementation(Libs.retrofit2_kotlinx_serialization_converter)
     implementation(Libs.timber)
     //
     //  Testing dependencies

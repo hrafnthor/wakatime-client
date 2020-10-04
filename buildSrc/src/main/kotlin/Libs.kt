@@ -7,6 +7,40 @@ import kotlin.String
  *   `$ ./gradlew buildSrcVersions`
  */
 object Libs {
+    const val kotlinx_serialization_core: String =
+            "org.jetbrains.kotlinx:kotlinx-serialization-core:" +
+            Versions.org_jetbrains_kotlinx_kotlinx_serialization
+
+    /**
+     * https://github.com/square/retrofit
+     */
+    const val converter_gson: String = "com.squareup.retrofit2:converter-gson:" +
+            Versions.com_squareup_retrofit2
+
+    /**
+     * https://github.com/square/retrofit
+     */
+    const val retrofit: String = "com.squareup.retrofit2:retrofit:" +
+            Versions.com_squareup_retrofit2
+
+    const val databinding_adapters: String = "androidx.databinding:databinding-adapters:" +
+            Versions.androidx_databinding
+
+    /**
+     * https://developer.android.com/studio
+     */
+    const val databinding_common: String = "androidx.databinding:databinding-common:" +
+            Versions.androidx_databinding
+
+    /**
+     * https://developer.android.com/studio
+     */
+    const val databinding_compiler: String = "androidx.databinding:databinding-compiler:" +
+            Versions.androidx_databinding
+
+    const val databinding_runtime: String = "androidx.databinding:databinding-runtime:" +
+            Versions.androidx_databinding
+
     /**
      * https://kotlinlang.org/
      */
@@ -36,6 +70,18 @@ object Libs {
     /**
      * https://kotlinlang.org/
      */
+    const val kotlin_serialization: String = "org.jetbrains.kotlin:kotlin-serialization:" +
+            Versions.org_jetbrains_kotlin
+
+    /**
+     * https://kotlinlang.org/
+     */
+    const val kotlin_serialization_unshaded: String =
+            "org.jetbrains.kotlin:kotlin-serialization-unshaded:" + Versions.org_jetbrains_kotlin
+
+    /**
+     * https://kotlinlang.org/
+     */
     const val kotlin_stdlib_jdk7: String = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:" +
             Versions.org_jetbrains_kotlin
 
@@ -44,6 +90,40 @@ object Libs {
      */
     const val kotlin_stdlib_jdk8: String = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:" +
             Versions.org_jetbrains_kotlin
+
+    /**
+     * https://developer.android.com/topic/libraries/architecture/index.html
+     */
+    const val lifecycle_extensions: String = "androidx.lifecycle:lifecycle-extensions:" +
+            Versions.androidx_lifecycle
+
+    /**
+     * https://developer.android.com/jetpack/androidx
+     */
+    const val lifecycle_livedata_ktx: String = "androidx.lifecycle:lifecycle-livedata-ktx:" +
+            Versions.androidx_lifecycle
+
+    /**
+     * https://developer.android.com/jetpack/androidx
+     */
+    const val lifecycle_runtime_ktx: String = "androidx.lifecycle:lifecycle-runtime-ktx:" +
+            Versions.androidx_lifecycle
+
+    /**
+     * https://developer.android.com/jetpack/androidx
+     */
+    const val lifecycle_viewmodel_ktx: String = "androidx.lifecycle:lifecycle-viewmodel-ktx:" +
+            Versions.androidx_lifecycle
+
+    /**
+     * https://developer.android.com/jetpack/androidx
+     */
+    const val activity: String = "androidx.activity:activity:" + Versions.androidx_activity
+
+    /**
+     * https://developer.android.com/jetpack/androidx
+     */
+    const val activity_ktx: String = "androidx.activity:activity-ktx:" + Versions.androidx_activity
 
     /**
      * https://junit.org/junit5/
@@ -75,22 +155,21 @@ object Libs {
     const val androidx_test_runner: String = "androidx.test:runner:" + Versions.androidx_test_runner
 
     /**
-     * https://developer.android.com/topic/libraries/architecture/index.html */
-    const val room_common: String = "androidx.room:room-common:" + Versions.androidx_room
-
-    /**
-     * https://developer.android.com/topic/libraries/architecture/index.html */
-    const val room_compiler: String = "androidx.room:room-compiler:" + Versions.androidx_room
-
-    /**
-     * https://developer.android.com/topic/libraries/architecture/index.html */
-    const val room_runtime: String = "androidx.room:room-runtime:" + Versions.androidx_room
-
-
+     * https://github.com/JakeWharton/retrofit2-kotlinx-serialization-converter/
+     */
+    const val retrofit2_kotlinx_serialization_converter: String =
+            "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:" +
+            Versions.retrofit2_kotlinx_serialization_converter
 
     const val de_fayard_buildsrcversions_gradle_plugin: String =
             "de.fayard.buildSrcVersions:de.fayard.buildSrcVersions.gradle.plugin:" +
             Versions.de_fayard_buildsrcversions_gradle_plugin
+
+    /**
+     * https://square.github.io/okhttp/
+     */
+    const val logging_interceptor: String = "com.squareup.okhttp3:logging-interceptor:" +
+            Versions.logging_interceptor
 
     /**
      * http://tools.android.com
@@ -114,14 +193,29 @@ object Libs {
             Versions.espresso_core
 
     /**
+     * https://developer.android.com/topic/libraries/architecture/index.html
+     */
+    const val room_compiler: String = "androidx.room:room-compiler:" + Versions.room_compiler
+
+    /**
      * http://assertj.org
      */
     const val assertj_core: String = "org.assertj:assertj-core:" + Versions.assertj_core
 
     /**
+     * https://developer.android.com/topic/libraries/architecture/index.html
+     */
+    const val room_runtime: String = "androidx.room:room-runtime:" + Versions.room_runtime
+
+    /**
      * https://developer.android.com/studio
      */
     const val lint_gradle: String = "com.android.tools.lint:lint-gradle:" + Versions.lint_gradle
+
+    /**
+     * https://developer.android.com/topic/libraries/architecture/index.html
+     */
+    const val room_common: String = "androidx.room:room-common:" + Versions.room_common
 
     /**
      * https://developer.android.com/jetpack/androidx
@@ -132,6 +226,11 @@ object Libs {
      * https://developer.android.com/jetpack/androidx
      */
     const val core_ktx: String = "androidx.core:core-ktx:" + Versions.core_ktx
+
+    /**
+     * https://developer.android.com/topic/libraries/architecture/index.html
+     */
+    const val room_ktx: String = "androidx.room:room-ktx:" + Versions.room_ktx
 
     /**
      * https://github.com/openid/AppAuth-Android
@@ -152,4 +251,9 @@ object Libs {
      * http://mockk.io
      */
     const val mockk: String = "io.mockk:mockk:" + Versions.mockk
+
+    /**
+     * https://github.com/google/gson
+     */
+    const val gson: String = "com.google.code.gson:gson:" + Versions.gson
 }
