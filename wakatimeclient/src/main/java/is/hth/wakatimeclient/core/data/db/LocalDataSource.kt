@@ -8,7 +8,9 @@ internal open class LocalDataSource(
     private val processor: DbErrorProcessor
 ) {
 
-    suspend fun <T : Any> load(call: suspend () -> T?): Results<T> = safeOperation(processor) {
+    suspend fun <T : Any> operate(
+        call: suspend () -> T?
+    ): Results<T> = safeOperation(processor) {
         call.invoke().valueOrEmpty()
     }
 }

@@ -1,22 +1,27 @@
 package `is`.hth.wakatimeclient.wakatime.data.db
 
 import `is`.hth.wakatimeclient.BuildConfig
+import `is`.hth.wakatimeclient.wakatime.data.db.dao.*
+import `is`.hth.wakatimeclient.wakatime.data.db.dao.RankingDao
 import `is`.hth.wakatimeclient.wakatime.data.db.dao.UserDao
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.ConfigEntity
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.CurrentUserView
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.TotalRecordEntity
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.UserEntity
+import `is`.hth.wakatimeclient.wakatime.data.db.entities.*
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+import java.util.concurrent.Executors
 
 @Database(
     entities = [
         UserEntity::class,
         ConfigEntity::class,
-        TotalRecordEntity::class
+        TotalRecordEntity::class,
+        LanguageEntity::class,
+        LeaderboardEntity::class,
+        UserRankEntity::class,
+        PeriodEntity::class,
     ],
     views = [
         CurrentUserView::class
@@ -35,12 +40,27 @@ internal abstract class WakatimeDatabase : RoomDatabase(), MasterDao {
 
         @Synchronized
         fun getInstance(context: Context): WakatimeDatabase {
-            return instance ?: getBuilder(context)
-                .addMigrations(*MIGRATIONS.toTypedArray())
-                .build()
-                .also {
+            return instance ?: synchronized(this) {
+                build(context).also {
                     instance = it
                 }
+            }
+        }
+
+        private fun build(context: Context): WakatimeDatabase {
+            return getBuilder(context)
+                .addMigrations(*MIGRATIONS.toTypedArray())
+                .addCallback(object : RoomDatabase.Callback() {
+                    override fun onCreate(db: SupportSQLiteDatabase) {
+                        Executors.newSingleThreadExecutor().execute {
+                            getInstance(context).let {
+                                // Perform any database initialization needed here
+                                it.rankings().insertIgnore(LeaderboardEntity.publicLeaderboard)
+                                it.languages().insertIgnoreLanguage(LanguageEntity.none)
+                            }
+                        }
+                    }
+                }).build()
         }
 
         private fun getBuilder(context: Context): Builder<WakatimeDatabase> {
@@ -58,7 +78,22 @@ internal interface MasterDao {
     /**
      * The user domain dao
      */
-    fun userDao(): UserDao
+    fun users(): UserDao
+
+    /**
+     * The leaderboard and ranking domain
+     */
+    fun rankings(): RankingDao
+
+    /**
+     *
+     */
+    fun languages(): LanguageDao
+
+    /**
+     *
+     */
+    fun calendar(): CalendarDao
 }
 
 /**

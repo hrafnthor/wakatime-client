@@ -8,6 +8,7 @@ buildscript {
         classpath(Libs.com_android_tools_build_gradle)
         classpath(Libs.kotlin_gradle_plugin)
         classpath(Libs.android_junit5)
+        classpath("org.jetbrains.kotlin:kotlin-serialization:1.3.61")
     }
 }
 

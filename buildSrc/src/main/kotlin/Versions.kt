@@ -12,48 +12,70 @@ import org.gradle.plugin.use.PluginDependencySpec
  * YOU are responsible for updating manually the dependency version.
  */
 object Versions {
-    const val org_jetbrains_kotlin: String = "1.3.61" // available: "1.3.71"
+    const val org_jetbrains_kotlinx_kotlinx_serialization: String = "1.0.0-RC"
 
-    const val org_junit_jupiter: String = "5.5.2" // available: "5.6.1"
+    const val com_squareup_retrofit2: String = "2.9.0"
 
-    const val com_android_tools_build_gradle: String = "4.0.0"
+    const val androidx_databinding: String = "4.0.0" // available: "4.0.1"
 
-    const val androidx_test_runner: String = "1.2.0"
+    const val org_jetbrains_kotlin: String =  "1.4.0"
+
+    const val androidx_lifecycle: String = "2.2.0"
+
+    const val androidx_activity: String = "1.1.0"
+
+    const val org_junit_jupiter: String = "5.5.2" // available: "5.6.2"
+
+    const val com_android_tools_build_gradle: String = "4.0.1"
+
+    const val androidx_test_runner: String = "1.2.0" // available: "1.3.0"
+
+    const val retrofit2_kotlinx_serialization_converter: String = "0.7.0"
 
     const val de_fayard_buildsrcversions_gradle_plugin: String = "0.7.0"
 
-    const val constraintlayout: String = "1.1.3"
+    const val logging_interceptor: String = "3.9.0" // available: "4.8.1"
+
+    const val constraintlayout: String = "1.1.3" // available: "2.0.1"
 
     const val security_crypto: String = "1.0.0-alpha02"
 
-    const val androidx_room: String = "2.1.0"
+    const val android_junit5: String = "1.5.2.0" // available: "1.6.2.0"
 
-    const val android_junit5: String = "1.5.2.0" // available: "1.6.0.0"
+    const val espresso_core: String = "3.2.0" // available: "3.3.0"
 
-    const val espresso_core: String = "3.2.0"
+    const val room_compiler: String = "2.1.0" // available: "2.2.5"
 
-    const val assertj_core: String = "3.14.0" // available: "3.15.0"
+    const val assertj_core: String = "3.14.0" // available: "3.17.1"
 
-    const val lint_gradle: String = "27.0.0-alpha07"
+    const val room_runtime: String = "2.1.0" // available: "2.2.5"
 
-    const val appcompat: String = "1.1.0"
+    const val lint_gradle: String = "27.0.0" // available: "27.0.1"
 
-    const val core_ktx: String = "1.2.0"
+    const val room_common: String = "2.1.0" // available: "2.2.5"
+
+    const val appcompat: String = "1.1.0" // available: "1.2.0"
+
+    const val core_ktx: String = "1.2.0" // available: "1.3.1"
+
+    const val room_ktx: String = "2.2.5"
 
     const val appauth: String = "0.7.1"
 
     const val timber: String = "4.7.1"
 
-    const val aapt2: String = "4.0.0-alpha07-6051327"
+    const val aapt2: String = "4.0.0-6051327" // available: "4.0.1-6197926"
 
-    const val mockk: String = "1.9.3"
+    const val mockk: String = "1.9.3" // available: "1.10.0"
+
+    const val gson: String = "2.8.5" // available: "2.8.6"
 
     /**
-     * Current version: "6.1-milestone-2"
+     * Current version: "6.5"
      * See issue 19: How to update Gradle itself?
      * https://github.com/jmfayard/buildSrcVersions/issues/19
      */
-    const val gradleLatestVersion: String = "6.3"
+    const val gradleLatestVersion: String = "6.6.1"
 }
 
 /**

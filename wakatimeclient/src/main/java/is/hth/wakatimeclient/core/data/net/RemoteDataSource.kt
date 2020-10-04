@@ -19,13 +19,13 @@ internal open class RemoteDataSource(
      */
     suspend fun <T : Any, R : Any> makeCall(
         /**
+         * Should execute a network call and return the unmodified response
+         */
+        networkCall: suspend () -> Response<T>,
+        /**
          * Performs any type conversion on the received network value that might be required
          */
         convert: (T) -> R,
-        /**
-         * Should execute a network call and return the unmodified response
-         */
-        networkCall: suspend () -> Response<T>
     ): Results<R> = safeOperation(processor) {
         checkPreconditions {
             with(networkCall()) {

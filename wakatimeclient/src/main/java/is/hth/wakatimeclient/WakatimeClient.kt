@@ -1,25 +1,23 @@
 package `is`.hth.wakatimeclient
 
-import `is`.hth.wakatimeclient.core.data.net.NetworkClient
-import `is`.hth.wakatimeclient.core.data.net.NetworkClientImpl
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.auth.AuthClientImpl
 import `is`.hth.wakatimeclient.core.data.auth.AuthConfig
 import `is`.hth.wakatimeclient.core.data.auth.Method
 import `is`.hth.wakatimeclient.core.data.db.DbErrorProcessor
-import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeErrorProcessor
-import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeNetworkClient
-import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeNetworkClientImpl
-import `is`.hth.wakatimeclient.wakatime.data.auth.SessionManager
-import `is`.hth.wakatimeclient.wakatime.data.auth.SessionManagerImpl
-import `is`.hth.wakatimeclient.wakatime.data.db.MasterDao
+import `is`.hth.wakatimeclient.core.data.net.NetworkClient
+import `is`.hth.wakatimeclient.core.data.net.NetworkClientImpl
+import `is`.hth.wakatimeclient.core.util.RateLimiter
+import `is`.hth.wakatimeclient.wakatime.*
+import `is`.hth.wakatimeclient.wakatime.data.api.*
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeDatabase
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeDbClient
-import `is`.hth.wakatimeclient.wakatime.data.users.UserInjector
-import `is`.hth.wakatimeclient.wakatime.data.users.UserRepository
+import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSource
+import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSourceImpl
 import android.content.Context
 import android.net.Uri
-import com.google.gson.Gson
+import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 /**
@@ -31,11 +29,11 @@ class WakatimeClient private constructor(
     private val net: WakatimeNetworkClient,
     private val db: WakatimeDbClient,
     private val session: SessionManager,
-    val users: UserRepository
+    val users: UserRepo,
+    val leaderboards: LeaderboardRepo,
 ) : AuthClient by auth,
     WakatimeNetworkClient by net,
-    SessionManager by session,
-    MasterDao by db {
+    SessionManager by session {
 
     /**
      *
@@ -47,6 +45,14 @@ class WakatimeClient private constructor(
         redirectUri: Uri = Uri.parse(""),
         method: Method
     ) {
+
+        init {
+            if (BuildConfig.DEBUG) {
+                Timber.plant(Timber.DebugTree())
+            } else {
+                Timber.plant(Timber.asTree())
+            }
+        }
 
         /**
          * The client will be configured to use basic authentication with
@@ -72,7 +78,7 @@ class WakatimeClient private constructor(
             method = Method.OAuth
         )
 
-        private var cacheLifetimeMinutes: Int = 5
+        private var cacheLifetimeInSeconds: Int = 60
         private val config: AuthConfig = AuthConfig(
             clientSecret = secret,
             clientId = clientId,
@@ -99,20 +105,26 @@ class WakatimeClient private constructor(
          * Assigns the global cache lifetime in minutes used to determine if new
          * values should be fetched over the network. The default value is 5 minutes.
          */
-        fun cacheLifetimeInMinutes(minutes: Int): Builder =
-            apply { cacheLifetimeMinutes = abs(minutes) }
+        fun cacheLifetimeInSeconds(minutes: Int): Builder =
+            apply { cacheLifetimeInSeconds = abs(minutes) }
 
         /**
          * Constructs a [WakatimeClient] based on the current configuration
          */
         fun build(context: Context): WakatimeClient {
-            val db = WakatimeDatabase.getInstance(context.applicationContext)
+            val db: WakatimeDatabase = WakatimeDatabase.getInstance(context.applicationContext)
             val dbClient = WakatimeDbClient(db, DbErrorProcessor())
 
-            val authClient = authBuilder.build(context)
-
-            val netClient = netBuilder.setAuthenticatorIfNeeded(authClient.authenticator()).build()
-            val wakaNetClient = WakatimeNetworkClientImpl(netClient, WakatimeErrorProcessor(Gson()))
+            val authClient: AuthClientImpl = authBuilder.build(context)
+            val netClient: NetworkClient = netBuilder
+                .setAuthenticatorIfNeeded(authClient.authenticator())
+                .also {
+                    if (cacheLifetimeInSeconds > 0) {
+                        it.enableCache(context.cacheDir, cacheLifetimeInSeconds)
+                    }
+                }.build()
+            val wakaNetClient = WakatimeNetworkClientImpl(netClient, WakatimeErrorProcessor())
+            val limiter = RateLimiter<String>(cacheLifetimeInSeconds, TimeUnit.SECONDS)
 
             val manager = SessionManagerImpl(
                 config = config,
@@ -120,14 +132,30 @@ class WakatimeClient private constructor(
                 storage = authClient.storage,
                 session = authClient.session(),
                 oauthApi = wakaNetClient.oauthApi(),
-                netProcessor = wakaNetClient.processor()
+                netProcessor = wakaNetClient.processor(),
             )
 
-            val users = UserInjector.provideRepository(
-                cacheLimit = cacheLifetimeMinutes,
+            val localSource: WakatimeLocalDataSource = WakatimeLocalDataSourceImpl(
+                db = dbClient.wakatimeDatabase,
+                processor = dbClient.processor
+            )
+
+            val remoteSource: WakatimeRemoteDataSource = WakatimeRemoteDataSourceImpl(
                 session = authClient.session(),
-                dbClient = dbClient,
-                netClient = wakaNetClient
+                api = wakaNetClient.api(),
+                processor = wakaNetClient.processor(),
+            )
+
+            val users: UserRepo = UserRepoImpl(
+                limiter = limiter,
+                remote = remoteSource,
+                local = localSource
+            )
+
+            val ranking: LeaderboardRepo = LeaderboardRepoImpl(
+                limiter = limiter,
+                remote = remoteSource,
+                local = localSource
             )
 
             return WakatimeClient(
@@ -135,7 +163,8 @@ class WakatimeClient private constructor(
                 net = wakaNetClient,
                 db = dbClient,
                 session = manager,
-                users = users
+                users = users,
+                leaderboards = ranking,
             )
         }
     }

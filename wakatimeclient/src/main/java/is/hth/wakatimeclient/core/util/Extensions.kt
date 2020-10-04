@@ -1,21 +1,6 @@
-/*
- * Copyright 2018 Google LLC.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package `is`.hth.wakatimeclient.core.util
 
+import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.Results
 
 /**
@@ -38,9 +23,17 @@ val <T> T.exhaustive: T
     get() = this
 
 /**
- * Helper to returning the value in the correct [Results] wrapper, depending on if
- * it is null or not.
+ * Returns `this` value wrapped in a [Results.Success.Values] unless it is null,
+ * then a [Results.Success.Empty] is returned
  */
 fun <T : Any> T?.valueOrEmpty(): Results<T> = if (this == null) {
     Results.Success.Empty
+} else Results.Success.Values(this)
+
+/**
+ * Returns `this` value wrapped in a [Results.Success.Values] unless it is null,
+ * then the supplied [error] wrapped in a [Results.Failure] is returned
+ */
+fun <T : Any> T?.valueOrFailure(error: Error): Results<T> = if (this == null) {
+    Results.Failure(error)
 } else Results.Success.Values(this)

@@ -8,17 +8,15 @@ sealed class Scope(val name: String) {
 
     companion object {
 
-        val scopes: HashMap<String, Scope> by lazy {
-            hashMapOf(
-                Email.name to Email,
-                ReadLoggedTime.name to ReadLoggedTime,
-                WriteLoggedTime.name to WriteLoggedTime,
-                ReadStats.name to ReadStats,
-                ReadOrganization.name to ReadOrganization,
-                ReadPrivateLeaderboards.name to ReadPrivateLeaderboards,
-                WritePrivateLeaderboards.name to WritePrivateLeaderboards
-            )
-        }
+        private val scopes: Set<Scope> = setOf(
+            Email,
+            ReadLoggedTime,
+            WriteLoggedTime,
+            ReadStats,
+            ReadOrganization,
+            ReadPrivateLeaderboards,
+            WritePrivateLeaderboards
+        )
 
         /**
          * Attempts to parse any scope values that might be in the input and convert them to [Scope]s
@@ -26,8 +24,8 @@ sealed class Scope(val name: String) {
         fun extractScopes(value: String): Set<Scope> {
             return mutableSetOf<Scope>().apply {
                 scopes.forEach { scope ->
-                    if (value.contains(other = scope.key, ignoreCase = true)) {
-                        add(scope.value)
+                    if (value.contains(other = scope.name, ignoreCase = true)) {
+                        add(scope)
                     }
                 }
             }

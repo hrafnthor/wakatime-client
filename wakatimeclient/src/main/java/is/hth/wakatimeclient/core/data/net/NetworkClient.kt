@@ -1,11 +1,16 @@
 package `is`.hth.wakatimeclient.core.data.net
 
-import `is`.hth.wakatimeclient.core.util.NullStringAdapter
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
+import `is`.hth.wakatimeclient.core.util.Mime
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
 import okhttp3.Authenticator
+import okhttp3.Cache
+import okhttp3.MediaType
 import okhttp3.OkHttpClient
+import retrofit2.Converter
 import retrofit2.Retrofit
+import java.io.File
 
 interface NetworkClient {
 
@@ -13,6 +18,11 @@ interface NetworkClient {
      * Creates a network service interface through the use of a backing [Retrofit] client
      */
     fun <T> createService(clazz: Class<T>): T
+
+    /**
+     * Clears the underlying cache if any is set
+     */
+    fun clearCache()
 
     interface Builder {
 
@@ -47,13 +57,13 @@ internal class NetworkClientImpl private constructor(
 
     override fun <T> createService(clazz: Class<T>): T = retrofit.create(clazz)
 
+    override fun clearCache() {
+        client.cache()?.delete()
+    }
+
     internal class Builder(
         private val host: String
     ) : NetworkClient.Builder {
-
-        private val gson: Gson = GsonBuilder()
-            .registerTypeAdapter(String::class.java, NullStringAdapter())
-            .create()
 
         private val clientBuilder = OkHttpClient.Builder()
         private val retrofitBuilder = Retrofit.Builder()
@@ -63,18 +73,50 @@ internal class NetworkClientImpl private constructor(
 
         override fun getRetrofitBuilder(): Retrofit.Builder = retrofitBuilder
 
-        override fun setAuthenticator(authenticator: Authenticator): NetworkClient.Builder =
-            apply { this.authenticator = authenticator }
+        override fun setAuthenticator(
+            authenticator: Authenticator
+        ): NetworkClient.Builder = apply {
+            this.authenticator = authenticator
+        }
 
-        fun setAuthenticatorIfNeeded(authenticator: Authenticator): Builder =
-            apply { if (!this::authenticator.isInitialized) setAuthenticator(authenticator) }
+        fun setAuthenticatorIfNeeded(
+            authenticator: Authenticator
+        ): Builder = apply {
+            if (!this::authenticator.isInitialized) setAuthenticator(authenticator)
+        }
 
+        /**
+         * Turns on forced network layer caching
+         */
+        internal fun enableCache(
+            cacheDir: File,
+            cacheLifetimeInSeconds: Int
+        ): Builder = apply {
+            if (cacheLifetimeInSeconds > 0) {
+                with(getOKHttpBuilder()) {
+                    val cacheSize: Long = (10 * 1028 * 1028).toLong()
+                    cache(Cache(cacheDir, cacheSize))
+                    addInterceptor(ReadInterceptor(cacheLifetimeInSeconds))
+                    addNetworkInterceptor(WriteInterceptor(cacheLifetimeInSeconds))
+                }
+            }
+        }
+
+        @ExperimentalSerializationApi
         internal fun build(): NetworkClient {
-            val client = clientBuilder.authenticator(authenticator).build()
-            val retrofit = retrofitBuilder
+            val factory: Converter.Factory = Json {
+                ignoreUnknownKeys = true
+                coerceInputValues = true
+            }.asConverterFactory(MediaType.get(Mime.ApplicationJson.toString()))
+
+            val client: OkHttpClient = clientBuilder
+                .authenticator(authenticator)
+                .build()
+
+            val retrofit: Retrofit = retrofitBuilder
                 .baseUrl(host)
                 .client(client)
-                .addConverterFactory(DeEnvelopingConverter(gson))
+                .addConverterFactory(factory)
                 .build()
 
             return NetworkClientImpl(

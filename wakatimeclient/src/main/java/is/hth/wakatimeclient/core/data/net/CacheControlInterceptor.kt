@@ -1,0 +1,54 @@
+package `is`.hth.wakatimeclient.core.data.net
+
+import okhttp3.CacheControl
+import okhttp3.Interceptor
+import okhttp3.Request
+import okhttp3.Response
+import timber.log.Timber
+import java.util.concurrent.TimeUnit
+
+/**
+ * Forces cache reading onto any network request that goes through it.
+ */
+@Suppress("unused")
+class ReadInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSeconds) {
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        Timber.d("Forcing read from cache")
+        val original: Request = chain.request()
+        val modified: Request = original.newBuilder()
+            .addHeader(Header.CacheControl.toString(), maxAgeCacheControl.toString())
+            .build()
+        return chain.proceed(modified)
+    }
+}
+
+/**
+ * Forces cache writing onto all requests that go through it, and clearing all caching
+ * headers received from the server in favor of a new one, set to the supplied max-age
+ * value.
+ */
+@Suppress("unused")
+class WriteInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSeconds) {
+
+    override fun intercept(chain: Interceptor.Chain): Response {
+        Timber.d("Forcing write into cache")
+        val request: Request = chain.request()
+        val original: Response = chain.proceed(request)
+        return original.newBuilder()
+            .removeHeader(Header.CacheControl.toString())
+            .removeHeader(Header.Pragma.toString())
+            .addHeader(Header.CacheControl.toString(), maxAgeCacheControl.toString())
+            .build()
+    }
+}
+
+abstract class CacheControlInterceptor internal constructor(maxAgeSeconds: Int) : Interceptor {
+
+    /**
+     *  A [CacheControl] configured to use the supplied maxAgeSeconds
+     */
+    protected val maxAgeCacheControl: CacheControl = CacheControl.Builder()
+        .maxAge(maxAgeSeconds, TimeUnit.SECONDS)
+        .build()
+}

@@ -2,6 +2,7 @@ package `is`.hth.wakatimeclient.wakatime.data.db.entities
 
 import `is`.hth.wakatimeclient.wakatime.model.Config
 import `is`.hth.wakatimeclient.wakatime.model.CurrentUser
+import `is`.hth.wakatimeclient.wakatime.model.FullUser
 import `is`.hth.wakatimeclient.wakatime.model.User
 import androidx.room.*
 
@@ -12,15 +13,15 @@ import androidx.room.*
 data class UserEntity(
     @PrimaryKey
     @ColumnInfo(name = "id")
-    val id: String = "",
+    val id: String,
     @ColumnInfo(name = "display_name")
     val displayName: String = "",
     @ColumnInfo(name = "username")
-    val userName: String = "",
+    val username: String = "",
     @ColumnInfo(name = "full_name")
     val fullName: String = "",
     @ColumnInfo(name = "email_public")
-    val emailPublic: String = "",
+    val email: String = "",
     @ColumnInfo(name = "website")
     val website: String = "",
     @ColumnInfo(name = "website_human")
@@ -40,7 +41,7 @@ data class UserEntity(
 data class ConfigEntity(
     @PrimaryKey
     @ColumnInfo(name = "user_id")
-    val userId: String = "",
+    val userId: String,
     @ColumnInfo(name = "email_is_public")
     val emailIsPublic: Boolean = false,
     @ColumnInfo(name = "has_premium_features")
@@ -79,12 +80,12 @@ data class ConfigEntity(
      * The primary email that is used in communication with the user
      */
     @ColumnInfo(name = "email_primary")
-    val emailPrimary: String,
+    val emailPrimary: String = "",
     /**
      * Is this potentially when the current payment method has expired?
      */
     @ColumnInfo(name = "needs_payment_method")
-    val needsPaymentMethod: Boolean,
+    val needsPaymentMethod: Boolean = false,
     @ColumnInfo(name = "show_machine_name_ip")
     val showMachineNameIp: Boolean = false,
     @ColumnInfo(name = "dashboard_default_range")
@@ -101,12 +102,12 @@ data class ConfigEntity(
      * time when user was created in ISO 8601 format
      */
     @ColumnInfo(name = "created_at")
-    val createdAt: String,
+    val createdAt: String = "",
     /**
      * time when user was last modified in ISO 8601 format
      */
     @ColumnInfo(name = "modified_at")
-    val modifiedAt: String
+    val modifiedAt: String = ""
 )
 
 /**
@@ -134,9 +135,9 @@ internal fun CurrentUserView.toCurrentUser(): CurrentUser = CurrentUser(
 internal fun UserEntity.toUser(): User = User(
     id = id,
     displayName = displayName,
-    userName = userName,
+    username = username,
     fullName = fullName,
-    emailPublic = emailPublic,
+    email = email,
     website = website,
     websiteHumanReadable = websiteHumanReadable,
     location = location,
@@ -150,9 +151,9 @@ internal fun UserEntity.toUser(): User = User(
 internal fun User.toEntity(): UserEntity = UserEntity(
     id = id,
     displayName = displayName,
-    userName = userName,
+    username = username,
     fullName = fullName,
-    emailPublic = emailPublic,
+    email = email,
     website = website,
     websiteHumanReadable = websiteHumanReadable,
     location = location,
@@ -171,37 +172,67 @@ internal fun ConfigEntity.toConfig(): Config = Config(
     loggedTimeIsPublic = loggedTimeIsPublic,
     languagesArePublic = languagesArePublic,
     colorScheme = colorScheme,
-    timezone = timezone
+    timezone = timezone,
+    lastHeartbeat = lastHeartbeat,
+    lastPlugin = lastPlugin,
+    lastProject = lastProject,
+    plan = plan,
+    dateFormat = dateFormat,
+    bio = bio,
+    dashboardDefaultRange = dashboardDefaultRange,
+    emailPrimary = emailPrimary,
+    needsPaymentMethod = needsPaymentMethod,
+    showMachineNameIp = showMachineNameIp,
+    using24hrFormat = using24hrFormat,
+    timeout = timeout,
+    weekdayStart = weekdayStart,
+    writesOnly = writesOnly,
+    createdAt = createdAt,
+    modifiedAt = modifiedAt
 )
 
 /**
- * Maps this [Config] to a [ConfigEntity]
- * // TODO: 2.8.2020 finish adding the mappings to ConfigEntity once Config contains the fields.
+ * Maps the [FullUser] to a [CurrentUserView]
  */
-internal fun CurrentUser.toConfigEntity(): ConfigEntity = ConfigEntity(
-    userId = user.id,
-    emailIsPublic = config.emailIsPublic,
-    hasPremiumFeatures = config.hasPremiumFeatures,
-    emailIsConfirmed = config.emailIsConfirmed,
-    photoIsPublic = config.photoIsPublic,
-    loggedTimeIsPublic = config.loggedTimeIsPublic,
-    languagesArePublic = config.languagesArePublic,
-    colorScheme = config.colorScheme,
-    timezone = config.timezone,
-    lastHeartbeat = "",
-    lastPlugin = "",
-    lastProject = "",
-    plan = "",
-    dateFormat = "",
-    bio = "",
-    emailPrimary = "",
-    needsPaymentMethod = false,
-    showMachineNameIp = false,
-    dashboardDefaultRange = "",
-    using24hrFormat = true,
-    timeout = 0,
-    weekdayStart = 0,
-    writesOnly = false,
-    createdAt = "",
-    modifiedAt = ""
+@Suppress("unused")
+internal fun FullUser.toCurrentUserView(): CurrentUserView = CurrentUserView(
+    user = UserEntity(
+        id = id,
+        displayName = displayName,
+        username = username,
+        fullName = fullName,
+        email = emailPublic,
+        website = website,
+        websiteHumanReadable = websiteHumanReadable,
+        location = location,
+        photoUrl = photoUrl,
+        isHireable = isHireable
+    ),
+    config = ConfigEntity(
+        userId = id,
+        emailIsPublic = emailIsPublic,
+        hasPremiumFeatures = hasPremiumFeatures,
+        emailIsConfirmed = emailIsConfirmed,
+        photoIsPublic = photoIsPublic,
+        loggedTimeIsPublic = loggedTimeIsPublic,
+        languagesArePublic = languagesArePublic,
+        colorScheme = colorScheme,
+        timezone = timezone,
+        lastHeartbeat = lastHeartbeat,
+        lastPlugin = lastPlugin,
+        lastProject = lastProject,
+        plan = plan,
+        dateFormat = dateFormat,
+        bio = bio,
+        dashboardDefaultRange = dashboardDefaultRange,
+        emailPrimary = email,
+        needsPaymentMethod = needsPaymentMethod,
+        showMachineNameIp = showMachineNameIp,
+        using24hrFormat = using24hrFormat,
+        timeout = timeout,
+        weekdayStart = weekdayStart,
+        writesOnly = writesOnly,
+        createdAt = createdAt,
+        modifiedAt = modifiedAt
+    )
 )
