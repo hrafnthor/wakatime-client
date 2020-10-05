@@ -53,7 +53,7 @@ data class LeaderboardEntity(
 /**
  * Converts the model to a database entity
  */
-internal fun Leaderboard.toEntity(isPrivate: Boolean): LeaderboardEntity = LeaderboardEntity(
+internal fun Leaderboard.toEntity(): LeaderboardEntity = LeaderboardEntity(
         id = id,
         memberCount = memberCount,
         canEdit = canEdit,
