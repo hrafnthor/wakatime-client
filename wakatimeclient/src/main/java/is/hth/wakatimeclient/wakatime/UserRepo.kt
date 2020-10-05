@@ -56,6 +56,7 @@ internal class UserRepoImpl(
             // value is found it is considered to be valid.
             false
         }
+
     private val currentUserLoader = Loader<FullUser, CurrentUser>()
         .cache {
             local.getCurrentUser()
@@ -70,6 +71,7 @@ internal class UserRepoImpl(
                 }
             }
         }
+
     private val totalRecordLoader = SingleLoader<TotalRecord>()
         .cache {
             local.getTotalRecord()

@@ -2,6 +2,7 @@ package `is`.hth.wakatimeclient.wakatime.data.api
 
 import `is`.hth.wakatimeclient.core.data.net.EnvelopePayload
 import `is`.hth.wakatimeclient.wakatime.model.FullUser
+import `is`.hth.wakatimeclient.wakatime.model.Leaderboard
 import `is`.hth.wakatimeclient.wakatime.model.Leaders
 import `is`.hth.wakatimeclient.wakatime.model.TotalRecord
 import kotlinx.serialization.SerialName
@@ -21,6 +22,7 @@ interface WakatimeApi {
         private const val USERS = "$API_ENDPOINT/users"
         private const val CURRENT_USER = "$USERS/current"
         private const val LEADERS = "$API_ENDPOINT/leaders"
+        private const val BOARDS = "$CURRENT_USER/leaderboards"
     }
 
     /**
@@ -38,15 +40,22 @@ interface WakatimeApi {
     suspend fun getTotalRecord(): Response<Wrapper<TotalRecord>>
 
     /**
-     * Retrieves the public leaderboard.
+     * Retrieves the public leaderboards leaders.
      * Can filter by [language] which will give the public leaders for that language.
      * The results are paginated so iterate by requesting a [page]
      */
     @GET(LEADERS)
-    suspend fun getPublicLeaderboard(
-        @Query("language") language: String,
-        @Query("page") page: Int
+    suspend fun getPublicLeaders(
+            @Query("language") language: String,
+            @Query("page") page: Int
     ): Response<Leaders>
+
+    /**
+     * Retrieves all of the private leaderboards that the currently authenticated
+     * user is a member off.
+     */
+    @GET(BOARDS)
+    suspend fun getLeaderboards(): Response<PagedWrapper<List<Leaderboard>>>
 }
 
 /**
@@ -54,8 +63,8 @@ interface WakatimeApi {
  */
 @Serializable
 internal data class ServiceError(
-    @SerialName("error")
-    val message: String
+        @SerialName("error")
+        val message: String
 )
 
 /**
@@ -63,3 +72,23 @@ internal data class ServiceError(
  */
 @Serializable
 data class Wrapper<T : Any>(val data: T)
+
+/**
+ * A dumb JSON payload wrapper for paged data
+ */
+@Serializable
+data class PagedWrapper<T : Any>(
+        /**
+         * The actual data payload
+         */
+        val data: T,
+        /**
+         * The current page
+         */
+        val page: Int,
+        /**
+         * The total number of pages to iterate through
+         */
+        @SerialName("total_pages")
+        val totalPages: Int
+)

@@ -5,6 +5,7 @@ import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 import `is`.hth.wakatimeclient.core.data.net.RemoteDataSource
 import `is`.hth.wakatimeclient.wakatime.model.FullUser
+import `is`.hth.wakatimeclient.wakatime.model.Leaderboard
 import `is`.hth.wakatimeclient.wakatime.model.Leaders
 import `is`.hth.wakatimeclient.wakatime.model.TotalRecord
 
@@ -37,36 +38,54 @@ internal interface WakatimeRemoteDataSource {
      * If the required authentication scope access has not been given, the result will be for
      * page 1.
      */
-    suspend fun getPublicLeaderboard(language: String = "", page: Int): Results<Leaders>
+    suspend fun getPublicLeaders(language: String = "", page: Int): Results<Leaders>
+
+    /**
+     * Fetches the private leaderboards that the currently authenticated user is member of.
+     */
+    suspend fun getLeaderboards(): Results<List<Leaderboard>>
 }
 
 internal class WakatimeRemoteDataSourceImpl(
-    session: AuthClient.Session,
-    processor: NetworkErrorProcessor,
-    private val api: WakatimeApi,
+        session: AuthClient.Session,
+        processor: NetworkErrorProcessor,
+        private val api: WakatimeApi,
 ) : RemoteDataSource(session, processor), WakatimeRemoteDataSource {
 
-    override suspend fun getPublicLeaderboard(
-        language: String,
-        page: Int
-    ): Results<Leaders> =
-        makeCall(networkCall = {
-            api.getPublicLeaderboard(language, page)
+    override suspend fun getPublicLeaders(
+            language: String,
+            page: Int
+    ): Results<Leaders> {
+        return makeCall(networkCall = {
+            api.getPublicLeaders(language, page)
         }, convert = {
             it
         })
+    }
 
-    override suspend fun getCurrentUser(): Results<FullUser> =
-        makeCall(networkCall = {
+    override suspend fun getCurrentUser(): Results<FullUser> {
+        return makeCall(networkCall = {
             api.getCurrentUser()
         }, convert = {
             it.data
         })
+    }
 
-    override suspend fun getTotalRecord(): Results<TotalRecord> =
-        makeCall(networkCall = {
+
+    override suspend fun getTotalRecord(): Results<TotalRecord> {
+        return makeCall(networkCall = {
             api.getTotalRecord()
         }, convert = {
             it.data
         })
+
+    }
+
+    override suspend fun getLeaderboards(): Results<List<Leaderboard>> {
+        return makeCall(networkCall = {
+            api.getLeaderboards()
+        }, convert = {
+            it.data
+        })
+    }
 }

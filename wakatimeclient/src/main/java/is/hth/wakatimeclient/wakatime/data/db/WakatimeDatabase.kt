@@ -55,7 +55,7 @@ internal abstract class WakatimeDatabase : RoomDatabase(), MasterDao {
                         Executors.newSingleThreadExecutor().execute {
                             getInstance(context).let {
                                 // Perform any database initialization needed here
-                                it.rankings().insertIgnore(LeaderboardEntity.publicLeaderboard)
+                                it.rankings().insertIgnoreLeaderboard(LeaderboardEntity.publicLeaderboard)
                                 it.languages().insertIgnoreLanguage(LanguageEntity.none)
                             }
                         }
