@@ -37,9 +37,11 @@ internal interface WakatimeLocalDataSource {
 
     suspend fun storeLanguages(names: Set<String>): Results<Unit>
 
-    suspend fun storeUsers(vararg users: UserEntity): Results<Unit>
+    suspend fun storeUsers(vararg entities: UserEntity): Results<Unit>
 
     suspend fun storeRank(rank: UserRankEntity): Results<Long>
+
+    suspend fun storeLeaderboards(vararg entities: LeaderboardEntity): Results<Unit>
 
     suspend fun storePeriod(startDate: String, endDate: String): Results<Long>
 
@@ -95,9 +97,9 @@ internal class WakatimeLocalDataSourceImpl(
     }
 
     override suspend fun storeUsers(
-        vararg users: UserEntity
+        vararg entities: UserEntity
     ): Results<Unit> = operate {
-        db.users().insertReplaceUsers(*users)
+        db.users().insertReplaceUsers(*entities)
     }
 
     override suspend fun storeRank(
@@ -106,6 +108,12 @@ internal class WakatimeLocalDataSourceImpl(
         db.rankings().setUserRank(rank).also { id ->
             if (id == -1L) throw IllegalStateException("Unable to insert user rank: $rank")
         }
+    }
+
+    override suspend fun storeLeaderboards(
+            vararg entities: LeaderboardEntity
+    ): Results<Unit> = operate {
+        db.rankings().insertReplaceLeaderboards(*entities)
     }
 
     override suspend fun storePeriod(
