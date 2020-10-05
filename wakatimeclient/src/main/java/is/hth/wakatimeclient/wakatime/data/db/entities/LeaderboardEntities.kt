@@ -19,7 +19,7 @@ data class LeaderboardEntity(
         @ColumnInfo(name = "is_private")
         val isPrivate: Boolean,
         @ColumnInfo(name = "members_with_timezones")
-        val membersWithTimeZones: Int,
+        val membersWithTimezones: Int,
         @ColumnInfo(name = "name")
         val name: String,
         @ColumnInfo(name = "range")
@@ -41,7 +41,7 @@ data class LeaderboardEntity(
                 canDelete = false,
                 hasAvailableSeats = false,
                 isPrivate = false,
-                membersWithTimeZones = -1,
+                membersWithTimezones = -1,
                 name = "Public Wakatime leaderboards",
                 range = "",
                 createdAt = "",
@@ -60,7 +60,24 @@ internal fun Leaderboard.toEntity(isPrivate: Boolean): LeaderboardEntity = Leade
         canDelete = canDelete,
         hasAvailableSeats = hasAvailableSeats,
         isPrivate = isPrivate,
-        membersWithTimeZones = membersWithTimezone,
+        membersWithTimezones = membersWithTimezones,
+        name = name,
+        range = range,
+        createdAt = createdAt,
+        modifiedAt = modifiedAt
+)
+
+/**
+ * Converts the database entity to a model
+ */
+internal fun LeaderboardEntity.toModel(): Leaderboard = Leaderboard(
+        id = id,
+        memberCount = memberCount,
+        canEdit = canEdit,
+        canDelete = canDelete,
+        hasAvailableSeats = hasAvailableSeats,
+        isPrivate = isPrivate,
+        membersWithTimezones = membersWithTimezones,
         name = name,
         range = range,
         createdAt = createdAt,
