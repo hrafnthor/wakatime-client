@@ -22,7 +22,7 @@ interface WakatimeApi {
         private const val USERS = "$API_ENDPOINT/users"
         private const val CURRENT_USER = "$USERS/current"
         private const val LEADERS = "$API_ENDPOINT/leaders"
-        private const val BOARDS = "$API_ENDPOINT/current/leaderboards"
+        private const val BOARDS = "$CURRENT_USER/leaderboards"
     }
 
     /**
@@ -46,8 +46,8 @@ interface WakatimeApi {
      */
     @GET(LEADERS)
     suspend fun getPublicLeaders(
-        @Query("language") language: String,
-        @Query("page") page: Int
+            @Query("language") language: String,
+            @Query("page") page: Int
     ): Response<Leaders>
 
     /**
@@ -63,8 +63,8 @@ interface WakatimeApi {
  */
 @Serializable
 internal data class ServiceError(
-    @SerialName("error")
-    val message: String
+        @SerialName("error")
+        val message: String
 )
 
 /**
@@ -77,15 +77,15 @@ data class Wrapper<T : Any>(val data: T)
  * A dumb JSON payload wrapper for paged data
  */
 @Serializable
-data class PagedWrapper<T:Any>(
+data class PagedWrapper<T : Any>(
         /**
          * The actual data payload
          */
         val data: T,
         /**
-         * The total number of items
+         * The current page
          */
-        val total: Int,
+        val page: Int,
         /**
          * The total number of pages to iterate through
          */
