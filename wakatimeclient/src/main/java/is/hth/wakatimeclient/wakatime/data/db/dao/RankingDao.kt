@@ -47,7 +47,11 @@ internal interface RankingDao {
     fun insertReplace(leaderboardEntity: LeaderboardEntity)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertIgnore(leaderboardEntity: LeaderboardEntity): Long
+    fun insertIgnoreLeaderboard(entity: LeaderboardEntity): Long
+
+    @Transaction
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertReplaceLeaderboards(vararg entities: LeaderboardEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertReplace(entity: UserRankEntity): Long
