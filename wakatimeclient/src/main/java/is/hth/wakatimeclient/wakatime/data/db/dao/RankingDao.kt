@@ -7,23 +7,20 @@ import androidx.room.*
 @Dao
 internal interface RankingDao {
 
-    @Query(
-        """
+    @Query("""
         SELECT * 
         FROM user_rank 
         WHERE user_id ==:userId
             AND language_id==:languageId 
             AND leaderboard_id==:leaderboardId
-    """
-    )
+    """)
     fun getUserRankHistory(
-        userId: String,
-        languageId: Long,
-        leaderboardId: String
+            userId: String,
+            languageId: Long,
+            leaderboardId: String
     ): List<UserRankEntity>
 
-    @Query(
-        """
+    @Query("""
         SELECT * 
         FROM user_rank u1
         WHERE user_id ==:userId 
@@ -35,13 +32,24 @@ internal interface RankingDao {
                 where u2.user_id ==:userId 
                     AND u2.language_id==:languageId 
                     AND u2.leaderboard_id==:leaderboardId )
-    """
-    )
+    """)
     fun getUserRankLatest(
-        userId: String,
-        languageId: Long,
-        leaderboardId: String
+            userId: String,
+            languageId: Long,
+            leaderboardId: String
     ): UserRankEntity?
+
+    /**
+     * Retrieves all leaderboards marked as being private
+     */
+    @Query("SELECT * FROM leaderboards WHERE is_private==1")
+    fun getPrivateLeaderboards(): List<LeaderboardEntity>
+
+    /**
+     * Retrieves all leaderboards
+     */
+    @Query("SELECT * FROM leaderboards")
+    fun getLeaderboards(): List<LeaderboardEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertReplace(leaderboardEntity: LeaderboardEntity)
@@ -60,9 +68,9 @@ internal interface RankingDao {
     fun setUserRank(rank: UserRankEntity): Long {
         val id: Long = insertReplace(rank)
         return if (id != -1L) id else getUserRankLatest(
-            rank.userId,
-            rank.languageId,
-            rank.leaderboardId,
+                rank.userId,
+                rank.languageId,
+                rank.leaderboardId,
         )?.id ?: -1L
     }
 }
