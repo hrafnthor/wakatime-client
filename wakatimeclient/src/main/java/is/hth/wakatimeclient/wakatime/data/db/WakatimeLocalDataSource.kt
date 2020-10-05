@@ -5,12 +5,9 @@ import `is`.hth.wakatimeclient.core.data.db.DbErrorProcessor
 import `is`.hth.wakatimeclient.core.data.db.LocalDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.*
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.toCurrentUser
-import `is`.hth.wakatimeclient.wakatime.model.CurrentUser
-import `is`.hth.wakatimeclient.wakatime.model.Language
-import `is`.hth.wakatimeclient.wakatime.model.TotalRecord
-import `is`.hth.wakatimeclient.wakatime.model.User
+import `is`.hth.wakatimeclient.wakatime.model.*
 
-
+// TODO: 5.10.2020 Convert all entity inputs to models, as models are what is being returned
 internal interface WakatimeLocalDataSource {
 
     /**
@@ -33,6 +30,11 @@ internal interface WakatimeLocalDataSource {
 
     suspend fun getLanguages(): Results<Set<Language>>
 
+    /**
+     * Attempts to retrieve the [Leaderboard]s that the user is associated with.
+     */
+    suspend fun getLeaderboards(onlyPrivate: Boolean): Results<List<Leaderboard>>
+
     suspend fun storeLanguage(name: String): Results<Long>
 
     suspend fun storeLanguages(names: Set<String>): Results<Unit>
@@ -41,7 +43,7 @@ internal interface WakatimeLocalDataSource {
 
     suspend fun storeRank(rank: UserRankEntity): Results<Long>
 
-    suspend fun storeLeaderboards(vararg entities: LeaderboardEntity): Results<Unit>
+    suspend fun storeLeaderboards(boards: List<Leaderboard>): Results<Unit>
 
     suspend fun storePeriod(startDate: String, endDate: String): Results<Long>
 
@@ -53,8 +55,8 @@ internal interface WakatimeLocalDataSource {
 }
 
 internal class WakatimeLocalDataSourceImpl(
-    private val db: WakatimeDatabase,
-    processor: DbErrorProcessor
+        private val db: WakatimeDatabase,
+        processor: DbErrorProcessor
 ) : LocalDataSource(processor), WakatimeLocalDataSource {
 
     override suspend fun getCurrentUser(): Results<CurrentUser> = operate {
@@ -79,31 +81,41 @@ internal class WakatimeLocalDataSourceImpl(
         }
     }
 
+    override suspend fun getLeaderboards(onlyPrivate: Boolean): Results<List<Leaderboard>> = operate {
+        if (onlyPrivate) {
+            db.rankings().getPrivateLeaderboards()
+        } else {
+            db.rankings().getLeaderboards()
+        }.map {
+            it.toModel()
+        }
+    }
+
     override suspend fun storeLanguage(
-        name: String
+            name: String
     ): Results<Long> = operate {
         db.languages().setLanguage(name).also { id ->
             if (id == -1L) throw IllegalStateException(
-                "Unable to insert language $name into database!"
+                    "Unable to insert language $name into database!"
             )
         }
     }
 
     override suspend fun storeLanguages(
-        names: Set<String>
+            names: Set<String>
     ): Results<Unit> = operate {
         val languages: List<LanguageEntity> = names.map { LanguageEntity(name = it) }
         db.languages().insertIgnoreLanguages(*languages.toTypedArray())
     }
 
     override suspend fun storeUsers(
-        vararg entities: UserEntity
+            vararg entities: UserEntity
     ): Results<Unit> = operate {
         db.users().insertReplaceUsers(*entities)
     }
 
     override suspend fun storeRank(
-        rank: UserRankEntity
+            rank: UserRankEntity
     ): Results<Long> = operate {
         db.rankings().setUserRank(rank).also { id ->
             if (id == -1L) throw IllegalStateException("Unable to insert user rank: $rank")
@@ -111,33 +123,34 @@ internal class WakatimeLocalDataSourceImpl(
     }
 
     override suspend fun storeLeaderboards(
-            vararg entities: LeaderboardEntity
+            boards: List<Leaderboard>
     ): Results<Unit> = operate {
-        db.rankings().insertReplaceLeaderboards(*entities)
+        val converted: List<LeaderboardEntity> = boards.map(Leaderboard::toEntity)
+        db.rankings().insertReplaceLeaderboards(*converted.toTypedArray())
     }
 
     override suspend fun storePeriod(
-        startDate: String,
-        endDate: String
+            startDate: String,
+            endDate: String
     ): Results<Long> = operate {
         db.calendar().setPeriod(startDate, endDate)
     }
 
     override suspend fun storeCurrentUser(
-        currentUser: CurrentUserView
+            currentUser: CurrentUserView
     ): Results<Unit> = operate {
         db.users().insertReplaceUsers(currentUser.user)
         db.users().insertReplace(currentUser.config)
     }
 
     override suspend fun storeTotalRecord(
-        totalRecord: TotalRecordEntity
+            totalRecord: TotalRecordEntity
     ): Results<Unit> = operate {
         db.users().insertReplace(totalRecord)
     }
 
     override suspend fun removeUser(
-        id: String
+            id: String
     ): Results<Boolean> = operate {
         db.users().removeUser(id) > 0
     }
