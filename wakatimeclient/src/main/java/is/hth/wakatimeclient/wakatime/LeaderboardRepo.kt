@@ -2,11 +2,13 @@ package `is`.hth.wakatimeclient.wakatime
 
 import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.Results
+import `is`.hth.wakatimeclient.core.data.SingleLoader
 import `is`.hth.wakatimeclient.core.util.RateLimiter
 import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeRemoteDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.*
 import `is`.hth.wakatimeclient.wakatime.model.Language
+import `is`.hth.wakatimeclient.wakatime.model.Leaderboard
 import `is`.hth.wakatimeclient.wakatime.model.Leaders
 import `is`.hth.wakatimeclient.wakatime.model.Rank
 
@@ -25,21 +27,47 @@ interface LeaderboardRepo {
      * page 1.
      */
     suspend fun getPublicLeaders(language: String, page: Int): Results<Leaders>
+
+    /**
+     * Fetches the private leaderboards for the currently authenticated user
+     */
+    suspend fun getLeaderboards(): Results<List<Leaderboard>>
 }
 
 internal class LeaderboardRepoImpl(
-    private val limiter: RateLimiter<String>,
-    private val remote: WakatimeRemoteDataSource,
-    private val local: WakatimeLocalDataSource,
+        private val limiter: RateLimiter<String>,
+        private val remote: WakatimeRemoteDataSource,
+        private val local: WakatimeLocalDataSource,
 ) : LeaderboardRepo {
 
+    companion object {
+        private const val keyLeaderboards = "leaderboards"
+    }
+
+    private val leaderboardLoader = SingleLoader<List<Leaderboard>>()
+            .cache {
+                local.getLeaderboards(true)
+            }.expired {
+                limiter.shouldFetch(keyLeaderboards)
+            }.remote {
+                remote.getLeaderboards()
+            }.update {
+                local.storeLeaderboards(it).also { result ->
+                    if (result is Results.Success) {
+                        limiter.mark(keyLeaderboards)
+                    }
+                }
+            }
+
     override suspend fun getPublicLeaders(language: String, page: Int): Results<Leaders> {
-        return remote.getPublicLeaderboard(language, page).also {
+        return remote.getPublicLeaders(language, page).also {
             if (it is Results.Success.Values) {
                 updateLeaders(LeaderboardEntity.publicLeaderboard.id, it.data)
             }
         }
     }
+
+    override suspend fun getLeaderboards(): Results<List<Leaderboard>> = leaderboardLoader.execute()
 
     /**
      * Stores the leadership positions for the given leaderboard for
@@ -48,8 +76,8 @@ internal class LeaderboardRepoImpl(
      * not to capture all the data.
      */
     private suspend fun updateLeaders(
-        leaderboardId: String,
-        leaders: Leaders
+            leaderboardId: String,
+            leaders: Leaders
     ): Results<Unit> {
         // Get the primary language id for this leaderboard, if any
         val languageId: Long = if (leaders.language.isNotEmpty()) {
@@ -57,20 +85,20 @@ internal class LeaderboardRepoImpl(
                 is Results.Success.Values -> results.data.id
                 is Results.Failure -> return results
                 Results.Success.Empty -> return Results.Failure(
-                    Error.Database.Empty("Unable to find id for language ${leaders.language}")
+                        Error.Database.Empty("Unable to find id for language ${leaders.language}")
                 )
             }
         } else LanguageEntity.none.id
 
         // Store the period for which these records are valid for
         val periodId: Long = when (val results: Results<Long> = local.storePeriod(
-            startDate = leaders.period.startDate,
-            endDate = leaders.period.endDate
+                startDate = leaders.period.startDate,
+                endDate = leaders.period.endDate
         )) {
             is Results.Success.Values -> results.data
             is Results.Failure -> return results
             Results.Success.Empty -> return Results.Failure(
-                Error.Database.Insert("Unable to insert or select id for period")
+                    Error.Database.Insert("Unable to insert or select id for period")
             )
         }
 
@@ -85,17 +113,17 @@ internal class LeaderboardRepoImpl(
         // Store each user's leadership rank
         ranks.forEach { ranking ->
             val rank = UserRankEntity(
-                userId = ranking.user.id,
-                languageId = languageId,
-                leaderboardId = leaderboardId,
-                rank = ranking.rank,
-                periodId = periodId,
-                modifiedAt = leaders.modifiedAt
+                    userId = ranking.user.id,
+                    languageId = languageId,
+                    leaderboardId = leaderboardId,
+                    rank = ranking.rank,
+                    periodId = periodId,
+                    modifiedAt = leaders.modifiedAt
             )
             when (val results: Results<Long> = local.storeRank(rank)) {
                 is Results.Failure -> return results
                 Results.Success.Empty -> return Results.Failure(
-                    Error.Database.Insert("Unable to insert or select id for user rank")
+                        Error.Database.Insert("Unable to insert or select id for user rank")
                 )
             }
         }
@@ -111,7 +139,7 @@ internal class LeaderboardRepoImpl(
     }
 
     private fun extractUsers(ranks: List<Rank>): Set<UserEntity> = ranks
-        .map {
-            it.user.toEntity()
-        }.toHashSet()
+            .map {
+                it.user.toEntity()
+            }.toHashSet()
 }
