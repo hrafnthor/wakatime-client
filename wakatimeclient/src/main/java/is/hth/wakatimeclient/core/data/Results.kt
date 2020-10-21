@@ -15,7 +15,9 @@ sealed class Results<out T> {
         object Empty : Success<Nothing>()
 
         /**
-         * Values were produced, but potentially an error was as well
+         * Values were produced, but potentially an error was as well such as
+         * in the case when network fetching has failed and only cached values
+         * were returned.
          */
         class Values<T>(val data: T, val error: Error? = null) : Success<T>()
     }

@@ -12,10 +12,18 @@ interface LanguageDao {
     @Query("SELECT * FROM languages WHERE name == :name")
     fun getLanguage(name: String): LanguageEntity?
 
+    /**
+     * Attempts to inserts the supplied [LanguageEntity]s, ignoring them if they
+     * already exist. Returns a list of all new rowids that were inserted.
+     */
     @Transaction
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertIgnoreLanguages(vararg languages: LanguageEntity)
+    fun insertIgnoreLanguages(vararg languages: LanguageEntity): List<Long>
 
+    /**
+     * Attempts to inserts the supplied [LanguageEntity], ignoring it if a row
+     * already exist. Returns the new rowid that was inserted or -1 if ignored
+     */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     fun insertIgnoreLanguage(language: LanguageEntity): Long
 

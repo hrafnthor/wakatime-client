@@ -4,7 +4,6 @@ import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.db.DbErrorProcessor
 import `is`.hth.wakatimeclient.core.data.db.LocalDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.*
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.toCurrentUser
 import `is`.hth.wakatimeclient.wakatime.model.*
 
 // TODO: 5.10.2020 Convert all entity inputs to models, as models are what is being returned
@@ -35,21 +34,27 @@ internal interface WakatimeLocalDataSource {
      */
     suspend fun getLeaderboards(onlyPrivate: Boolean): Results<List<Leaderboard>>
 
+    suspend fun getLeaderboard(identifier: String): Results<Leaderboard>
+
     suspend fun storeLanguage(name: String): Results<Long>
 
-    suspend fun storeLanguages(names: Set<String>): Results<Unit>
+    suspend fun storeLanguages(names: Set<String>): Results<Int>
 
-    suspend fun storeUsers(vararg entities: UserEntity): Results<Unit>
+    suspend fun storeUsers(users: List<UserEntity>): Results<Int>
 
-    suspend fun storeRank(rank: UserRankEntity): Results<Long>
+    /**
+     * Stores the supplied [UserRankEntity]s to the local database.
+     * Returns the number of rows affected.
+     */
+    suspend fun storeRanks(ranks: List<UserRankEntity>): Results<Int>
 
-    suspend fun storeLeaderboards(boards: List<Leaderboard>): Results<Unit>
+    suspend fun storeLeaderboards(boards: List<Leaderboard>): Results<Int>
 
-    suspend fun storePeriod(startDate: String, endDate: String): Results<Long>
+    suspend fun storePeriod(period: Period): Results<Long>
 
-    suspend fun storeCurrentUser(currentUser: CurrentUserView): Results<Unit>
+    suspend fun storeCurrentUser(currentUser: CurrentUserView): Results<Int>
 
-    suspend fun storeTotalRecord(totalRecord: TotalRecordEntity): Results<Unit>
+    suspend fun storeTotalRecord(totalRecord: TotalRecordEntity): Results<Long>
 
     suspend fun removeUser(id: String): Results<Boolean>
 }
@@ -81,76 +86,78 @@ internal class WakatimeLocalDataSourceImpl(
         }
     }
 
-    override suspend fun getLeaderboards(onlyPrivate: Boolean): Results<List<Leaderboard>> = operate {
-        if (onlyPrivate) {
-            db.rankings().getPrivateLeaderboards()
-        } else {
-            db.rankings().getLeaderboards()
-        }.map {
-            it.toModel()
+    override suspend fun getLeaderboards(onlyPrivate: Boolean): Results<List<Leaderboard>> =
+        operate {
+            if (onlyPrivate) {
+                db.rankings().getPrivateLeaderboards()
+            } else {
+                db.rankings().getLeaderboards()
+            }.map {
+                it.toModel()
+            }
         }
+
+    override suspend fun getLeaderboard(identifier: String): Results<Leaderboard> = operate {
+        db.rankings().getLeaderboard(identifier)?.toModel()
     }
 
     override suspend fun storeLanguage(
-            name: String
+        name: String
     ): Results<Long> = operate {
         db.languages().setLanguage(name).also { id ->
             if (id == -1L) throw IllegalStateException(
-                    "Unable to insert language $name into database!"
+                "Unable to insert language $name into database!"
             )
         }
     }
 
     override suspend fun storeLanguages(
-            names: Set<String>
-    ): Results<Unit> = operate {
+        names: Set<String>
+    ): Results<Int> = operate {
         val languages: List<LanguageEntity> = names.map { LanguageEntity(name = it) }
-        db.languages().insertIgnoreLanguages(*languages.toTypedArray())
+        db.languages().insertIgnoreLanguages(*languages.toTypedArray()).size
     }
 
     override suspend fun storeUsers(
-            vararg entities: UserEntity
-    ): Results<Unit> = operate {
-        db.users().insertReplaceUsers(*entities)
+        users: List<UserEntity>
+    ): Results<Int> = operate {
+        db.users().insertOrUpdateUsers(*users.toTypedArray())
     }
 
-    override suspend fun storeRank(
-            rank: UserRankEntity
-    ): Results<Long> = operate {
-        db.rankings().setUserRank(rank).also { id ->
-            if (id == -1L) throw IllegalStateException("Unable to insert user rank: $rank")
-        }
+    override suspend fun storeRanks(
+        ranks: List<UserRankEntity>
+    ): Results<Int> = operate {
+        db.rankings().insertOrUpdateRanks(ranks)
     }
 
     override suspend fun storeLeaderboards(
-            boards: List<Leaderboard>
-    ): Results<Unit> = operate {
-        val converted: List<LeaderboardEntity> = boards.map(Leaderboard::toEntity)
-        db.rankings().insertReplaceLeaderboards(*converted.toTypedArray())
+        boards: List<Leaderboard>
+    ): Results<Int> = operate {
+        db.rankings().insertOrUpdateLeaderboards(boards.map(Leaderboard::toEntity))
     }
 
     override suspend fun storePeriod(
-            startDate: String,
-            endDate: String
+        period: Period
     ): Results<Long> = operate {
-        db.calendar().setPeriod(startDate, endDate)
+        db.calendar().setPeriod(period.startDate, period.endDate)
     }
 
     override suspend fun storeCurrentUser(
-            currentUser: CurrentUserView
-    ): Results<Unit> = operate {
-        db.users().insertReplaceUsers(currentUser.user)
-        db.users().insertReplace(currentUser.config)
+        currentUser: CurrentUserView
+    ): Results<Int> = operate {
+        db.users().insertOrUpdateUsers(currentUser.user).also {
+            db.users().insertReplace(currentUser.config)
+        }
     }
 
     override suspend fun storeTotalRecord(
-            totalRecord: TotalRecordEntity
-    ): Results<Unit> = operate {
+        totalRecord: TotalRecordEntity
+    ): Results<Long> = operate {
         db.users().insertReplace(totalRecord)
     }
 
     override suspend fun removeUser(
-            id: String
+        id: String
     ): Results<Boolean> = operate {
         db.users().removeUser(id) > 0
     }

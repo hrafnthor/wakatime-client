@@ -8,7 +8,10 @@ import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeRemoteDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.toCurrentUserView
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.toTotalRecordEntity
-import `is`.hth.wakatimeclient.wakatime.model.*
+import `is`.hth.wakatimeclient.wakatime.model.CurrentUser
+import `is`.hth.wakatimeclient.wakatime.model.FullUser
+import `is`.hth.wakatimeclient.wakatime.model.TotalRecord
+import `is`.hth.wakatimeclient.wakatime.model.User
 
 /**
  * Exposes data access functionality related to user information

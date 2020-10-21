@@ -16,7 +16,7 @@ internal open class Loader<R, T> {
         print("No remote data source defined. Returning empty")
         Results.Success.Empty
     }
-    private var update: suspend (R) -> Results<Unit> = {
+    private var update: suspend (R) -> Results<Any> = {
         print("No update mechanism defined")
         Results.Success.Empty
     }
@@ -43,7 +43,7 @@ internal open class Loader<R, T> {
     /**
      * Updates the local cache after a successful remote fetch operation
      */
-    fun update(action: suspend (R) -> Results<Unit>) = apply { update = action }
+    fun update(action: suspend (R) -> Results<Any>) = apply { update = action }
 
     /**
      * Clears the local cache after a successful remote fetch operation returns empty

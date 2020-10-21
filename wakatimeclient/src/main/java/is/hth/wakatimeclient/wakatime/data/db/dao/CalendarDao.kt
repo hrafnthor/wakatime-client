@@ -23,6 +23,6 @@ interface CalendarDao {
     @Transaction
     fun setPeriod(startDate: String, endDate: String): Long {
         val id: Long = insertIgnore(PeriodEntity(startDate = startDate, endDate = endDate))
-        return if (id >= -1L) id else getPeriod(startDate, endDate)?.id ?: -1L
+        return if (id != -1L) id else getPeriod(startDate, endDate)?.id ?: -1L
     }
 }

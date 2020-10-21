@@ -28,14 +28,30 @@ internal interface UserDao {
     fun getTotalRecord(): TotalRecordEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertReplace(totalRecord: TotalRecordEntity)
+    fun insertReplace(totalRecord: TotalRecordEntity): Long
 
     @Transaction
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertReplaceUsers(vararg user: UserEntity)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertOrIgnoreUser(user: UserEntity): Long
+
+    @Update
+    fun updateUser(user: UserEntity): Int
+
+    @Transaction
+    fun insertOrUpdateUsers(vararg users: UserEntity): Int {
+        var count = 0
+        users.forEach {
+            if (insertOrIgnoreUser(it) > 0) {
+                count++
+            } else {
+                count += updateUser(it)
+            }
+        }
+        return count
+    }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertReplace(configEntity: ConfigEntity)
+    fun insertReplace(configEntity: ConfigEntity): Long
 
     @Query("DELETE FROM users WHERE id == :id")
     fun removeUser(id: String): Int

@@ -48,10 +48,10 @@ data class UserRankEntity(
     @ColumnInfo(name = "user_id")
     val userId: String,
     @ColumnInfo(name = "leaderboard_id")
-    val leaderboardId: String,
+    val leaderboardId: Long,
     @ColumnInfo(name = "language_id")
     val languageId: Long,
-    @ColumnInfo(name ="period_id")
+    @ColumnInfo(name = "period_id")
     val periodId: Long,
     @ColumnInfo(name = "rank")
     val rank: Int,
