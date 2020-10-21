@@ -7,20 +7,23 @@ import androidx.room.*
 @Dao
 internal interface RankingDao {
 
-    @Query("""
+    @Query(
+        """
         SELECT * 
         FROM user_rank 
         WHERE user_id ==:userId
             AND language_id==:languageId 
             AND leaderboard_id==:leaderboardId
-    """)
+    """
+    )
     fun getUserRankHistory(
-            userId: String,
-            languageId: Long,
-            leaderboardId: String
+        userId: Long,
+        languageId: Long,
+        leaderboardId: String
     ): List<UserRankEntity>
 
-    @Query("""
+    @Query(
+        """
         SELECT * 
         FROM user_rank u1
         WHERE user_id ==:userId 
@@ -32,11 +35,12 @@ internal interface RankingDao {
                 where u2.user_id ==:userId 
                     AND u2.language_id==:languageId 
                     AND u2.leaderboard_id==:leaderboardId )
-    """)
+    """
+    )
     fun getUserRankLatest(
-            userId: String,
-            languageId: Long,
-            leaderboardId: String
+        userId: String,
+        languageId: Long,
+        leaderboardId: Long
     ): UserRankEntity?
 
     /**
@@ -51,26 +55,69 @@ internal interface RankingDao {
     @Query("SELECT * FROM leaderboards")
     fun getLeaderboards(): List<LeaderboardEntity>
 
+    /**
+     * Attempts to retrieve the [LeaderboardEntity] matching the supplied [identifier]
+     */
+    @Query("SELECT * FROM leaderboards WHERE identifier==:identifier")
+    fun getLeaderboard(identifier: String): LeaderboardEntity?
+
+    /**
+     * Attempts to retrieve the id of the [LeaderboardEntity] matching the
+     * supplied [identifier]. If none is found returns -1
+     */
+    @Query("SELECT id FROM leaderboards WHERE identifier==:identifier")
+    fun getLeaderboardId(identifier: String): Long
+
+    /**
+     * Inserts and replaces the supplied [LeaderboardEntity], returning the rowid
+     * of the newly inserted row
+     */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertReplace(leaderboardEntity: LeaderboardEntity)
+    fun insertReplace(leaderboardEntity: LeaderboardEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertIgnoreLeaderboard(entity: LeaderboardEntity): Long
+    fun insertOrIgnoreLeaderboard(entity: LeaderboardEntity): Long
 
+    @Update
+    fun updateLeaderboard(leaderboard: LeaderboardEntity): Int
+
+    /**
+     * Attempts to insert the supplied values if they do not already exist,
+     * in which case they will be updated. Returns the number of rows affected
+     */
     @Transaction
+    fun insertOrUpdateLeaderboards(leaderboards: List<LeaderboardEntity>): Int {
+        var count = 0
+        leaderboards.forEach {
+            if (insertOrIgnoreLeaderboard(it) > 0) {
+                count++
+            } else {
+                count += updateLeaderboard(it)
+            }
+        }
+        return count
+    }
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    fun insertReplaceLeaderboards(vararg entities: LeaderboardEntity)
+    fun insertOrIgnoreRank(entity: UserRankEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertReplace(entity: UserRankEntity): Long
+    @Update
+    fun updateRank(rank: UserRankEntity): Int
 
+    /**
+     * Attempts to insert the supplied values if they do not already exist,
+     * in which case they will be updated. Returns the number of rows affected.
+     */
     @Transaction
-    fun setUserRank(rank: UserRankEntity): Long {
-        val id: Long = insertReplace(rank)
-        return if (id != -1L) id else getUserRankLatest(
-                rank.userId,
-                rank.languageId,
-                rank.leaderboardId,
-        )?.id ?: -1L
+    fun insertOrUpdateRanks(ranks: List<UserRankEntity>): Int {
+        var count = 0
+        ranks.forEach {
+            if (insertOrIgnoreRank(it) > 0) {
+                count++
+            } else {
+                count += updateRank(it)
+            }
+        }
+        return count
     }
 }

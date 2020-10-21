@@ -4,7 +4,6 @@ import okhttp3.CacheControl
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 /**
@@ -14,7 +13,6 @@ import java.util.concurrent.TimeUnit
 class ReadInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSeconds) {
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        Timber.d("Forcing read from cache")
         val original: Request = chain.request()
         val modified: Request = original.newBuilder()
             .addHeader(Header.CacheControl.toString(), maxAgeCacheControl.toString())
@@ -32,7 +30,6 @@ class ReadInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSecond
 class WriteInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSeconds) {
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        Timber.d("Forcing write into cache")
         val request: Request = chain.request()
         val original: Response = chain.proceed(request)
         return original.newBuilder()

@@ -6,7 +6,16 @@ import kotlinx.serialization.Transient
 
 @Serializable
 data class Leaderboard(
-        val id: String,
+        /**
+         * The local database id for this leaderboard
+         */
+        @Transient
+        val id: Long = -1L,
+        /**
+         * The server side unique identifier for this leaderboard
+         */
+        @SerialName("id")
+        val identifier: String,
         val name: String,
         @SerialName("can_delete")
         val canDelete: Boolean,

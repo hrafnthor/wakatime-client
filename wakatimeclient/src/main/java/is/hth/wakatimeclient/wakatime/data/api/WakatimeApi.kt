@@ -9,6 +9,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 /**
@@ -21,8 +22,8 @@ interface WakatimeApi {
         private const val API_ENDPOINT = "/api/v1"
         private const val USERS = "$API_ENDPOINT/users"
         private const val CURRENT_USER = "$USERS/current"
-        private const val LEADERS = "$API_ENDPOINT/leaders"
-        private const val BOARDS = "$CURRENT_USER/leaderboards"
+        private const val PUBLIC_LEADERS = "$API_ENDPOINT/leaders"
+        private const val PRIVATE_BOARDS = "$CURRENT_USER/leaderboards"
     }
 
     /**
@@ -44,7 +45,7 @@ interface WakatimeApi {
      * Can filter by [language] which will give the public leaders for that language.
      * The results are paginated so iterate by requesting a [page]
      */
-    @GET(LEADERS)
+    @GET(PUBLIC_LEADERS)
     suspend fun getPublicLeaders(
             @Query("language") language: String,
             @Query("page") page: Int
@@ -54,8 +55,20 @@ interface WakatimeApi {
      * Retrieves all of the private leaderboards that the currently authenticated
      * user is a member off.
      */
-    @GET(BOARDS)
-    suspend fun getLeaderboards(): Response<PagedWrapper<List<Leaderboard>>>
+    @GET(PRIVATE_BOARDS)
+    suspend fun getPrivateLeaderboards(): Response<PagedWrapper<List<Leaderboard>>>
+
+    /**
+     * Retrieves the leaders for the specified leaderboard that the currently
+     * authenticated user is a member off. Results can be filtered by [language]
+     * and [page] number
+     */
+    @GET("$PRIVATE_BOARDS/{leaderboardId}")
+    suspend fun getPrivateLeaders(
+            @Path("leaderboardId") leaderboardId: String,
+            @Query("language") language: String,
+            @Query("page") page: Int
+    ): Response<Leaders>
 }
 
 /**

@@ -1,7 +1,8 @@
 package `is`.hth.wakatimeclient.wakatime.data.db
 
 import `is`.hth.wakatimeclient.BuildConfig
-import `is`.hth.wakatimeclient.wakatime.data.db.dao.*
+import `is`.hth.wakatimeclient.wakatime.data.db.dao.CalendarDao
+import `is`.hth.wakatimeclient.wakatime.data.db.dao.LanguageDao
 import `is`.hth.wakatimeclient.wakatime.data.db.dao.RankingDao
 import `is`.hth.wakatimeclient.wakatime.data.db.dao.UserDao
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.*
@@ -55,7 +56,8 @@ internal abstract class WakatimeDatabase : RoomDatabase(), MasterDao {
                         Executors.newSingleThreadExecutor().execute {
                             getInstance(context).let {
                                 // Perform any database initialization needed here
-                                it.rankings().insertIgnoreLeaderboard(LeaderboardEntity.publicLeaderboard)
+                                it.rankings()
+                                    .insertOrIgnoreLeaderboard(LeaderboardEntity.publicLeaderboard)
                                 it.languages().insertIgnoreLanguage(LanguageEntity.none)
                             }
                         }

@@ -35,7 +35,7 @@ data class User(
      * display name of this user taken from full_name or @username. Defaults to 'Anonymous User'
      */
     @SerialName("display_name")
-    val displayName: String ="",
+    val displayName: String = "",
     /**
      *  website of user
      */

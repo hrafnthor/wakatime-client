@@ -44,6 +44,16 @@ internal interface WakatimeRemoteDataSource {
      * Fetches the private leaderboards that the currently authenticated user is member of.
      */
     suspend fun getLeaderboards(): Results<List<Leaderboard>>
+
+    /**
+     * Fetches the leaders on the specific leaderboard matching the supplied [leaderboardId],
+     * optionally filtered by [language] and a certain page
+     */
+    suspend fun getPrivateLeaders(
+            leaderboardId: String,
+            language: String = "",
+            page: Int = 0
+    ): Results<Leaders>
 }
 
 internal class WakatimeRemoteDataSourceImpl(
@@ -71,21 +81,31 @@ internal class WakatimeRemoteDataSourceImpl(
         })
     }
 
-
     override suspend fun getTotalRecord(): Results<TotalRecord> {
         return makeCall(networkCall = {
             api.getTotalRecord()
         }, convert = {
             it.data
         })
-
     }
 
     override suspend fun getLeaderboards(): Results<List<Leaderboard>> {
         return makeCall(networkCall = {
-            api.getLeaderboards()
+            api.getPrivateLeaderboards()
         }, convert = {
             it.data
+        })
+    }
+
+    override suspend fun getPrivateLeaders(
+            leaderboardId: String,
+            language: String,
+            page: Int
+    ): Results<Leaders> {
+        return makeCall(networkCall = {
+            api.getPrivateLeaders(leaderboardId, language, page)
+        }, convert = {
+            it
         })
     }
 }
