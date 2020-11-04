@@ -1,10 +1,7 @@
 package `is`.hth.wakatimeclient.wakatime.data.api
 
 import `is`.hth.wakatimeclient.core.data.net.EnvelopePayload
-import `is`.hth.wakatimeclient.wakatime.model.FullUser
-import `is`.hth.wakatimeclient.wakatime.model.Leaderboard
-import `is`.hth.wakatimeclient.wakatime.model.Leaders
-import `is`.hth.wakatimeclient.wakatime.model.TotalRecord
+import `is`.hth.wakatimeclient.wakatime.model.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import retrofit2.Response
@@ -47,8 +44,8 @@ interface WakatimeApi {
      */
     @GET(PUBLIC_LEADERS)
     suspend fun getPublicLeaders(
-            @Query("language") language: String,
-            @Query("page") page: Int
+        @Query("language") language: String,
+        @Query("page") page: Int
     ): Response<Leaders>
 
     /**
@@ -65,19 +62,33 @@ interface WakatimeApi {
      */
     @GET("$PRIVATE_BOARDS/{leaderboardId}")
     suspend fun getPrivateLeaders(
-            @Path("leaderboardId") leaderboardId: String,
-            @Query("language") language: String,
-            @Query("page") page: Int
+        @Path("leaderboardId") leaderboardId: String,
+        @Query("language") language: String,
+        @Query("page") page: Int
     ): Response<Leaders>
+
+    /**
+     * Retrieves a list of all [Project]s that Wakatime has observed this user
+     * working on.
+     */
+    @GET("$USERS/{userId}/projects")
+    suspend fun getProjects(@Path("userId") userId: String): Response<List<Project>>
+
+    /**
+     * Retrieves a list of all [Project]s that Wakatime has observed the currently
+     * authenticated user working on.
+     */
+    @GET("$CURRENT_USER/projects")
+    suspend fun getCurrentUsersProjects(): Response<Wrapper<List<Project>>>
 }
 
 /**
  * The Wakatime service error payload
  */
 @Serializable
-internal data class ServiceError(
-        @SerialName("error")
-        val message: String
+data class ServiceError(
+    @SerialName("error")
+    val message: String
 )
 
 /**
@@ -91,17 +102,17 @@ data class Wrapper<T : Any>(val data: T)
  */
 @Serializable
 data class PagedWrapper<T : Any>(
-        /**
-         * The actual data payload
-         */
-        val data: T,
-        /**
-         * The current page
-         */
-        val page: Int,
-        /**
-         * The total number of pages to iterate through
-         */
-        @SerialName("total_pages")
-        val totalPages: Int
+    /**
+     * The actual data payload
+     */
+    val data: T,
+    /**
+     * The current page
+     */
+    val page: Int,
+    /**
+     * The total number of pages to iterate through
+     */
+    @SerialName("total_pages")
+    val totalPages: Int
 )

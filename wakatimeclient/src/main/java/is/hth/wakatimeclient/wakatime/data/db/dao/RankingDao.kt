@@ -87,15 +87,13 @@ internal interface RankingDao {
      */
     @Transaction
     fun insertOrUpdateLeaderboards(leaderboards: List<LeaderboardEntity>): Int {
-        var count = 0
-        leaderboards.forEach {
-            if (insertOrIgnoreLeaderboard(it) > 0) {
-                count++
+        return leaderboards.fold(0) { count, leaderboard ->
+            if (insertOrIgnoreLeaderboard(leaderboard) > 0) {
+                count + 1
             } else {
-                count += updateLeaderboard(it)
+                count + updateLeaderboard(leaderboard)
             }
         }
-        return count
     }
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -110,14 +108,12 @@ internal interface RankingDao {
      */
     @Transaction
     fun insertOrUpdateRanks(ranks: List<UserRankEntity>): Int {
-        var count = 0
-        ranks.forEach {
-            if (insertOrIgnoreRank(it) > 0) {
-                count++
+        return ranks.fold(0) { count, rank ->
+            if (insertOrIgnoreRank(rank) > 0) {
+                count + 1
             } else {
-                count += updateRank(it)
+                count + updateRank(rank)
             }
         }
-        return count
     }
 }

@@ -39,15 +39,13 @@ internal interface UserDao {
 
     @Transaction
     fun insertOrUpdateUsers(vararg users: UserEntity): Int {
-        var count = 0
-        users.forEach {
-            if (insertOrIgnoreUser(it) > 0) {
-                count++
+        return users.fold(0) { count, user ->
+            if (insertOrIgnoreUser(user) > 0) {
+                count + 1
             } else {
-                count += updateUser(it)
+                count + updateUser(user)
             }
         }
-        return count
     }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

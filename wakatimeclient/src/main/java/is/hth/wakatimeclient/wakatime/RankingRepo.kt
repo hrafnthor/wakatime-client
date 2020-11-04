@@ -7,12 +7,15 @@ import `is`.hth.wakatimeclient.core.util.RateLimiter
 import `is`.hth.wakatimeclient.core.util.unwrap
 import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeRemoteDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSource
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.*
+import `is`.hth.wakatimeclient.wakatime.data.db.entities.LanguageEntity
+import `is`.hth.wakatimeclient.wakatime.data.db.entities.LeaderboardEntity
+import `is`.hth.wakatimeclient.wakatime.data.db.entities.UserRankEntity
 import `is`.hth.wakatimeclient.wakatime.model.Leaderboard
 import `is`.hth.wakatimeclient.wakatime.model.Leaders
 import `is`.hth.wakatimeclient.wakatime.model.Rank
+import `is`.hth.wakatimeclient.wakatime.model.User
 
-interface LeaderboardRepo {
+interface RankingRepo {
 
     /**
      * Fetches the requested [page] of the public leaderboard for the supplied [language].
@@ -47,11 +50,11 @@ interface LeaderboardRepo {
     suspend fun getLeaderboards(): Results<List<Leaderboard>>
 }
 
-internal class LeaderboardRepoImpl(
+internal class RankingRepoImpl(
     private val limiter: RateLimiter<String>,
     private val remote: WakatimeRemoteDataSource,
     private val local: WakatimeLocalDataSource,
-) : LeaderboardRepo {
+) : RankingRepo {
 
     companion object {
         private const val keyLeaderboards = "leaderboards"
@@ -152,11 +155,10 @@ internal class LeaderboardRepoImpl(
         } else leaders.ranks
     }
 
-    private fun extractUsers(ranks: List<Rank>): List<UserEntity> {
-        return ranks
-            .mapTo(mutableListOf()) {
-                it.user.toEntity()
-            }
+    private fun extractUsers(ranks: List<Rank>): List<User> {
+        return ranks.map {
+            it.user
+        }.toList()
     }
 
     private fun extractLanguages(ranks: List<Rank>): Set<String> {

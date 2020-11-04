@@ -4,7 +4,7 @@ import `is`.hth.wakatimeclient.wakatime.data.db.entities.PeriodEntity
 import androidx.room.*
 
 @Dao
-interface CalendarDao {
+internal interface CalendarDao {
 
     /**
      * Attempts to find a [PeriodEntity] that matches the supplied start and end

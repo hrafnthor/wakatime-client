@@ -30,17 +30,30 @@ internal interface WakatimeLocalDataSource {
     suspend fun getLanguages(): Results<Set<Language>>
 
     /**
-     * Attempts to retrieve the [Leaderboard]s that the user is associated with.
+     * Retrieves all locally stored [Leaderboard]s that the user is associated with.
      */
     suspend fun getLeaderboards(onlyPrivate: Boolean): Results<List<Leaderboard>>
 
+    /**
+     * Attempts to retrieve the [Leaderboard] matching the supplied identifier
+     */
     suspend fun getLeaderboard(identifier: String): Results<Leaderboard>
+
+    /**
+     * Retrieves all locally stored [Project]s
+     */
+    suspend fun getProjects(): Results<List<Project>>
+
+    /**
+     * Attempts to retrieve the [Project] that matches the supplied id
+     */
+    suspend fun getProject(id: String): Results<Project>
 
     suspend fun storeLanguage(name: String): Results<Long>
 
     suspend fun storeLanguages(names: Set<String>): Results<Int>
 
-    suspend fun storeUsers(users: List<UserEntity>): Results<Int>
+    suspend fun storeUsers(users: List<User>): Results<Int>
 
     /**
      * Stores the supplied [UserRankEntity]s to the local database.
@@ -56,12 +69,17 @@ internal interface WakatimeLocalDataSource {
 
     suspend fun storeTotalRecord(totalRecord: TotalRecordEntity): Results<Long>
 
+    /**
+     * Stores the supplied [Project]s to the local storage
+     */
+    suspend fun storeProjects(projects: List<Project>): Results<Int>
+
     suspend fun removeUser(id: String): Results<Boolean>
 }
 
 internal class WakatimeLocalDataSourceImpl(
-        private val db: WakatimeDatabase,
-        processor: DbErrorProcessor
+    private val db: WakatimeDatabase,
+    processor: DbErrorProcessor
 ) : LocalDataSource(processor), WakatimeLocalDataSource {
 
     override suspend fun getCurrentUser(): Results<CurrentUser> = operate {
@@ -86,19 +104,34 @@ internal class WakatimeLocalDataSourceImpl(
         }
     }
 
-    override suspend fun getLeaderboards(onlyPrivate: Boolean): Results<List<Leaderboard>> =
-        operate {
-            if (onlyPrivate) {
-                db.rankings().getPrivateLeaderboards()
-            } else {
-                db.rankings().getLeaderboards()
-            }.map {
-                it.toModel()
-            }
+    override suspend fun getLeaderboards(
+        onlyPrivate: Boolean
+    ): Results<List<Leaderboard>> = operate {
+        if (onlyPrivate) {
+            db.rankings().getPrivateLeaderboards()
+        } else {
+            db.rankings().getLeaderboards()
+        }.map {
+            it.toModel()
         }
+    }
 
-    override suspend fun getLeaderboard(identifier: String): Results<Leaderboard> = operate {
+    override suspend fun getLeaderboard(
+        identifier: String
+    ): Results<Leaderboard> = operate {
         db.rankings().getLeaderboard(identifier)?.toModel()
+    }
+
+    override suspend fun getProjects(): Results<List<Project>> = operate {
+        db.projects().getProjects().map {
+            it.toModel()
+        }
+    }
+
+    override suspend fun getProject(
+        id: String
+    ): Results<Project> = operate {
+        db.projects().getProject(id)?.toModel()
     }
 
     override suspend fun storeLanguage(
@@ -119,9 +152,11 @@ internal class WakatimeLocalDataSourceImpl(
     }
 
     override suspend fun storeUsers(
-        users: List<UserEntity>
+        users: List<User>
     ): Results<Int> = operate {
-        db.users().insertOrUpdateUsers(*users.toTypedArray())
+        db.users().insertOrUpdateUsers(*users.map {
+            it.toEntity()
+        }.toTypedArray())
     }
 
     override suspend fun storeRanks(
@@ -154,6 +189,14 @@ internal class WakatimeLocalDataSourceImpl(
         totalRecord: TotalRecordEntity
     ): Results<Long> = operate {
         db.users().insertReplace(totalRecord)
+    }
+
+    override suspend fun storeProjects(
+        projects: List<Project>
+    ): Results<Int> = operate {
+        db.projects().insertOrUpdate(*projects.map {
+            it.toEntity()
+        }.toTypedArray())
     }
 
     override suspend fun removeUser(

@@ -17,6 +17,19 @@ internal open class RemoteDataSource(
      * Structured execution and result handling for network operations. Conducts authentication
      * and network state checks before executing the network operation.
      */
+    suspend fun <T : Any> makeCall(
+        /**
+         * Should execute a network call and return the unmodified response
+         */
+        networkCall: suspend () -> Response<T>
+    ): Results<T> = makeCall(networkCall) {
+        it
+    }
+
+    /**
+     * Structured execution and result handling for network operations. Conducts authentication
+     * and network state checks before executing the network operation.
+     */
     suspend fun <T : Any, R : Any> makeCall(
         /**
          * Should execute a network call and return the unmodified response
@@ -25,13 +38,13 @@ internal open class RemoteDataSource(
         /**
          * Performs any type conversion on the received network value that might be required
          */
-        convert: (T) -> R,
+        transform: (T) -> R,
     ): Results<R> = safeOperation(processor) {
         checkPreconditions {
             with(networkCall()) {
                 val body: T? = body()
                 when {
-                    isSuccessful && body != null -> Results.Success.Values(convert(body))
+                    isSuccessful && body != null -> Results.Success.Values(transform(body))
                     isSuccessful -> Results.Success.Empty
                     else -> Results.Failure(processor.onError(this))
                 }

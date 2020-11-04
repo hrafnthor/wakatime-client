@@ -4,7 +4,7 @@ import `is`.hth.wakatimeclient.wakatime.data.db.entities.LanguageEntity
 import androidx.room.*
 
 @Dao
-interface LanguageDao {
+internal interface LanguageDao {
 
     @Query("SELECT * FROM languages")
     fun getLanguages(): List<LanguageEntity>

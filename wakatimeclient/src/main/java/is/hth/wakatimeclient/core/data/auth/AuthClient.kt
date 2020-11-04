@@ -218,13 +218,14 @@ internal class AuthClientImpl internal constructor(
         override suspend fun update(force: Boolean): Results<Unit> = suspendCoroutine {
             if (storage.getMethod() is Method.OAuth) {
                 with(storage.getState()) {
+                    // Mark if token should be refreshed no matter its state
                     needsTokenRefresh = force
                     when {
                         needsTokenRefresh -> performActionWithFreshTokens(service) { _, _, exception ->
                             val results: Results<Unit> = if (exception == null) {
                                 Results.Success.Empty
                             } else {
-                                val message = exception.message ?: ""
+                                val message: String = exception.message ?: ""
                                 val error = Error.Authentication.TokenRefresh(message)
                                 Results.Failure(error)
                             }

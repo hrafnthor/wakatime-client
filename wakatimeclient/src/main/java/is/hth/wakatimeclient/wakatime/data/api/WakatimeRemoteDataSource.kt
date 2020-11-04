@@ -4,10 +4,7 @@ import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 import `is`.hth.wakatimeclient.core.data.net.RemoteDataSource
-import `is`.hth.wakatimeclient.wakatime.model.FullUser
-import `is`.hth.wakatimeclient.wakatime.model.Leaderboard
-import `is`.hth.wakatimeclient.wakatime.model.Leaders
-import `is`.hth.wakatimeclient.wakatime.model.TotalRecord
+import `is`.hth.wakatimeclient.wakatime.model.*
 
 internal interface WakatimeRemoteDataSource {
     /**
@@ -50,33 +47,37 @@ internal interface WakatimeRemoteDataSource {
      * optionally filtered by [language] and a certain page
      */
     suspend fun getPrivateLeaders(
-            leaderboardId: String,
-            language: String = "",
-            page: Int = 0
+        leaderboardId: String,
+        language: String = "",
+        page: Int = 0
     ): Results<Leaders>
+
+    /**
+     * Fetches the projects that Wakatime has observed the currently authenticated user
+     * working on.
+     */
+    suspend fun getProjects(): Results<List<Project>>
 }
 
 internal class WakatimeRemoteDataSourceImpl(
-        session: AuthClient.Session,
-        processor: NetworkErrorProcessor,
-        private val api: WakatimeApi,
+    session: AuthClient.Session,
+    processor: NetworkErrorProcessor,
+    private val api: WakatimeApi,
 ) : RemoteDataSource(session, processor), WakatimeRemoteDataSource {
 
     override suspend fun getPublicLeaders(
-            language: String,
-            page: Int
+        language: String,
+        page: Int
     ): Results<Leaders> {
-        return makeCall(networkCall = {
+        return makeCall {
             api.getPublicLeaders(language, page)
-        }, convert = {
-            it
-        })
+        }
     }
 
     override suspend fun getCurrentUser(): Results<FullUser> {
         return makeCall(networkCall = {
             api.getCurrentUser()
-        }, convert = {
+        }, transform = {
             it.data
         })
     }
@@ -84,7 +85,7 @@ internal class WakatimeRemoteDataSourceImpl(
     override suspend fun getTotalRecord(): Results<TotalRecord> {
         return makeCall(networkCall = {
             api.getTotalRecord()
-        }, convert = {
+        }, transform = {
             it.data
         })
     }
@@ -92,20 +93,26 @@ internal class WakatimeRemoteDataSourceImpl(
     override suspend fun getLeaderboards(): Results<List<Leaderboard>> {
         return makeCall(networkCall = {
             api.getPrivateLeaderboards()
-        }, convert = {
+        }, transform = {
             it.data
         })
     }
 
     override suspend fun getPrivateLeaders(
-            leaderboardId: String,
-            language: String,
-            page: Int
+        leaderboardId: String,
+        language: String,
+        page: Int
     ): Results<Leaders> {
-        return makeCall(networkCall = {
+        return makeCall {
             api.getPrivateLeaders(leaderboardId, language, page)
-        }, convert = {
-            it
+        }
+    }
+
+    override suspend fun getProjects(): Results<List<Project>> {
+        return makeCall(networkCall = {
+            api.getCurrentUsersProjects()
+        }, transform = {
+            it.data
         })
     }
 }

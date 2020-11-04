@@ -16,6 +16,7 @@ import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSourceImpl
 import android.content.Context
 import android.net.Uri
+import kotlinx.serialization.ExperimentalSerializationApi
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -30,7 +31,8 @@ class WakatimeClient private constructor(
     private val db: WakatimeDbClient,
     private val session: SessionManager,
     val users: UserRepo,
-    val leaderboards: LeaderboardRepo,
+    val rankings: RankingRepo,
+    val code: CodeRepo
 ) : AuthClient by auth,
     WakatimeNetworkClient by net,
     SessionManager by session {
@@ -111,6 +113,7 @@ class WakatimeClient private constructor(
         /**
          * Constructs a [WakatimeClient] based on the current configuration
          */
+        @ExperimentalSerializationApi
         fun build(context: Context): WakatimeClient {
             val db: WakatimeDatabase = WakatimeDatabase.getInstance(context.applicationContext)
             val dbClient = WakatimeDbClient(db, DbErrorProcessor())
@@ -152,7 +155,13 @@ class WakatimeClient private constructor(
                 local = localSource
             )
 
-            val ranking: LeaderboardRepo = LeaderboardRepoImpl(
+            val rankings: RankingRepo = RankingRepoImpl(
+                limiter = limiter,
+                remote = remoteSource,
+                local = localSource
+            )
+
+            val code: CodeRepo = CodeRepoImpl(
                 limiter = limiter,
                 remote = remoteSource,
                 local = localSource
@@ -164,7 +173,8 @@ class WakatimeClient private constructor(
                 db = dbClient,
                 session = manager,
                 users = users,
-                leaderboards = ranking,
+                rankings = rankings,
+                code = code
             )
         }
     }

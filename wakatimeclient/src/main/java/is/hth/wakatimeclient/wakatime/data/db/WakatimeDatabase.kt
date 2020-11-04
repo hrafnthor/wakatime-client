@@ -1,10 +1,7 @@
 package `is`.hth.wakatimeclient.wakatime.data.db
 
 import `is`.hth.wakatimeclient.BuildConfig
-import `is`.hth.wakatimeclient.wakatime.data.db.dao.CalendarDao
-import `is`.hth.wakatimeclient.wakatime.data.db.dao.LanguageDao
-import `is`.hth.wakatimeclient.wakatime.data.db.dao.RankingDao
-import `is`.hth.wakatimeclient.wakatime.data.db.dao.UserDao
+import `is`.hth.wakatimeclient.wakatime.data.db.dao.*
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.*
 import android.content.Context
 import androidx.room.Database
@@ -23,6 +20,7 @@ import java.util.concurrent.Executors
         LeaderboardEntity::class,
         UserRankEntity::class,
         PeriodEntity::class,
+        ProjectEntity::class,
     ],
     views = [
         CurrentUserView::class
@@ -88,14 +86,19 @@ internal interface MasterDao {
     fun rankings(): RankingDao
 
     /**
-     *
+     * Language domain dao
      */
     fun languages(): LanguageDao
 
     /**
-     *
+     * Calendar related dao
      */
     fun calendar(): CalendarDao
+
+    /**
+     * Project domain dao
+     */
+    fun projects(): ProjectDao
 }
 
 /**
