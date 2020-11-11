@@ -2,8 +2,8 @@ package `is`.hth.wakatimeclient.wakatime
 
 import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.SingleLoader
-import `is`.hth.wakatimeclient.core.takeIfNotEmpty
 import `is`.hth.wakatimeclient.core.util.RateLimiter
+import `is`.hth.wakatimeclient.core.util.ifNotEmpty
 import `is`.hth.wakatimeclient.core.util.unwrap
 import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeRemoteDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSource
@@ -123,11 +123,11 @@ internal class RankingRepoImpl(
             val ranks: List<Rank> = extractRanks(leaders)
             val languages: Set<String> = extractLanguages(ranks)
             unwrap(local.storeLanguages(languages)) {
-                val name: String = leaders.language.takeIfNotEmpty() ?: LanguageEntity.none.name
+                val name: String = leaders.language.ifNotEmpty(LanguageEntity.none.name)
                 unwrap(local.getLanguage(name)) { language ->
                     unwrap(local.storePeriod(leaders.period)) { periodId ->
                         unwrap(local.storeUsers(extractUsers(ranks))) {
-                            val rankings: List<UserRankEntity> = ranks.map { ranking ->
+                            ranks.map { ranking ->
                                 UserRankEntity(
                                     userId = ranking.user.id,
                                     languageId = language.id,
@@ -136,9 +136,10 @@ internal class RankingRepoImpl(
                                     periodId = periodId,
                                     modifiedAt = leaders.modifiedAt
                                 )
-                            }
-                            unwrap(local.storeRanks(rankings)) {
-                                Results.Success.Values(leaders)
+                            }.let { list ->
+                                unwrap(local.storeRanks(list)) {
+                                    Results.Success.Values(leaders)
+                                }
                             }
                         }
                     }

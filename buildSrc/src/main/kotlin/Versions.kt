@@ -1,4 +1,3 @@
-import kotlin.String
 import org.gradle.plugin.use.PluginDependenciesSpec
 import org.gradle.plugin.use.PluginDependencySpec
 
@@ -18,7 +17,7 @@ object Versions {
 
     const val androidx_databinding: String = "4.0.0" // available: "4.0.1"
 
-    const val org_jetbrains_kotlin: String =  "1.4.0"
+    const val org_jetbrains_kotlin: String = "1.4.0"
 
     const val androidx_lifecycle: String = "2.2.0"
 
