@@ -1,6 +1,5 @@
 package `is`.hth.wakatimeclient.core.util
 
-import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.Results
 
 /**
@@ -31,9 +30,29 @@ fun <T : Any> T?.valueOrEmpty(): Results<T> = if (this == null) {
 } else Results.Success.Values(this)
 
 /**
- * Returns `this` value wrapped in a [Results.Success.Values] unless it is null,
- * then the supplied [error] wrapped in a [Results.Failure] is returned
+ * Returns `this` value unless it is empty, then it returns [alternative]
  */
-fun <T : Any> T?.valueOrFailure(error: Error): Results<T> = if (this == null) {
-    Results.Failure(error)
-} else Results.Success.Values(this)
+fun String.ifNotEmpty(alternative: String): String = if (isNotEmpty()) this else alternative
+
+/**
+ * Returns the first value
+ */
+fun <T> List<T>.firstOr(default: T): T = firstOrNull() ?: default
+
+/**
+ * Returns the first element matching the given [predicate], or [default] if
+ * element was not found.
+ */
+inline fun <T> Iterable<T>.firstOr(default: T, predicate: (T) -> Boolean): T {
+    return firstOrNull(predicate) ?: default
+}
+
+/**
+ * Returns the first element matching the given [predicate] after it has been sent
+ * through [transform], or [default] if none was found.
+ */
+inline fun <T, R> Iterable<T>.firstOr(
+    default: R,
+    predicate: (T) -> Boolean,
+    transform: (T) -> R
+): R = firstOrNull(predicate)?.let(transform) ?: default

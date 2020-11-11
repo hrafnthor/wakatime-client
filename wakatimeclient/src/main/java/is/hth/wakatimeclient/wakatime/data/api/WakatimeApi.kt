@@ -21,6 +21,7 @@ interface WakatimeApi {
         private const val CURRENT_USER = "$USERS/current"
         private const val PUBLIC_LEADERS = "$API_ENDPOINT/leaders"
         private const val PRIVATE_BOARDS = "$CURRENT_USER/leaderboards"
+        private const val STATS = "$CURRENT_USER/stats"
     }
 
     /**
@@ -80,6 +81,31 @@ interface WakatimeApi {
      */
     @GET("$CURRENT_USER/projects")
     suspend fun getCurrentUsersProjects(): Response<Wrapper<List<Project>>>
+
+    /**
+     * Retrieves the stats for the current user over the supplied range, optionally filtered
+     * by the other inputs
+     * @param timeout       The timeout value used to calculate these stats.
+     *                      Defaults the the user's timeout value.
+     * @param writesOnly    The writes_only value used to calculate these stats.
+     *                      Defaults to the user's writes_only setting.
+     * @param projectId     Show more detailed stats limited to this project
+     */
+    @GET("$STATS/{range}")
+    suspend fun getStats(
+        @Path("range") range: String,
+        @Query("timeout") timeout: Int? = null,
+        @Query("writes_only") writesOnly: Boolean? = null,
+        @Query("project") projectId: String? = null
+    ): Response<Wrapper<Stats>>
+
+    /*
+    timeout - Integer - optional - The timeout value used to calculate these stats. Defaults the the user's timeout value.
+
+writes_only - Boolean - optional - The writes_only value used to calculate these stats. Defaults to the user's writes_only setting.
+
+project - String - optional - Show more detailed stats limited to this project.
+     */
 }
 
 /**

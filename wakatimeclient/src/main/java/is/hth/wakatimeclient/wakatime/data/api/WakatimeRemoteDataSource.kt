@@ -57,6 +57,22 @@ internal interface WakatimeRemoteDataSource {
      * working on.
      */
     suspend fun getProjects(): Results<List<Project>>
+
+    /**
+     * Retrieves the [Stats] for the current user over the supplied range, optionally filtered
+     * by the other inputs
+     * @param timeout       The timeout value used to calculate these stats.
+     *                      Defaults the the user's timeout value.
+     * @param writesOnly    The writes_only value used to calculate these stats.
+     *                      Defaults to the user's writes_only setting.
+     * @param projectId     Show more detailed stats limited to this project
+     */
+    suspend fun getStats(
+        timeout: Int?,
+        writesOnly: Boolean?,
+        projectId: String?,
+        range: Range
+    ): Results<Stats>
 }
 
 internal class WakatimeRemoteDataSourceImpl(
@@ -111,6 +127,19 @@ internal class WakatimeRemoteDataSourceImpl(
     override suspend fun getProjects(): Results<List<Project>> {
         return makeCall(networkCall = {
             api.getCurrentUsersProjects()
+        }, transform = {
+            it.data
+        })
+    }
+
+    override suspend fun getStats(
+        timeout: Int?,
+        writesOnly: Boolean?,
+        projectId: String?,
+        range: Range
+    ): Results<Stats> {
+        return makeCall(networkCall = {
+            api.getStats(range.description)
         }, transform = {
             it.data
         })
