@@ -25,8 +25,14 @@ internal interface WakatimeLocalDataSource {
      */
     suspend fun getTotalRecord(): Results<TotalRecord>
 
+    /**
+     *
+     */
     suspend fun getLanguage(name: String): Results<Language>
 
+    /**
+     *
+     */
     suspend fun getLanguages(): Results<Set<Language>>
 
     /**
@@ -49,10 +55,24 @@ internal interface WakatimeLocalDataSource {
      */
     suspend fun getProject(id: String): Results<Project>
 
+    /**
+     * Retrieves all of the locally stored user [Agent]s
+     */
+    suspend fun getAgents(): Results<List<Agent>>
+
+    /**
+     *
+     */
     suspend fun storeLanguage(name: String): Results<Long>
 
+    /**
+     *
+     */
     suspend fun storeLanguages(names: Set<String>): Results<Int>
 
+    /**
+     *
+     */
     suspend fun storeUsers(users: List<User>): Results<Int>
 
     /**
@@ -61,18 +81,35 @@ internal interface WakatimeLocalDataSource {
      */
     suspend fun storeRanks(ranks: List<UserRankEntity>): Results<Int>
 
+    /**
+     *
+     */
     suspend fun storeLeaderboards(boards: List<Leaderboard>): Results<Int>
 
+    /**
+     *
+     */
     suspend fun storePeriod(period: Period): Results<Long>
 
+    /**
+     *
+     */
     suspend fun storeCurrentUser(currentUser: CurrentUserView): Results<Int>
 
+    /**
+     *
+     */
     suspend fun storeTotalRecord(totalRecord: TotalRecordEntity): Results<Long>
 
     /**
      * Stores the supplied [Project]s to the local storage
      */
     suspend fun storeProjects(projects: List<Project>): Results<Int>
+
+    /**
+     * Stores the supplied [Agent]s to the local storage
+     */
+    suspend fun storeAgents(agents: List<Agent>): Results<Int>
 
     suspend fun removeUser(id: String): Results<Boolean>
 }
@@ -132,6 +169,12 @@ internal class WakatimeLocalDataSourceImpl(
         id: String
     ): Results<Project> = operate {
         db.projects().getProject(id)?.toModel()
+    }
+
+    override suspend fun getAgents(): Results<List<Agent>> = operate {
+        db.users().getAgents().map {
+            it.toModel()
+        }
     }
 
     override suspend fun storeLanguage(
@@ -195,6 +238,14 @@ internal class WakatimeLocalDataSourceImpl(
         projects: List<Project>
     ): Results<Int> = operate {
         db.projects().insertOrUpdate(*projects.map {
+            it.toEntity()
+        }.toTypedArray())
+    }
+
+    override suspend fun storeAgents(
+        agents: List<Agent>
+    ): Results<Int> = operate {
+        db.users().insertOrUpdateAgents(*agents.map {
             it.toEntity()
         }.toTypedArray())
     }

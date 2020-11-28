@@ -59,14 +59,23 @@ internal interface WakatimeRemoteDataSource {
     suspend fun getProjects(): Results<List<Project>>
 
     /**
-     * Fetches the [Stats] for the current user over using the supplied request
+     * Fetches the [Stats] for the current user filtered by the supplied request
      * @param request defines the filtering to apply
      */
     suspend fun getStats(
-       request: Stats.Request
+        request: Stats.Request
     ): Results<Stats>
 
+    /**
+     * Fetches the [Summaries] for the current user filtered by the supplied request
+     * @param request defined the filtering to apply
+     */
     suspend fun getSummaries(request: Summaries.Request): Results<Summaries>
+
+    /**
+     * Fetches the [Agent]s used by the current user
+     */
+    suspend fun getAgents(): Results<List<Agent>>
 }
 
 internal class WakatimeRemoteDataSourceImpl(
@@ -152,6 +161,14 @@ internal class WakatimeRemoteDataSourceImpl(
                 timezone = request.timezone,
                 writesOnly = request.writesOnly
             )
+        })
+    }
+
+    override suspend fun getAgents(): Results<List<Agent>> {
+        return makeCall(networkCall = {
+            api.getAgents()
+        }, transform = {
+            it.data
         })
     }
 }

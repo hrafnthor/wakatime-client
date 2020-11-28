@@ -8,10 +8,7 @@ import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeRemoteDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.toCurrentUserView
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.toTotalRecordEntity
-import `is`.hth.wakatimeclient.wakatime.model.CurrentUser
-import `is`.hth.wakatimeclient.wakatime.model.FullUser
-import `is`.hth.wakatimeclient.wakatime.model.TotalRecord
-import `is`.hth.wakatimeclient.wakatime.model.User
+import `is`.hth.wakatimeclient.wakatime.model.*
 
 /**
  * Exposes data access functionality related to user information
@@ -39,6 +36,11 @@ interface UserRepo {
      * of it finishing the results will be cached for the duration of the set cache limit.
      */
     suspend fun getTotalRecord(): Results<TotalRecord>
+
+    /**
+     * Fetches the [Agent]s used by the current user
+     */
+    suspend fun getAgents(): Results<List<Agent>>
 }
 
 internal class UserRepoImpl(
@@ -50,6 +52,7 @@ internal class UserRepoImpl(
     companion object {
         private const val keyCurrentUser = "user_current"
         private const val keyTotalRecord = "user_current_totalRecord"
+        private const val keyAgents = "user_agents"
     }
 
     private val userLoader = SingleLoader<User>()
@@ -92,6 +95,21 @@ internal class UserRepoImpl(
             }
         }
 
+    private val agentLoader = SingleLoader<List<Agent>>()
+        .cache {
+            local.getAgents()
+        }.expired {
+            limiter.shouldFetch(keyAgents)
+        }.remote {
+            remote.getAgents()
+        }.update { agents ->
+            local.storeAgents(agents).also { result ->
+                if (result is Results.Success) {
+                    limiter.mark(keyAgents)
+                }
+            }
+        }
+
     override suspend fun getCurrentUser(): Results<CurrentUser> = currentUserLoader.execute()
 
     override suspend fun getUser(id: String): Results<User> = userLoader
@@ -100,4 +118,6 @@ internal class UserRepoImpl(
         }.execute()
 
     override suspend fun getTotalRecord(): Results<TotalRecord> = totalRecordLoader.execute()
+
+    override suspend fun getAgents(): Results<List<Agent>> = agentLoader.execute()
 }

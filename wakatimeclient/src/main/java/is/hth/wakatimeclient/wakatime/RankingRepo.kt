@@ -10,10 +10,7 @@ import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.LanguageEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.LeaderboardEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.UserRankEntity
-import `is`.hth.wakatimeclient.wakatime.model.Leaderboard
-import `is`.hth.wakatimeclient.wakatime.model.Leaders
-import `is`.hth.wakatimeclient.wakatime.model.Rank
-import `is`.hth.wakatimeclient.wakatime.model.User
+import `is`.hth.wakatimeclient.wakatime.model.*
 
 interface RankingRepo {
 

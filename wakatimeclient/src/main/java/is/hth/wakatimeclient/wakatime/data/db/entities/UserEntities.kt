@@ -1,9 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.db.entities
 
-import `is`.hth.wakatimeclient.wakatime.model.Config
-import `is`.hth.wakatimeclient.wakatime.model.CurrentUser
-import `is`.hth.wakatimeclient.wakatime.model.FullUser
-import `is`.hth.wakatimeclient.wakatime.model.User
+import `is`.hth.wakatimeclient.wakatime.model.*
 import androidx.room.*
 
 /**
@@ -122,6 +119,49 @@ data class CurrentUserView(
 )
 
 /**
+ * Stores the agents (plugins) that the user has used
+ */
+@Entity(tableName = "agents")
+data class AgentEntity(
+    /**
+     * The unique id of this users agent
+     */
+    @PrimaryKey
+    @ColumnInfo(name = "id")
+    val id: String,
+    /**
+     * A string describing the agent
+     */
+    @ColumnInfo(name = "value")
+    val value: String,
+    /**
+     * The editor or IDE name of this user agent
+     */
+    @ColumnInfo(name = "editor")
+    val editor: String,
+    /**
+     * The version of Wakatime plugin used for this user agent
+     */
+    @ColumnInfo(name = "version")
+    val version: String,
+    /**
+     * The operating system of this user agent
+     */
+    @ColumnInfo(name = "os")
+    val os: String,
+    /**
+     * The time when this user agent was last seen in ISO 8601 format
+     */
+    @ColumnInfo(name = "last_seen")
+    val lastSeen: String,
+    /**
+     * The time when this user agent was first seen in ISO 8601 format
+     */
+    @ColumnInfo(name = "created_at")
+    val createdAt: String
+)
+
+/**
  * Maps this [CurrentUserView] to a [CurrentUser]
  */
 internal fun CurrentUserView.toCurrentUser(): CurrentUser = CurrentUser(
@@ -235,4 +275,24 @@ internal fun FullUser.toCurrentUserView(): CurrentUserView = CurrentUserView(
         createdAt = createdAt,
         modifiedAt = modifiedAt
     )
+)
+
+internal fun AgentEntity.toModel(): Agent = Agent(
+    id = id,
+    value = value,
+    editor = editor,
+    version = version,
+    os = os,
+    lastSeen = lastSeen,
+    createdAt = createdAt
+)
+
+internal fun Agent.toEntity(): AgentEntity = AgentEntity(
+    id = id,
+    value = value,
+    editor = editor,
+    version = version,
+    os = os,
+    lastSeen = lastSeen,
+    createdAt = createdAt
 )

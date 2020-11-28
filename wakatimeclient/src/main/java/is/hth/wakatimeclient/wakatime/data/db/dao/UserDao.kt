@@ -1,9 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.db.dao
 
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.ConfigEntity
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.CurrentUserView
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.TotalRecordEntity
-import `is`.hth.wakatimeclient.wakatime.data.db.entities.UserEntity
+import `is`.hth.wakatimeclient.wakatime.data.db.entities.*
 import androidx.room.*
 
 @Dao
@@ -54,4 +51,29 @@ internal interface UserDao {
     @Query("DELETE FROM users WHERE id == :id")
     fun removeUser(id: String): Int
 
+    /**
+     * Inserts the supplied agents or updates the ones already stored
+     */
+    @Transaction
+    fun insertOrUpdateAgents(vararg agents: AgentEntity): Int {
+        return agents.fold(0) { count, agent ->
+            if (insertOrIgnoreAgent(agent) > 0) {
+                count + 1
+            } else {
+                count + updateAgent(agent)
+            }
+        }
+    }
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertOrIgnoreAgent(agent: AgentEntity): Long
+
+    @Update
+    fun updateAgent(agent: AgentEntity): Int
+
+    /**
+     * Retrieves all locally stored agents
+     */
+    @Query("SELECT * FROM agents")
+    fun getAgents(): List<AgentEntity>
 }

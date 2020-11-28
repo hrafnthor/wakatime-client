@@ -102,16 +102,13 @@ interface WakatimeApi {
     /**
      * Retrieves the current user's coding activity for the given time range as a
      * list of summaries segmented by day
-     * @param start [LocalDate] required:   The start date of the time range in 'yyyy-MM-dd' format
-     * @param end [LocalDate] required:     The end date of the time range in 'yyyy-MM-dd' format
-     * @param projectId [String] optional:  Filter the summaries to only those related to this project
-     * @param branches [Array] optional:    Filter the summaries to only those related to these
-     *                                      branch names
-     * @param timeout [Int] optional:       The timeout preference used when joining heartbeats
-     *                                      into durations. Defaults to the user's timeout value
+     * @param start [LocalDate] required: The start date of the time range in 'yyyy-MM-dd' format
+     * @param end [LocalDate] required: The end date of the time range in 'yyyy-MM-dd' format
+     * @param projectId [String] optional: Filter the summaries to only those related to this project
+     * @param branches [Array] optional: Filter the summaries to only those related to these branch names
+     * @param timeout [Int] optional: The timeout preference used when joining heartbeats into durations. Defaults to the user's timeout value
      * @param writesOnly [Boolean] optional: Defaults to user's 'writes only' preference
-     * @param timezone [String] optional:   The timezone for the given start and end dates.
-     *                                      Defaults to the user's timezone
+     * @param timezone [String] optional: The timezone for the given start and end dates. Defaults to the user's timezone
      */
     @GET("$CURRENT_USER/summaries")
     suspend fun getSummaries(
@@ -123,6 +120,12 @@ interface WakatimeApi {
         @Query("writes_only") writesOnly: Boolean?,
         @Query("timezone") timezone: String?,
     ): Response<Summaries>
+
+    /**
+     * Retrieves a list of [Agent]s used by the current user
+     */
+    @GET("$CURRENT_USER/user_agents")
+    suspend fun getAgents(): Response<Wrapper<List<Agent>>>
 }
 
 /**
