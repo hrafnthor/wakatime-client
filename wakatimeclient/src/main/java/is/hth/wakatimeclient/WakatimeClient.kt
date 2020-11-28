@@ -32,7 +32,7 @@ class WakatimeClient private constructor(
     private val session: SessionManager,
     val users: UserRepo,
     val rankings: RankingRepo,
-    val code: CodeRepo
+    val activity: ActivityRepo
 ) : AuthClient by auth,
     WakatimeNetworkClient by net,
     SessionManager by session {
@@ -161,7 +161,7 @@ class WakatimeClient private constructor(
                 local = localSource
             )
 
-            val code: CodeRepo = CodeRepoImpl(
+            val activity: ActivityRepo = ActivityRepoImpl(
                 limiter = limiter,
                 remote = remoteSource,
                 local = localSource
@@ -174,7 +174,7 @@ class WakatimeClient private constructor(
                 session = manager,
                 users = users,
                 rankings = rankings,
-                code = code
+                activity = activity
             )
         }
     }

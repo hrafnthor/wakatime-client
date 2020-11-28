@@ -112,4 +112,56 @@ data class Stats(
     @SerialName("operating_systems")
     val operatingSystems: List<Measurement>,
     val projects: List<Measurement>,
-)
+) {
+
+    companion object {
+
+        /**
+         * Returns a [Request.Builder] for network request construction
+         */
+        fun makeRequest(range: HumanRange): Request.Builder = Request.Builder(range)
+    }
+
+    class Request private constructor(builder: Builder) {
+
+        /**
+         * The range to filter the stats by
+         */
+        val range: HumanRange = builder.range
+
+        /**
+         * The timeout value used to calculate these stats. Defaults the the user's timeout value.
+         */
+        val timeout: Int? = builder.timeout
+
+        /**
+         * The writes_only value used to calculate these stats. Defaults to the user's writes_only setting.
+         */
+        val writesOnly: Boolean? = builder.writesOnly
+
+        /**
+         * Filters the returned stats to the relevant project
+         */
+        val projectId: String? = builder.projectId
+
+        class Builder internal constructor(range: HumanRange){
+
+            var range: HumanRange = range
+                private set
+            var timeout: Int? = null
+                private set
+            var writesOnly: Boolean? = null
+                private set
+            var projectId: String? = null
+                private set
+
+            fun setRange(range: HumanRange): Builder = apply { this.range = range }
+
+            fun setTimeout(timeout: Int?): Builder = apply { this.timeout = timeout }
+
+            fun writesOnly(writesOnly: Boolean?): Builder = apply { this.writesOnly = writesOnly }
+
+            fun filterByProject(projectId: String?): Builder = apply { this.projectId = projectId }
+        }
+    }
+}

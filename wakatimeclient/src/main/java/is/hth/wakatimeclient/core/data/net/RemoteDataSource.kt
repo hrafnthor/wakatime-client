@@ -16,11 +16,10 @@ internal open class RemoteDataSource(
     /**
      * Structured execution and result handling for network operations. Conducts authentication
      * and network state checks before executing the network operation.
+     *
+     * @param networkCall Should execute a network call and return the unmodified response
      */
     suspend fun <T : Any> makeCall(
-        /**
-         * Should execute a network call and return the unmodified response
-         */
         networkCall: suspend () -> Response<T>
     ): Results<T> = makeCall(networkCall) {
         it
@@ -29,15 +28,12 @@ internal open class RemoteDataSource(
     /**
      * Structured execution and result handling for network operations. Conducts authentication
      * and network state checks before executing the network operation.
+     *
+     * @param networkCall Should execute a network call and return the unmodified response
+     * @param transform Performs any type conversion on the received network value that might be required
      */
     suspend fun <T : Any, R : Any> makeCall(
-        /**
-         * Should execute a network call and return the unmodified response
-         */
         networkCall: suspend () -> Response<T>,
-        /**
-         * Performs any type conversion on the received network value that might be required
-         */
         transform: (T) -> R,
     ): Results<R> = safeOperation(processor) {
         checkPreconditions {
@@ -52,7 +48,6 @@ internal open class RemoteDataSource(
         }
     }
 
-    // TODO: 20.8.2020 Add a check for network connectivity as a first step
     private suspend fun <R> checkPreconditions(passed: suspend () -> Results<R>): Results<R> {
         return when (val results = session.update(false)) {
             is Results.Success -> passed.invoke()

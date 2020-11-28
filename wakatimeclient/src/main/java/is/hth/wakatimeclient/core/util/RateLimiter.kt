@@ -24,15 +24,15 @@ import java.util.concurrent.TimeUnit
 /**
  * Utility class that decides whether we should fetch some data or not.
  */
-class RateLimiter<in KEY>(timeout: Int, timeUnit: TimeUnit) {
-    private val timestamps = ArrayMap<KEY, Long>()
+class RateLimiter<in T>(timeout: Int, timeUnit: TimeUnit) {
+    private val timestamps = ArrayMap<T, Long>()
     private val timeout = timeUnit.toMillis(timeout.toLong())
 
     /**
      * Determines if the supplied [key] should be considered to have expired
      */
     @Synchronized
-    fun shouldFetch(key: KEY): Boolean {
+    fun shouldFetch(key: T): Boolean {
         val lastFetched = timestamps[key]
         val now = now()
         return lastFetched == null || now - lastFetched > timeout
@@ -43,7 +43,7 @@ class RateLimiter<in KEY>(timeout: Int, timeUnit: TimeUnit) {
      * of the configured max timeout
      */
     @Synchronized
-    fun mark(key: KEY) {
+    fun mark(key: T) {
         timestamps[key] = now()
     }
 
@@ -51,7 +51,7 @@ class RateLimiter<in KEY>(timeout: Int, timeUnit: TimeUnit) {
      * Resets the timestamp for the supplied [key]
      */
     @Synchronized
-    fun reset(key: KEY) {
+    fun reset(key: T) {
         timestamps.remove(key)
     }
 

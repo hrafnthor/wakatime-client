@@ -7,13 +7,13 @@ import `is`.hth.wakatimeclient.core.util.firstOr
 import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeRemoteDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSource
 import `is`.hth.wakatimeclient.wakatime.model.Project
-import `is`.hth.wakatimeclient.wakatime.model.Range
 import `is`.hth.wakatimeclient.wakatime.model.Stats
+import `is`.hth.wakatimeclient.wakatime.model.Summaries
 
 /**
  * Exposes data access functionality related to the user's coding information
  */
-interface CodeRepo {
+interface ActivityRepo {
 
     /**
      * Retrieves all of the user's [Project]s
@@ -22,31 +22,31 @@ interface CodeRepo {
 
     /**
      * Attempts to retrieve a [Project] matching the supplied id
+     * @param id The project id to fetch
      */
     suspend fun getProject(id: String): Results<Project>
 
     /**
      * Retrieves the [Stats] for the current user over the supplied range, optionally filtered
      * by the other inputs
-     * @param timeout       The timeout value used to calculate these stats.
-     *                      Defaults the the user's timeout value.
-     * @param writesOnly    The writes_only value used to calculate these stats.
-     *                      Defaults to the user's writes_only setting.
-     * @param projectId     Show more detailed stats limited to this project
+     * @param request defines filtering to apply to the network request
      */
     suspend fun getStats(
-        timeout: Int? = null,
-        writesOnly: Boolean? = null,
-        projectId: String? = null,
-        range: Range
+       request: Stats.Request
     ): Results<Stats>
+
+    /**
+     * Retrieves the [Summaries] for the current user
+     * @param request Defines the network request for the summaries
+     */
+    suspend fun getSummaries(request: Summaries.Request): Results<Summaries>
 }
 
-internal class CodeRepoImpl(
+internal class ActivityRepoImpl(
     private val limiter: RateLimiter<String>,
     private val remote: WakatimeRemoteDataSource,
     private val local: WakatimeLocalDataSource
-) : CodeRepo {
+) : ActivityRepo {
 
     private val projectsLoader = SingleLoader<List<Project>>()
         .cache {
@@ -78,11 +78,12 @@ internal class CodeRepoImpl(
     }
 
     override suspend fun getStats(
-        timeout: Int?,
-        writesOnly: Boolean?,
-        projectId: String?,
-        range: Range
-    ): Results<Stats> = remote.getStats(timeout, writesOnly, projectId, range = range)
+        request: Stats.Request
+    ): Results<Stats> = remote.getStats(request)
+
+    override suspend fun getSummaries(
+        request: Summaries.Request
+    ): Results<Summaries> = remote.getSummaries(request)
 
     companion object {
         private const val keyProjects = "projects"
