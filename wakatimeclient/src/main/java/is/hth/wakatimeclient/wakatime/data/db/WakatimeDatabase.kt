@@ -21,6 +21,7 @@ import java.util.concurrent.Executors
         UserRankEntity::class,
         PeriodEntity::class,
         ProjectEntity::class,
+        AgentEntity::class,
     ],
     views = [
         CurrentUserView::class
