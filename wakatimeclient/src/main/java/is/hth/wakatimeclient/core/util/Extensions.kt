@@ -35,6 +35,11 @@ fun <T : Any> T?.valueOrEmpty(): Results<T> = if (this == null) {
 fun String.ifNotEmpty(alternative: String): String = if (isNotEmpty()) this else alternative
 
 /**
+ * Returns `this` value unless it is empty, then it returns `null`
+ */
+fun String.nullIfEmpty(): String? = if (isNotEmpty()) this else null
+
+/**
  * Returns the first value
  */
 fun <T> List<T>.firstOr(default: T): T = firstOrNull() ?: default
@@ -50,8 +55,11 @@ inline fun <T> Iterable<T>.firstOr(default: T, predicate: (T) -> Boolean): T {
 /**
  * Returns the first element matching the given [predicate] after it has been sent
  * through [transform], or [default] if none was found.
+ * @param default will be returned if no item fulfills the predicate or the Iterable is empty
+ * @param predicate function that evaluates each element and returns the result of predicate evaluation
+ * @param transform function that transforms each element filtered by [predicate]
  */
-inline fun <T, R> Iterable<T>.firstOr(
+internal inline fun <T, R> Iterable<T>.firstOr(
     default: R,
     predicate: (T) -> Boolean,
     transform: (T) -> R

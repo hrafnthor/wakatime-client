@@ -200,9 +200,12 @@ internal class AuthClientImpl internal constructor(
         private val service: AuthorizationService
     ) : AuthClient.Session {
 
-        override fun isAuthorized(): Boolean = if (authenticationMethod() is Method.OAuth) {
-            getState().isAuthorized
-        } else apiKey().isNotEmpty()
+        override fun isAuthorized(): Boolean {
+            return when (authenticationMethod()) {
+                Method.ApiKey -> apiKey().isNotEmpty()
+                Method.OAuth -> getState().isAuthorized
+            }
+        }
 
         override fun authorizedScopes(): Set<Scope> {
             val scopes = getState().scopeSet?.joinToString(separator = ",") { it } ?: ""
@@ -222,7 +225,7 @@ internal class AuthClientImpl internal constructor(
                     needsTokenRefresh = force
                     when {
                         needsTokenRefresh -> performActionWithFreshTokens(service) { _, _, exception ->
-                            val results: Results<Unit> = if (exception == null) {
+                            val results = if (exception == null) {
                                 Results.Success.Empty
                             } else {
                                 val message: String = exception.message ?: ""
@@ -269,7 +272,7 @@ internal class AuthClientImpl internal constructor(
             apply { this.storage = storage }
 
         internal fun build(context: Context): AuthClientImpl {
-            if (!this::storage.isInitialized) {
+            if (this::storage.isInitialized.not()) {
                 storage = DefaultAuthStorage.construct(context.applicationContext)
             }
 

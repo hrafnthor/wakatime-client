@@ -54,7 +54,7 @@ internal open class Loader<R, T> {
      *
      */
     suspend fun execute(): Results<T> {
-        return when (val localData: Results<T> = cache()) {
+        return when (val localData = cache()) {
             is Results.Success.Values -> if (expired()) {
                 fetchRemote {
                     // Return the previously cached values as well as the remote load error
@@ -68,9 +68,9 @@ internal open class Loader<R, T> {
     }
 
     private suspend fun fetchRemote(onFailure: (Error) -> Results<T>): Results<T> {
-        return when (val remoteData: Results<R> = remote()) {
+        return when (val remoteData = remote()) {
             is Results.Failure -> onFailure(remoteData.error)
-            is Results.Success.Empty -> when (val cleared: Results<Boolean> = clear()) {
+            is Results.Success.Empty -> when (val cleared = clear()) {
                 is Results.Success.Values -> {
                     if (!cleared.data) print("Local cache was not cleared!")
                     Results.Success.Empty

@@ -59,20 +59,14 @@ internal interface WakatimeRemoteDataSource {
     suspend fun getProjects(): Results<List<Project>>
 
     /**
-     * Retrieves the [Stats] for the current user over the supplied range, optionally filtered
-     * by the other inputs
-     * @param timeout       The timeout value used to calculate these stats.
-     *                      Defaults the the user's timeout value.
-     * @param writesOnly    The writes_only value used to calculate these stats.
-     *                      Defaults to the user's writes_only setting.
-     * @param projectId     Show more detailed stats limited to this project
+     * Fetches the [Stats] for the current user over using the supplied request
+     * @param request defines the filtering to apply
      */
     suspend fun getStats(
-        timeout: Int?,
-        writesOnly: Boolean?,
-        projectId: String?,
-        range: Range
+       request: Stats.Request
     ): Results<Stats>
+
+    suspend fun getSummaries(request: Summaries.Request): Results<Summaries>
 }
 
 internal class WakatimeRemoteDataSourceImpl(
@@ -133,15 +127,31 @@ internal class WakatimeRemoteDataSourceImpl(
     }
 
     override suspend fun getStats(
-        timeout: Int?,
-        writesOnly: Boolean?,
-        projectId: String?,
-        range: Range
+        request: Stats.Request
     ): Results<Stats> {
         return makeCall(networkCall = {
-            api.getStats(range.description)
+            api.getStats(
+                range = request.range.description,
+                timeout = request.timeout,
+                writesOnly = request.writesOnly,
+                projectId = request.projectId
+            )
         }, transform = {
             it.data
+        })
+    }
+
+    override suspend fun getSummaries(request: Summaries.Request): Results<Summaries> {
+        return makeCall(networkCall = {
+            api.getSummaries(
+                start = request.start,
+                end = request.end,
+                projectId = request.projectId,
+                branches = request.branches,
+                timeout = request.timeout,
+                timezone = request.timezone,
+                writesOnly = request.writesOnly
+            )
         })
     }
 }

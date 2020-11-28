@@ -8,6 +8,7 @@ import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import java.time.LocalDate
 
 /**
  * Wakatime API interface as defined here https://wakatime.com/developer
@@ -46,7 +47,7 @@ interface WakatimeApi {
     @GET(PUBLIC_LEADERS)
     suspend fun getPublicLeaders(
         @Query("language") language: String,
-        @Query("page") page: Int
+        @Query("page") page: Int,
     ): Response<Leaders>
 
     /**
@@ -65,7 +66,7 @@ interface WakatimeApi {
     suspend fun getPrivateLeaders(
         @Path("leaderboardId") leaderboardId: String,
         @Query("language") language: String,
-        @Query("page") page: Int
+        @Query("page") page: Int,
     ): Response<Leaders>
 
     /**
@@ -85,27 +86,43 @@ interface WakatimeApi {
     /**
      * Retrieves the stats for the current user over the supplied range, optionally filtered
      * by the other inputs
-     * @param timeout       The timeout value used to calculate these stats.
-     *                      Defaults the the user's timeout value.
-     * @param writesOnly    The writes_only value used to calculate these stats.
-     *                      Defaults to the user's writes_only setting.
-     * @param projectId     Show more detailed stats limited to this project
+     * @param timeout The timeout value used to calculate these stats. Defaults the the user's timeout value.
+     * @param writesOnly The writes_only value used to calculate these stats. Defaults to the user's writes_only setting.
+     * @param projectId Show more detailed stats limited to this project
+     * @param range The range to filter the stats by
      */
     @GET("$STATS/{range}")
     suspend fun getStats(
         @Path("range") range: String,
         @Query("timeout") timeout: Int? = null,
         @Query("writes_only") writesOnly: Boolean? = null,
-        @Query("project") projectId: String? = null
+        @Query("project") projectId: String? = null,
     ): Response<Wrapper<Stats>>
 
-    /*
-    timeout - Integer - optional - The timeout value used to calculate these stats. Defaults the the user's timeout value.
-
-writes_only - Boolean - optional - The writes_only value used to calculate these stats. Defaults to the user's writes_only setting.
-
-project - String - optional - Show more detailed stats limited to this project.
+    /**
+     * Retrieves the current user's coding activity for the given time range as a
+     * list of summaries segmented by day
+     * @param start [LocalDate] required:   The start date of the time range in 'yyyy-MM-dd' format
+     * @param end [LocalDate] required:     The end date of the time range in 'yyyy-MM-dd' format
+     * @param projectId [String] optional:  Filter the summaries to only those related to this project
+     * @param branches [Array] optional:    Filter the summaries to only those related to these
+     *                                      branch names
+     * @param timeout [Int] optional:       The timeout preference used when joining heartbeats
+     *                                      into durations. Defaults to the user's timeout value
+     * @param writesOnly [Boolean] optional: Defaults to user's 'writes only' preference
+     * @param timezone [String] optional:   The timezone for the given start and end dates.
+     *                                      Defaults to the user's timezone
      */
+    @GET("$CURRENT_USER/summaries")
+    suspend fun getSummaries(
+        @Query("start") start: String,
+        @Query("end") end: String,
+        @Query("project") projectId: String?,
+        @Query("branches") branches: String?,
+        @Query("timeout") timeout: Int?,
+        @Query("writes_only") writesOnly: Boolean?,
+        @Query("timezone") timezone: String?,
+    ): Response<Summaries>
 }
 
 /**
