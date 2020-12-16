@@ -6,9 +6,8 @@ import `is`.hth.wakatimeclient.core.util.RateLimiter
 import `is`.hth.wakatimeclient.core.util.firstOr
 import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeRemoteDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSource
-import `is`.hth.wakatimeclient.wakatime.model.Project
-import `is`.hth.wakatimeclient.wakatime.model.Stats
-import `is`.hth.wakatimeclient.wakatime.model.Summaries
+import `is`.hth.wakatimeclient.wakatime.model.*
+import java.util.*
 
 /**
  * Exposes data access functionality related to the user's coding information
@@ -32,7 +31,7 @@ interface ActivityRepo {
      * @param request defines filtering to apply to the network request
      */
     suspend fun getStats(
-       request: Stats.Request
+        request: Stats.Request
     ): Results<Stats>
 
     /**
@@ -40,6 +39,21 @@ interface ActivityRepo {
      * @param request Defines the network request for the summaries
      */
     suspend fun getSummaries(request: Summaries.Request): Results<Summaries>
+
+    /**
+     * Retrieves any [Heartbeats] that the user got for the requested date
+     * @param date for which to fetch a list of heartbeats for
+     */
+    suspend fun getHeartbeats(
+        date: Date
+    ): Results<Heartbeats>
+
+    /**
+     * Sends the supplied [Heartbeat.Beat] to the service for recording
+     */
+    suspend fun sendHeartbeat(
+        beat: Heartbeat.Beat
+    ): Results<Confirmation>
 }
 
 internal class ActivityRepoImpl(
@@ -84,6 +98,14 @@ internal class ActivityRepoImpl(
     override suspend fun getSummaries(
         request: Summaries.Request
     ): Results<Summaries> = remote.getSummaries(request)
+
+    override suspend fun getHeartbeats(
+        date: Date
+    ): Results<Heartbeats> = remote.getHeartbeats(date)
+
+    override suspend fun sendHeartbeat(
+        beat: Heartbeat.Beat
+    ): Results<Confirmation> = remote.sendHeartbeat(beat)
 
     companion object {
         private const val keyProjects = "projects"

@@ -2,6 +2,7 @@ package `is`.hth.wakatimeclient.wakatime.data.api
 
 import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
+import `is`.hth.wakatimeclient.wakatime.data.api.model.ServiceError
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.ResponseBody
@@ -14,7 +15,12 @@ import timber.log.Timber
 class WakatimeErrorProcessor : NetworkErrorProcessor() {
 
     override fun onError(response: Response<*>): Error {
-        return onError(response.code(), convert(response.errorBody()).message)
+        val serviceError = convert(response.errorBody())
+        return onError(response.code(), serviceError.message).apply {
+            serviceError.fieldErrors.forEach {
+                extra.add("Field '${it.name}' had error '${it.description}'")
+            }
+        }
     }
 
     private fun convert(errorBody: ResponseBody?): ServiceError {

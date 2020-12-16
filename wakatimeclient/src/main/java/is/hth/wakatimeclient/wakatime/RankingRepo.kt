@@ -10,12 +10,15 @@ import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSource
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.LanguageEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.LeaderboardEntity
 import `is`.hth.wakatimeclient.wakatime.data.db.entities.UserRankEntity
-import `is`.hth.wakatimeclient.wakatime.model.*
+import `is`.hth.wakatimeclient.wakatime.model.Leaderboard
+import `is`.hth.wakatimeclient.wakatime.model.Leaders
+import `is`.hth.wakatimeclient.wakatime.model.Rank
+import `is`.hth.wakatimeclient.wakatime.model.User
 
 interface RankingRepo {
 
     /**
-     * Fetches the requested [page] of the public leaderboard for the supplied [language].
+     * Fetches leaders from the public leaderboard, using the supplied request for filtering.
      *
      * The language can be skipped which will give the all round public result ordered by
      * total coding activity and daily averages irregardless of language.
@@ -25,21 +28,15 @@ interface RankingRepo {
      *
      * If the required authentication scope access has not been given, the result will be for
      * page 1.
+     * @param request Contains configuration for filtering the request
      */
-    suspend fun getPublicLeaders(
-        language: String,
-        page: Int
-    ): Results<Leaders>
+    suspend fun getPublicLeaders(request: Leaders.Request): Results<Leaders>
 
     /**
-     * Fetches the requested [page] of the private leaderboard matching the supplied
-     * [leaderboardIdentifier] for an optional filtering of a [language].
+     * Fetches leaders from the requested private leaderboard
+     * @param request Configured for the remote query that will be made
      */
-    suspend fun getPrivateLeaders(
-        leaderboardIdentifier: String,
-        language: String,
-        page: Int
-    ): Results<Leaders>
+    suspend fun getPrivateLeaders(request: Leaders.Request): Results<Leaders>
 
     /**
      * Fetches the private leaderboards for the currently authenticated user
@@ -73,20 +70,17 @@ internal class RankingRepoImpl(
         }
 
     override suspend fun getPublicLeaders(
-        language: String,
-        page: Int
+        request: Leaders.Request
     ): Results<Leaders> = processLeaders(
         LeaderboardEntity.publicLeaderboard.identifier,
-        remote.getPublicLeaders(language, page)
+        remote.getPublicLeaders(request)
     )
 
     override suspend fun getPrivateLeaders(
-        leaderboardIdentifier: String,
-        language: String,
-        page: Int
+        request: Leaders.Request
     ): Results<Leaders> = processLeaders(
-        leaderboardIdentifier,
-        remote.getPrivateLeaders(leaderboardIdentifier, language, page)
+        request.leaderboardId,
+        remote.getPrivateLeaders(request)
     )
 
     override suspend fun getLeaderboards(): Results<List<Leaderboard>> = leaderboardLoader.execute()

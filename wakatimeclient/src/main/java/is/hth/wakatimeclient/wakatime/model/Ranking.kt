@@ -47,7 +47,56 @@ data class Leaders(
      */
     @SerialName("data")
     val ranks: List<Rank>,
-)
+) {
+    /**
+     * A request object for [Leaders] defining querying values
+     */
+    class Request private constructor(
+        val leaderboardId: String,
+        val language: String?,
+        val page: Int?
+    ) {
+
+        class Builder internal constructor(
+            private val leaderboardId: String
+        ) {
+
+            private var language: String? = null
+            private var page: Int? = null
+
+            fun setLanguage(language: String?): Builder = apply {
+                this.language = language
+            }
+
+            fun setPage(page: Int?): Builder = apply {
+                this.page = page
+            }
+
+            /**
+             * Constructs a new [Request] from set values
+             */
+            fun build(): Request = Request(leaderboardId, language, page)
+        }
+    }
+
+    companion object {
+
+        /**
+         * Returns a [Request.Builder] configured for public leaderboard querying
+         */
+        fun publicLeaderboardRequest(): Request.Builder {
+            return Request.Builder("")
+        }
+
+        /**
+         * Returns a [Request.Builder] configured for a private leaderboard querying
+         * @param leaderboardId The unique id of the leaderboard that should be queried
+         */
+        fun privateLeaderboardRequest(leaderboardId: String): Request.Builder {
+            return Request.Builder(leaderboardId)
+        }
+    }
+}
 
 @Serializable
 data class Rank(

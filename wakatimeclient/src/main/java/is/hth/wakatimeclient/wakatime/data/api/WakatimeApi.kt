@@ -1,13 +1,10 @@
 package `is`.hth.wakatimeclient.wakatime.data.api
 
 import `is`.hth.wakatimeclient.core.data.net.EnvelopePayload
+import `is`.hth.wakatimeclient.wakatime.data.api.model.ResponseWrapper
 import `is`.hth.wakatimeclient.wakatime.model.*
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Path
-import retrofit2.http.Query
+import retrofit2.http.*
 import java.time.LocalDate
 
 /**
@@ -23,6 +20,7 @@ interface WakatimeApi {
         private const val PUBLIC_LEADERS = "$API_ENDPOINT/leaders"
         private const val PRIVATE_BOARDS = "$CURRENT_USER/leaderboards"
         private const val STATS = "$CURRENT_USER/stats"
+        private const val HEARTBEATS = "$CURRENT_USER/heartbeats"
     }
 
     /**
@@ -30,14 +28,14 @@ interface WakatimeApi {
      */
     @EnvelopePayload("data")
     @GET(CURRENT_USER)
-    suspend fun getCurrentUser(): Response<Wrapper<FullUser>>
+    suspend fun getCurrentUser(): Response<ResponseWrapper<FullUser>>
 
     /**
      * Retrieves the total recorded time for the current user.
      */
     @EnvelopePayload("data")
     @GET("$CURRENT_USER/all_time_since_today")
-    suspend fun getTotalRecord(): Response<Wrapper<TotalRecord>>
+    suspend fun getTotalRecord(): Response<ResponseWrapper<TotalRecord>>
 
     /**
      * Retrieves the public leaderboards leaders.
@@ -46,8 +44,8 @@ interface WakatimeApi {
      */
     @GET(PUBLIC_LEADERS)
     suspend fun getPublicLeaders(
-        @Query("language") language: String,
-        @Query("page") page: Int,
+        @Query("language") language: String?,
+        @Query("page") page: Int?,
     ): Response<Leaders>
 
     /**
@@ -55,7 +53,7 @@ interface WakatimeApi {
      * user is a member off.
      */
     @GET(PRIVATE_BOARDS)
-    suspend fun getPrivateLeaderboards(): Response<PagedWrapper<List<Leaderboard>>>
+    suspend fun getPrivateLeaderboards(): Response<ResponseWrapper<List<Leaderboard>>>
 
     /**
      * Retrieves the leaders for the specified leaderboard that the currently
@@ -65,8 +63,8 @@ interface WakatimeApi {
     @GET("$PRIVATE_BOARDS/{leaderboardId}")
     suspend fun getPrivateLeaders(
         @Path("leaderboardId") leaderboardId: String,
-        @Query("language") language: String,
-        @Query("page") page: Int,
+        @Query("language") language: String?,
+        @Query("page") page: Int?,
     ): Response<Leaders>
 
     /**
@@ -81,7 +79,7 @@ interface WakatimeApi {
      * authenticated user working on.
      */
     @GET("$CURRENT_USER/projects")
-    suspend fun getCurrentUsersProjects(): Response<Wrapper<List<Project>>>
+    suspend fun getCurrentUsersProjects(): Response<ResponseWrapper<List<Project>>>
 
     /**
      * Retrieves the stats for the current user over the supplied range, optionally filtered
@@ -97,7 +95,7 @@ interface WakatimeApi {
         @Query("timeout") timeout: Int? = null,
         @Query("writes_only") writesOnly: Boolean? = null,
         @Query("project") projectId: String? = null,
-    ): Response<Wrapper<Stats>>
+    ): Response<ResponseWrapper<Stats>>
 
     /**
      * Retrieves the current user's coding activity for the given time range as a
@@ -125,40 +123,25 @@ interface WakatimeApi {
      * Retrieves a list of [Agent]s used by the current user
      */
     @GET("$CURRENT_USER/user_agents")
-    suspend fun getAgents(): Response<Wrapper<List<Agent>>>
+    suspend fun getAgents(): Response<ResponseWrapper<List<Agent>>>
+
+    /**
+     * Retrieves all of the user's [Heartbeats] for the given date.
+     *
+     * @param date The day to return heartbeats for, in a YYYY-mm-dd format. Heartbeats will be returned
+     * from 12:00 until 23:59 in the user's timezone for this day
+     */
+    @GET(HEARTBEATS)
+    suspend fun getHeartbeats(
+        @Query("date") date: String
+    ): Response<Heartbeats>
+
+    /**
+     * Posts a new heartbeat to the service
+     * @param beat to register with the server
+     */
+    @POST(HEARTBEATS)
+    suspend fun sendBeat(
+        @Body beat: Heartbeat.Beat
+    ): Response<ResponseWrapper<Confirmation>>
 }
-
-/**
- * The Wakatime service error payload
- */
-@Serializable
-data class ServiceError(
-    @SerialName("error")
-    val message: String
-)
-
-/**
- * A dumb JSON wrapper
- */
-@Serializable
-data class Wrapper<T : Any>(val data: T)
-
-/**
- * A dumb JSON payload wrapper for paged data
- */
-@Serializable
-data class PagedWrapper<T : Any>(
-    /**
-     * The actual data payload
-     */
-    val data: T,
-    /**
-     * The current page
-     */
-    val page: Int,
-    /**
-     * The total number of pages to iterate through
-     */
-    @SerialName("total_pages")
-    val totalPages: Int
-)
