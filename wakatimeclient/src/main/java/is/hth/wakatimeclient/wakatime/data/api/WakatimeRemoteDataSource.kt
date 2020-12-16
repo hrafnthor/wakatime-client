@@ -5,6 +5,8 @@ import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 import `is`.hth.wakatimeclient.core.data.net.RemoteDataSource
 import `is`.hth.wakatimeclient.wakatime.model.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 internal interface WakatimeRemoteDataSource {
     /**
@@ -24,7 +26,7 @@ internal interface WakatimeRemoteDataSource {
     suspend fun getTotalRecord(): Results<TotalRecord>
 
     /**
-     * Fetches the requested [page] of the public leaderboard for the supplied [language].
+     *  Fetches leaders from the public leaderboard, using the supplied request for filtering.
      *
      * The language can be skipped which will give the all round public result ordered by
      * total coding activity and daily averages irregardless of language.
@@ -35,7 +37,9 @@ internal interface WakatimeRemoteDataSource {
      * If the required authentication scope access has not been given, the result will be for
      * page 1.
      */
-    suspend fun getPublicLeaders(language: String = "", page: Int): Results<Leaders>
+    suspend fun getPublicLeaders(
+        request: Leaders.Request
+    ): Results<Leaders>
 
     /**
      * Fetches the private leaderboards that the currently authenticated user is member of.
@@ -43,13 +47,11 @@ internal interface WakatimeRemoteDataSource {
     suspend fun getLeaderboards(): Results<List<Leaderboard>>
 
     /**
-     * Fetches the leaders on the specific leaderboard matching the supplied [leaderboardId],
-     * optionally filtered by [language] and a certain page
+     * Fetches leaders from the requested private leaderboard
+     * @param request Contains configuration for filtering the request
      */
     suspend fun getPrivateLeaders(
-        leaderboardId: String,
-        language: String = "",
-        page: Int = 0
+        request: Leaders.Request
     ): Results<Leaders>
 
     /**
@@ -76,6 +78,22 @@ internal interface WakatimeRemoteDataSource {
      * Fetches the [Agent]s used by the current user
      */
     suspend fun getAgents(): Results<List<Agent>>
+
+    /**
+     * Fetches all of the heartbeats given for the supplied date
+     *
+     * @param date to fetch heartbeats for
+     */
+    suspend fun getHeartbeats(date: Date): Results<Heartbeats>
+
+    /**
+     * Sends the supplied [Heartbeat.Beat] to the service for recording
+     *
+     * @param beat to record with the service
+     */
+    suspend fun sendHeartbeat(
+        beat: Heartbeat.Beat
+    ): Results<Confirmation>
 }
 
 internal class WakatimeRemoteDataSourceImpl(
@@ -84,12 +102,13 @@ internal class WakatimeRemoteDataSourceImpl(
     private val api: WakatimeApi,
 ) : RemoteDataSource(session, processor), WakatimeRemoteDataSource {
 
+    private val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+
     override suspend fun getPublicLeaders(
-        language: String,
-        page: Int
+        request: Leaders.Request
     ): Results<Leaders> {
         return makeCall {
-            api.getPublicLeaders(language, page)
+            api.getPublicLeaders(request.language, request.page)
         }
     }
 
@@ -118,12 +137,14 @@ internal class WakatimeRemoteDataSourceImpl(
     }
 
     override suspend fun getPrivateLeaders(
-        leaderboardId: String,
-        language: String,
-        page: Int
+        request: Leaders.Request
     ): Results<Leaders> {
         return makeCall {
-            api.getPrivateLeaders(leaderboardId, language, page)
+            api.getPrivateLeaders(
+                leaderboardId = request.leaderboardId,
+                language = request.language,
+                page = request.page
+            )
         }
     }
 
@@ -155,7 +176,7 @@ internal class WakatimeRemoteDataSourceImpl(
             api.getSummaries(
                 start = request.start,
                 end = request.end,
-                projectId = request.projectId,
+                projectId = request.projectName,
                 branches = request.branches,
                 timeout = request.timeout,
                 timezone = request.timezone,
@@ -170,5 +191,24 @@ internal class WakatimeRemoteDataSourceImpl(
         }, transform = {
             it.data
         })
+    }
+
+    override suspend fun getHeartbeats(
+        date: Date
+    ): Results<Heartbeats> {
+        return makeCall {
+            api.getHeartbeats(dateFormatter.format(date))
+        }
+    }
+
+    override suspend fun sendHeartbeat(
+        beat: Heartbeat.Beat
+    ): Results<Confirmation> {
+        return makeCall(
+            networkCall = {
+                api.sendBeat(beat)
+            }, transform = {
+                it.data
+            })
     }
 }

@@ -217,73 +217,36 @@ data class Summaries(
     /**
      * Utility class for network request making for [Summaries]. Call [Summaries.makeRequest]
      * to make a new request
+     *
+     * @param start Required. The start date of the time range in 'yyyy-MM-dd' format.
+     * @param end Required. The end date of the time range in 'yyyy-MM-dd' format.
+     * @param writesOnly Optional. If only writes should be returned. Defaults to user's 'writes only' preference
+     * @param timeout Optional. The timeout preference used when joining heartbeats into durations. Defaults
+     * to the user's timeout value.
+     * @param projectName Optional. Filter the summaries to only those related to this project.
+     * @param timezone Optional. The timezone for the given start and end dates. Defaults to the user's timezone.
+     * @param branches Optional. Filter the summaries to only those related to these branch names.
      */
-    class Request private constructor(builder: Builder) {
-
-        companion object {
-            private val format: DateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
-        }
-
-        /**
-         * The start date of the time range in 'yyyy-MM-dd' format.
-         * Required parameter.
-         */
-        val start: String = builder.start
-
-        /**
-         * The end date of the time range in 'yyyy-MM-dd' format.
-         * Required parameter.
-         */
-        val end: String = builder.end
-
-        /**
-         * If only writes should be returned. Defaults to user's 'writes only' preference
-         * Optional parameter.
-         */
-        val writesOnly: Boolean? = builder.writesOnly
-
-        /**
-         * The timeout preference used when joining heartbeats into durations. Defaults
-         * to the user's timeout value.
-         * Optional parameter.
-         */
-        val timezone: String? = builder.timezone
-
-        /**
-         * Filter the summaries to only those related to this project.
-         * Optional parameter.
-         */
-        val timeout: Int? = builder.timeout
-
-        /**
-         * The timezone for the given start and end dates. Defaults to the user's timezone.
-         * Optional parameter.
-         */
-        val projectId: String? = builder.projectName
-
-        /**
-         * Filter the summaries to only those related to these branch names.
-         * Optional parameter.
-         */
-        val branches: String? = builder.branches
+    class Request private constructor(
+        val start: String,
+        val end: String,
+        val writesOnly: Boolean?,
+        val timezone: String?,
+        val timeout: Int?,
+        val projectName: String?,
+        val branches: String?
+    ) {
 
         @Suppress("unused")
         class Builder internal constructor(start: Calendar, end: Calendar) {
 
-            var start: String = format(start)
-                private set
-            var end: String = format(end)
-                private set
-            var writesOnly: Boolean? = null
-                private set
-            var timeout: Int? = null
-                private set
-            var projectName: String? = null
-                private set
-            var timezone: String? = null
-                private set
-            var branches: String? = null
-                private set
+            private var start: String = format(start)
+            private var end: String = format(end)
+            private var writesOnly: Boolean? = null
+            private var timeout: Int? = null
+            private var projectName: String? = null
+            private var timezone: String? = null
+            private var branches: String? = null
 
             fun setStart(start: Calendar): Builder = apply {
                 this.start = format(start)
@@ -320,9 +283,24 @@ data class Summaries(
                 this.timezone = timezone
             }
 
-            fun build(): Request = Request(this)
+            /**
+             * Constructs a new [Request]
+             */
+            fun build(): Request = Request(
+                start = start,
+                end = end,
+                writesOnly = writesOnly,
+                timezone = timezone,
+                timeout = timeout,
+                projectName = projectName,
+                branches = branches
+            )
 
             private fun format(cal: Calendar): String = format.format(cal.time)
+
+            private companion object {
+                private val format: DateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+            }
         }
     }
 }

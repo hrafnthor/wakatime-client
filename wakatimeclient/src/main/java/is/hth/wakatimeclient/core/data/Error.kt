@@ -4,6 +4,11 @@ package `is`.hth.wakatimeclient.core.data
 sealed class Error(val message: String) {
 
     /**
+     * Contains any extra details that might have been passed on with this error
+     */
+    val extra: MutableSet<String> = mutableSetOf()
+
+    /**
      * A authentication layer error occurred. This category of errors only happen during
      * initial authentication, token refresh and remote token revoke operations.
      */
@@ -78,7 +83,7 @@ sealed class Error(val message: String) {
         class TooManyRequests(message: String) : Network(message)
 
         /**
-         * The error originates within the internals of the libraries configuration
+         * The error originates internally
          */
         class Internal(message: String) : Network(message)
 
