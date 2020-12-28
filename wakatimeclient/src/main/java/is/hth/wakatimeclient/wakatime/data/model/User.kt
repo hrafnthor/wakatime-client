@@ -17,7 +17,7 @@ data class User(
      * represents the “hireable” badge on user profiles
      */
     @SerialName("is_hireable")
-    val isHireable: Boolean,
+    val isHireable: Boolean = false,
     /**
      * email address of user, if public
      */

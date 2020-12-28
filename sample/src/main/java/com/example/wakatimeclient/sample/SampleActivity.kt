@@ -4,7 +4,7 @@ import `is`.hth.wakatimeclient.WakatimeClient
 import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.Scope
-import `is`.hth.wakatimeclient.wakatime.model.CurrentUser
+import `is`.hth.wakatimeclient.wakatime.data.model.CurrentUser
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -179,7 +179,7 @@ class SampleViewModel(
 
     fun loadCurrentUser() {
         launch(context = coroutineContext) {
-            when (val results = client.users.getCurrentUser()) {
+            when (val results = client.getCurrentUser()) {
                 is Results.Failure -> {
 
                 }
@@ -192,7 +192,7 @@ class SampleViewModel(
 
     fun loadPublicLeaders() {
         launch(context = coroutineContext) {
-            when (val results = client.leaderboards.getPublicLeaders("", 1)) {
+            when (val results = client.getGoals()) {
                 is Results.Failure -> {
 
                 }

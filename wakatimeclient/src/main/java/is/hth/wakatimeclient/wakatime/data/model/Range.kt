@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 /**
  * Predefined chronological range constants
  */
+@Suppress("unused")
 sealed class HumanRange(val description: String) {
 
     /**

@@ -1,13 +1,7 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 
 /**
  * A heartbeat representing some activity for a user
@@ -98,12 +92,10 @@ data class Heartbeat internal constructor(
     /**
      * The category for this activity
      */
-    @Serializable(with = Category.CategorySerializer::class)
     val category: Category,
     /**
      * The type of the entity
      */
-    @Serializable(with = Type.TypeSerializer::class)
     val type: Type,
     /**
      * A list of dependencies detected from the entity file, if applicable
@@ -160,12 +152,10 @@ data class Heartbeat internal constructor(
         /**
          * The category for this beat
          */
-        @Serializable(with = Category.CategorySerializer::class)
         val category: Category,
         /**
          * The type of the beat
          */
-        @Serializable(with = Type.TypeSerializer::class)
         val type: Type,
     ) {
 
@@ -222,6 +212,7 @@ data class Heartbeat internal constructor(
         }
     }
 
+    @Suppress("unused")
     companion object {
 
         /**
@@ -282,105 +273,67 @@ data class Confirmation(
     /**
      * The type of the entity
      */
-    @Serializable(with = Type.TypeSerializer::class)
     val type: Type
 )
 
 /**
  * Defines a set of types that a entity can take
  */
-sealed class Type(protected val name: String) {
+@Suppress("unused")
+@Serializable
+enum class Type {
+    @SerialName("file")
+    FILE,
 
-    object File : Type("file")
+    @SerialName("app")
+    APP,
 
-    object App : Type("app")
-
-    object Domain : Type("domain")
-
-    /**
-     * Handles the de/serialization of [Type]s
-     */
-    object TypeSerializer : KSerializer<Type> {
-
-        override val descriptor: SerialDescriptor
-            get() = PrimitiveSerialDescriptor("type", PrimitiveKind.STRING)
-
-        override fun deserialize(decoder: Decoder): Type {
-            return when (val type = decoder.decodeString()) {
-                File.name -> File
-                App.name -> App
-                Domain.name -> Domain
-                else -> throw IllegalArgumentException("Unknown type $type given")
-            }
-        }
-
-        override fun serialize(encoder: Encoder, value: Type) = encoder.encodeString(value.name)
-    }
+    @SerialName("domain")
+    DOMAIN
 }
 
 /**
  * Defines a set of categories that a heartbeat can have
  */
-sealed class Category(protected val name: String) {
+@Suppress("unused")
+@Serializable
+enum class Category {
+    @SerialName("coding")
+    CODING,
 
-    object Coding : Category("coding")
+    @SerialName("building")
+    BUILDING,
 
-    object Building : Category("building")
+    @SerialName("indexing")
+    INDEXING,
 
-    object Indexing : Category("indexing")
+    @SerialName("debugging")
+    DEBUGGING,
 
-    object Debugging : Category("debugging")
+    @SerialName("browsing")
+    BROWSING,
 
-    object Browsing : Category("Browsing")
+    @SerialName("writing docs")
+    DOCUMENTATION,
 
-    object Documentation : Category("writing docs")
+    @SerialName("code reviewing")
+    CODEREVIEW,
 
-    object CodeReview : Category("code reviewing")
+    @SerialName("researching")
+    RESEARCHING,
 
-    object Researching : Category("researching")
+    @SerialName("learning")
+    LEARNING,
 
-    object Learning : Category("learning")
+    @SerialName("designing")
+    DESIGNING,
 
-    object Designing : Category("designing")
+    @SerialName("running tests")
+    TESTS_RUNNING,
 
-    sealed class Testing(name: String) : Category(name) {
+    @SerialName("writing tests")
+    TESTS_WRITING,
 
-        object Running : Testing("running tests")
-
-        object Writing : Testing("writing tests")
-
-        object Manual : Testing("manual testing")
-    }
-
-    /**
-     * Performs de/serialization of the [Category] class
-     */
-    object CategorySerializer : KSerializer<Category> {
-
-        override val descriptor: SerialDescriptor
-            get() = PrimitiveSerialDescriptor("category", PrimitiveKind.STRING)
-
-        override fun deserialize(decoder: Decoder): Category {
-            return when (val category = decoder.decodeString()) {
-                Coding.name -> Coding
-                Building.name -> Building
-                Indexing.name -> Indexing
-                Debugging.name -> Debugging
-                Browsing.name -> Browsing
-                Documentation.name -> Documentation
-                CodeReview.name -> CodeReview
-                Researching.name -> Researching
-                Learning.name -> Learning
-                Designing.name -> Designing
-                Testing.Running.name -> Testing.Running
-                Testing.Writing.name -> Testing.Writing
-                Testing.Manual.name -> Testing.Manual
-                else -> throw IllegalArgumentException("Unknown category $category given")
-            }
-        }
-
-        override fun serialize(encoder: Encoder, value: Category) {
-            encoder.encodeString(value.name)
-        }
-    }
+    @SerialName("manual testing")
+    TESTS_MANUAL
 }
