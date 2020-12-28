@@ -1,4 +1,4 @@
-package `is`.hth.wakatimeclient.wakatime.model
+package `is`.hth.wakatimeclient.wakatime.data.model
 
 data class Language(
     val id: Long,

@@ -3,7 +3,7 @@ package `is`.hth.wakatimeclient.core.data.net
 import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.Error.Network
 import `is`.hth.wakatimeclient.core.data.ErrorProcessor
-import com.google.gson.JsonParseException
+import kotlinx.serialization.SerializationException
 import retrofit2.HttpException
 import retrofit2.Response
 import java.net.HttpURLConnection
@@ -37,7 +37,7 @@ open class NetworkErrorProcessor : ErrorProcessor {
             is SocketTimeoutException -> Network.Timeout(message)
             is UnknownHostException -> Network.UnknownHost(message)
             is ProtocolException -> Network.Internal(message)
-            is JsonParseException -> Network.Serialization(message)
+            is SerializationException -> Network.Serialization(message)
             is HttpException -> onError(throwable.code(), message)
             else -> Network.Unknown(-1, message)
         }

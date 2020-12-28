@@ -4,15 +4,16 @@ import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 import `is`.hth.wakatimeclient.core.data.net.RemoteDataSource
-import `is`.hth.wakatimeclient.wakatime.model.*
+import `is`.hth.wakatimeclient.wakatime.data.model.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 internal interface WakatimeRemoteDataSource {
+
     /**
      * Fetches information for the currently authenticated user
      */
-    suspend fun getCurrentUser(): Results<FullUser>
+    suspend fun getCurrentUser(): Results<CurrentUser>
 
     /**
      * Fetches the total recorded time for the currently authenticated user.
@@ -112,11 +113,11 @@ internal class WakatimeRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getCurrentUser(): Results<FullUser> {
+    override suspend fun getCurrentUser(): Results<CurrentUser> {
         return makeCall(networkCall = {
             api.getCurrentUser()
         }, transform = {
-            it.data
+            it.data.toCurrentUser()
         })
     }
 

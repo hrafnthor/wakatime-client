@@ -1,9 +1,9 @@
 package `is`.hth.wakatimeclient.core.data.auth
 
-import `is`.hth.wakatimeclient.core.data.modify
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Build
+import androidx.core.content.edit
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKeys
 import net.openid.appauth.AuthState
@@ -113,7 +113,7 @@ internal class DefaultAuthStorage private constructor(
 
     override fun setState(state: AuthState): AuthState {
         return state.also {
-            preferences.modify {
+            preferences.edit {
                 putString(KEY_AUTH_STATE, it.jsonSerializeString())
             }
         }
@@ -130,14 +130,14 @@ internal class DefaultAuthStorage private constructor(
     }
 
     override fun setMethod(method: Method) {
-        preferences.modify {
+        preferences.edit {
             clear()
             putString(KEY_METHOD, method.name)
         }
     }
 
     override fun setKey(key: String) {
-        preferences.modify {
+        preferences.edit {
             putString(KEY_API_KEY, key)
         }
     }

@@ -1,9 +1,8 @@
-package `is`.hth.wakatimeclient.wakatime.data.api.model
+package `is`.hth.wakatimeclient.wakatime.data.api
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-
 
 /**
  * A web service response JSON wrapper
