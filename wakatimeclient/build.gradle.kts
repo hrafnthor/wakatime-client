@@ -29,6 +29,10 @@ android {
         sourceCompatibility = Properties.Common.javaCompatibility
         targetCompatibility = Properties.Common.javaCompatibility
     }
+
+    kotlinOptions {
+        jvmTarget = Properties.Common.javaCompatibility.toString()
+    }
 }
 
 dependencies {
@@ -49,16 +53,11 @@ dependencies {
     implementation(Libs.constraintlayout)
     implementation(Libs.security_crypto)
     implementation(Libs.core_ktx)
-    implementation(Libs.room_common)
-    implementation(Libs.room_runtime)
-    implementation(Libs.room_ktx)
-    kapt(Libs.room_compiler)
     //
     //
     //  Third party utility dependencies
     //
     api(Libs.appauth)
-    implementation(Libs.gson)
     implementation(Libs.retrofit)
     implementation(Libs.converter_gson)
     implementation(Libs.retrofit2_kotlinx_serialization_converter)

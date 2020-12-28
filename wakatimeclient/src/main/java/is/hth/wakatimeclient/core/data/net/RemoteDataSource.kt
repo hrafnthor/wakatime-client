@@ -2,7 +2,7 @@ package `is`.hth.wakatimeclient.core.data.net
 
 import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient
-import `is`.hth.wakatimeclient.core.util.safeOperation
+import `is`.hth.wakatimeclient.core.safeOperation
 import retrofit2.Response
 
 /**

@@ -94,27 +94,6 @@ sealed class Error(val message: String) {
     }
 
     /**
-     * A database layer error occurred.
-     */
-    sealed class Database(message: String = "") : Error(message) {
-
-        /**
-         * An empty database result was returned where it was not allowed to
-         */
-        class Empty(message: String) : Database(message)
-
-        /**
-         * A database insert operation failed with message
-         */
-        class Insert(message: String): Database(message)
-
-        /**
-         * An unknown database error occurred that couldn't be matched with a specific case
-         */
-        class Unknown(val code: Int, message: String) : Database(message)
-    }
-
-    /**
      * An unknown error occurred that couldn't be matched with a layer case
      */
     class Unknown(val code: Int, message: String) : Error(message)

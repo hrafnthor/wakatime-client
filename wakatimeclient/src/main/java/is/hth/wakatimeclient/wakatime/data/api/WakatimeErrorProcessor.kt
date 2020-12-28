@@ -2,7 +2,6 @@ package `is`.hth.wakatimeclient.wakatime.data.api
 
 import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
-import `is`.hth.wakatimeclient.wakatime.data.api.model.ServiceError
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.ResponseBody

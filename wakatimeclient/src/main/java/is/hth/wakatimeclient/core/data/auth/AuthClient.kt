@@ -220,30 +220,30 @@ internal class AuthClientImpl internal constructor(
 
         override suspend fun update(force: Boolean): Results<Unit> = suspendCoroutine {
             if (storage.getMethod() is Method.OAuth) {
-                with(storage.getState()) {
-                    // Mark if token should be refreshed no matter its state
-                    needsTokenRefresh = force
-                    when {
-                        needsTokenRefresh -> performActionWithFreshTokens(service) { _, _, exception ->
-                            val results = if (exception == null) {
-                                Results.Success.Empty
-                            } else {
-                                val message: String = exception.message ?: ""
-                                val error = Error.Authentication.TokenRefresh(message)
-                                Results.Failure(error)
-                            }
-                            it.resumeWith(Result.success(results))
+                val state = storage.getState()
+
+                // if forcing a token update mark it so
+                state.needsTokenRefresh = if (force) force else state.needsTokenRefresh
+                when {
+                    state.needsTokenRefresh -> state.performActionWithFreshTokens(service) { _, _, exception ->
+                        val results = if (exception == null) {
+                            Results.Success.Empty
+                        } else {
+                            val message: String = exception.message ?: ""
+                            val error = Error.Authentication.TokenRefresh(message)
+                            Results.Failure(error)
                         }
-                        isAuthorized -> {
-                            // Authentication is valid and does not need refreshing
-                            it.resumeWith(Result.success(Results.Success.Empty))
-                        }
-                        else -> {
-                            // No authentication was found
-                            val msg = "No authentication found! Halting token refresh operation"
-                            val result = Results.Failure(Error.Authentication.Unauthorized(msg))
-                            it.resumeWith(Result.success(result))
-                        }
+                        it.resumeWith(Result.success(results))
+                    }
+                    state.isAuthorized -> {
+                        // Authentication is valid and does not need refreshing
+                        it.resumeWith(Result.success(Results.Success.Empty))
+                    }
+                    else -> {
+                        // No authentication was found
+                        val msg = "No authentication found! Halting token refresh operation"
+                        val result = Results.Failure(Error.Authentication.Unauthorized(msg))
+                        it.resumeWith(Result.success(result))
                     }
                 }
             } else it.resumeWith(Result.success(Results.Success.Empty))

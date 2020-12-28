@@ -1,6 +1,5 @@
-package `is`.hth.wakatimeclient.wakatime.model
+package `is`.hth.wakatimeclient.wakatime.data.model
 
-import `is`.hth.wakatimeclient.core.util.nullIfEmpty
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -264,7 +263,6 @@ data class Summaries(
                 this.branches = branches
                     .filterNotNull()
                     .joinToString(separator = ",") { it }
-                    .nullIfEmpty()
             }
 
             fun setWritesOnly(writesOnly: Boolean?): Builder = apply {

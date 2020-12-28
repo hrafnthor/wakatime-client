@@ -1,8 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.api
 
-import `is`.hth.wakatimeclient.core.data.net.EnvelopePayload
-import `is`.hth.wakatimeclient.wakatime.data.api.model.ResponseWrapper
-import `is`.hth.wakatimeclient.wakatime.model.*
+import `is`.hth.wakatimeclient.wakatime.data.model.*
 import retrofit2.Response
 import retrofit2.http.*
 import java.time.LocalDate
@@ -26,14 +24,12 @@ interface WakatimeApi {
     /**
      * Retrieves the details of the currently authenticated user.
      */
-    @EnvelopePayload("data")
     @GET(CURRENT_USER)
-    suspend fun getCurrentUser(): Response<ResponseWrapper<FullUser>>
+    suspend fun getCurrentUser(): Response<ResponseWrapper<NetworkUser>>
 
     /**
      * Retrieves the total recorded time for the current user.
      */
-    @EnvelopePayload("data")
     @GET("$CURRENT_USER/all_time_since_today")
     suspend fun getTotalRecord(): Response<ResponseWrapper<TotalRecord>>
 

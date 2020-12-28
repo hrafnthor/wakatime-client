@@ -1,4 +1,4 @@
-package `is`.hth.wakatimeclient.core.util
+package `is`.hth.wakatimeclient.core.data.net
 
 sealed class Mime(private val name: String) {
 

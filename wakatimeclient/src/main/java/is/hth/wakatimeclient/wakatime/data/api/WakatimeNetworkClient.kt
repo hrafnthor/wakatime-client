@@ -13,7 +13,7 @@ interface WakatimeNetworkClient {
 }
 
 class WakatimeNetworkClientImpl internal constructor(
-    private val client: NetworkClient,
+    client: NetworkClient,
     private val errorProcessor: NetworkErrorProcessor
 ) : WakatimeNetworkClient {
 

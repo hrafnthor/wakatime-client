@@ -1,6 +1,5 @@
 package `is`.hth.wakatimeclient.core.data.net
 
-import `is`.hth.wakatimeclient.core.util.Mime
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json

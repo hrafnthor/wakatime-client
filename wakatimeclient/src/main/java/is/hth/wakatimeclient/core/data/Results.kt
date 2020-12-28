@@ -9,17 +9,16 @@ sealed class Results<out T> {
      * The operation was deemed successful
      */
     sealed class Success<T> : Results<T>() {
+
         /**
          * No resulting values were produced
          */
         object Empty : Success<Nothing>()
 
         /**
-         * Values were produced, but potentially an error was as well such as
-         * in the case when network fetching has failed and only cached values
-         * were returned.
+         * Resulting values were produced
          */
-        class Values<T>(val data: T, val error: Error? = null) : Success<T>()
+        class Values<T>(val data: T) : Success<T>()
     }
 
     /**

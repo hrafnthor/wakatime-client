@@ -1,4 +1,4 @@
-package `is`.hth.wakatimeclient.wakatime.model
+package `is`.hth.wakatimeclient.wakatime.data.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * The raw detailed user information payload received from the api
  */
 @Serializable
-data class FullUser(
+data class NetworkUser(
     /**
      * whether this user's email should be shown on the public leader board
      */
@@ -178,10 +178,10 @@ data class FullUser(
 )
 
 /**
- * Maps the [FullUser] to a [CurrentUser]
+ * Maps the [NetworkUser] to a [CurrentUser]
  */
 @Suppress("unused")
-fun FullUser.toCurrentUser(): CurrentUser = CurrentUser(
+fun NetworkUser.toCurrentUser(): CurrentUser = CurrentUser(
     user = User(
         id = id,
         displayName = displayName,
@@ -220,4 +220,9 @@ fun FullUser.toCurrentUser(): CurrentUser = CurrentUser(
         createdAt = createdAt,
         modifiedAt = modifiedAt
     )
+)
+
+data class CurrentUser(
+    val user: User,
+    val config: Config
 )

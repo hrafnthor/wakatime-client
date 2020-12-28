@@ -1,6 +1,5 @@
-package `is`.hth.wakatimeclient.wakatime.model
+package `is`.hth.wakatimeclient.wakatime.data.model
 
-import `is`.hth.wakatimeclient.core.util.nullIfEmpty
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -196,7 +195,6 @@ data class Heartbeat internal constructor(
             fun setDependencies(dependencies: Set<String>?): Builder = apply {
                 this.dependencies = dependencies
                     ?.joinToString(separator = ",") { it }
-                    ?.nullIfEmpty()
             }
 
             fun setLines(lines: Int?): Builder = apply { this.lines = lines }

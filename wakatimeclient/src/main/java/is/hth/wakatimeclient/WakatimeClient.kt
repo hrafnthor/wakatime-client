@@ -4,21 +4,15 @@ import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.auth.AuthClientImpl
 import `is`.hth.wakatimeclient.core.data.auth.AuthConfig
 import `is`.hth.wakatimeclient.core.data.auth.Method
-import `is`.hth.wakatimeclient.core.data.db.DbErrorProcessor
 import `is`.hth.wakatimeclient.core.data.net.NetworkClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkClientImpl
-import `is`.hth.wakatimeclient.core.util.RateLimiter
-import `is`.hth.wakatimeclient.wakatime.*
+import `is`.hth.wakatimeclient.wakatime.SessionManager
+import `is`.hth.wakatimeclient.wakatime.SessionManagerImpl
 import `is`.hth.wakatimeclient.wakatime.data.api.*
-import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeDatabase
-import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeDbClient
-import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSource
-import `is`.hth.wakatimeclient.wakatime.data.db.WakatimeLocalDataSourceImpl
 import android.content.Context
 import android.net.Uri
 import kotlinx.serialization.ExperimentalSerializationApi
 import timber.log.Timber
-import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 
 /**
@@ -28,14 +22,12 @@ import kotlin.math.abs
 class WakatimeClient private constructor(
     private val auth: AuthClientImpl,
     private val net: WakatimeNetworkClient,
-    private val db: WakatimeDbClient,
     private val session: SessionManager,
-    val users: UserRepo,
-    val rankings: RankingRepo,
-    val activity: ActivityRepo
-) : AuthClient by auth,
+    private val remote: WakatimeRemoteDataSource
+) : WakatimeRemoteDataSource by remote,
     WakatimeNetworkClient by net,
-    SessionManager by session {
+    SessionManager by session,
+    AuthClient by auth {
 
     /**
      *
@@ -80,7 +72,7 @@ class WakatimeClient private constructor(
             method = Method.OAuth
         )
 
-        private var cacheLifetimeInSeconds: Int = 60
+        private var cacheLifetimeInSeconds: Int = 0
         private val config: AuthConfig = AuthConfig(
             clientSecret = secret,
             clientId = clientId,
@@ -115,9 +107,6 @@ class WakatimeClient private constructor(
          */
         @ExperimentalSerializationApi
         fun build(context: Context): WakatimeClient {
-            val db: WakatimeDatabase = WakatimeDatabase.getInstance(context.applicationContext)
-            val dbClient = WakatimeDbClient(db, DbErrorProcessor())
-
             val authClient: AuthClientImpl = authBuilder.build(context)
             val netClient: NetworkClient = netBuilder
                 .setAuthenticatorIfNeeded(authClient.authenticator())
@@ -126,55 +115,28 @@ class WakatimeClient private constructor(
                         it.enableCache(context.cacheDir, cacheLifetimeInSeconds)
                     }
                 }.build()
-            val wakaNetClient = WakatimeNetworkClientImpl(netClient, WakatimeErrorProcessor())
-            val limiter = RateLimiter<String>(cacheLifetimeInSeconds, TimeUnit.SECONDS)
+
+            val client = WakatimeNetworkClientImpl(netClient, WakatimeErrorProcessor())
 
             val manager = SessionManagerImpl(
                 config = config,
-                dbClient = dbClient,
                 storage = authClient.storage,
                 session = authClient.session(),
-                oauthApi = wakaNetClient.oauthApi(),
-                netProcessor = wakaNetClient.processor(),
-            )
-
-            val localSource: WakatimeLocalDataSource = WakatimeLocalDataSourceImpl(
-                db = dbClient.wakatimeDatabase,
-                processor = dbClient.processor
+                oauthApi = client.oauthApi(),
+                netProcessor = client.processor(),
             )
 
             val remoteSource: WakatimeRemoteDataSource = WakatimeRemoteDataSourceImpl(
                 session = authClient.session(),
-                api = wakaNetClient.api(),
-                processor = wakaNetClient.processor(),
-            )
-
-            val users: UserRepo = UserRepoImpl(
-                limiter = limiter,
-                remote = remoteSource,
-                local = localSource
-            )
-
-            val rankings: RankingRepo = RankingRepoImpl(
-                limiter = limiter,
-                remote = remoteSource,
-                local = localSource
-            )
-
-            val activity: ActivityRepo = ActivityRepoImpl(
-                limiter = limiter,
-                remote = remoteSource,
-                local = localSource
+                api = client.api(),
+                processor = client.processor(),
             )
 
             return WakatimeClient(
                 auth = authClient,
-                net = wakaNetClient,
-                db = dbClient,
-                session = manager,
-                users = users,
-                rankings = rankings,
-                activity = activity
+                net = client,
+                remote = remoteSource,
+                session = manager
             )
         }
     }

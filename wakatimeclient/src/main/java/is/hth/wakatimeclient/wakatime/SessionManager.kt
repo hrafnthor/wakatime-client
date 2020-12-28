@@ -1,15 +1,14 @@
 package `is`.hth.wakatimeclient.wakatime
 
+import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.auth.AuthConfig
-import `is`.hth.wakatimeclient.wakatime.data.api.OauthApi
-import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.auth.AuthStorage
 import `is`.hth.wakatimeclient.core.data.auth.Method
-import `is`.hth.wakatimeclient.core.data.db.DatabaseClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
-import `is`.hth.wakatimeclient.core.util.safeOperation
+import `is`.hth.wakatimeclient.core.safeOperation
+import `is`.hth.wakatimeclient.wakatime.data.api.OauthApi
 
 interface SessionManager {
 
@@ -49,7 +48,6 @@ internal class SessionManagerImpl(
     private val config: AuthConfig,
     private val oauthApi: OauthApi,
     private val storage: AuthStorage,
-    private val dbClient: DatabaseClient,
     private val session: AuthClient.Session,
     private val netProcessor: NetworkErrorProcessor
 ) : SessionManager {
@@ -79,7 +77,6 @@ internal class SessionManagerImpl(
             storage.resetAuthState()
         }
 
-        dbClient.clear()
         return Results.Success.Values(Report(forced = force, errors = errors))
     }
 
