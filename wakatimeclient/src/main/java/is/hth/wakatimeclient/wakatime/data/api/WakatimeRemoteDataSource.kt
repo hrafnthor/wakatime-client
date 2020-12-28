@@ -38,9 +38,7 @@ internal interface WakatimeRemoteDataSource {
      * If the required authentication scope access has not been given, the result will be for
      * page 1.
      */
-    suspend fun getPublicLeaders(
-        request: Leaders.Request
-    ): Results<Leaders>
+    suspend fun getPublicLeaders(request: Leaders.Request): Results<Leaders>
 
     /**
      * Fetches the private leaderboards that the currently authenticated user is member of.
@@ -51,9 +49,7 @@ internal interface WakatimeRemoteDataSource {
      * Fetches leaders from the requested private leaderboard
      * @param request Contains configuration for filtering the request
      */
-    suspend fun getPrivateLeaders(
-        request: Leaders.Request
-    ): Results<Leaders>
+    suspend fun getPrivateLeaders(request: Leaders.Request): Results<Leaders>
 
     /**
      * Fetches the projects that Wakatime has observed the currently authenticated user
@@ -65,9 +61,7 @@ internal interface WakatimeRemoteDataSource {
      * Fetches the [Stats] for the current user filtered by the supplied request
      * @param request defines the filtering to apply
      */
-    suspend fun getStats(
-        request: Stats.Request
-    ): Results<Stats>
+    suspend fun getStats(request: Stats.Request): Results<Stats>
 
     /**
      * Fetches the [Summaries] for the current user filtered by the supplied request
@@ -92,9 +86,12 @@ internal interface WakatimeRemoteDataSource {
      *
      * @param beat to record with the service
      */
-    suspend fun sendHeartbeat(
-        beat: Heartbeat.Beat
-    ): Results<Confirmation>
+    suspend fun sendHeartbeat(beat: Heartbeat.Beat): Results<Confirmation>
+
+    /**
+     * Fetches all of the user's [Goal]s
+     */
+    suspend fun getGoals(): Results<List<Goal>>
 }
 
 internal class WakatimeRemoteDataSourceImpl(
@@ -172,7 +169,9 @@ internal class WakatimeRemoteDataSourceImpl(
         })
     }
 
-    override suspend fun getSummaries(request: Summaries.Request): Results<Summaries> {
+    override suspend fun getSummaries(
+        request: Summaries.Request
+    ): Results<Summaries> {
         return makeCall(networkCall = {
             api.getSummaries(
                 start = request.start,
@@ -208,6 +207,15 @@ internal class WakatimeRemoteDataSourceImpl(
         return makeCall(
             networkCall = {
                 api.sendBeat(beat)
+            }, transform = {
+                it.data
+            })
+    }
+
+    override suspend fun getGoals(): Results<List<Goal>> {
+        return makeCall(
+            networkCall = {
+                api.getGoals()
             }, transform = {
                 it.data
             })

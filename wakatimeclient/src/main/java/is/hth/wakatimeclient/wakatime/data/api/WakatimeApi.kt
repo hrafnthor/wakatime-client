@@ -19,6 +19,7 @@ interface WakatimeApi {
         private const val PRIVATE_BOARDS = "$CURRENT_USER/leaderboards"
         private const val STATS = "$CURRENT_USER/stats"
         private const val HEARTBEATS = "$CURRENT_USER/heartbeats"
+        private const val GOALS = "$CURRENT_USER/goals"
     }
 
     /**
@@ -140,4 +141,10 @@ interface WakatimeApi {
     suspend fun sendBeat(
         @Body beat: Heartbeat.Beat
     ): Response<ResponseWrapper<Confirmation>>
+
+    /**
+     * Retrieves all of the user's [Goal]s
+     */
+    @GET(GOALS)
+    suspend fun getGoals(): Response<ResponseWrapper<List<Goal>>>
 }
