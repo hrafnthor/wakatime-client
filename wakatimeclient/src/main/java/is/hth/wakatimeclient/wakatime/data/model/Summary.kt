@@ -247,6 +247,8 @@ data class Summaries(
             private var timezone: String? = null
             private var branches: String? = null
 
+            private val format: DateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+
             fun setStart(start: Calendar): Builder = apply {
                 this.start = format(start)
             }
@@ -259,10 +261,13 @@ data class Summaries(
              * Assigns the list of branches to filter summaries for. Branch filtering will
              * only work if a [projectName] has also been assigned to the request.
              */
-            fun setBranches(vararg branches: String?): Builder = apply {
-                this.branches = branches
-                    .filterNotNull()
-                    .joinToString(separator = ",") { it }
+            fun setBranches(projectName: String?, vararg branches: String?): Builder = apply {
+                this.projectName = projectName
+                if (projectName != null) {
+                    this.branches = branches
+                        .filterNotNull()
+                        .joinToString(separator = ",") { it }
+                }
             }
 
             fun setWritesOnly(writesOnly: Boolean?): Builder = apply {
@@ -295,10 +300,6 @@ data class Summaries(
             )
 
             private fun format(cal: Calendar): String = format.format(cal.time)
-
-            private companion object {
-                private val format: DateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
-            }
         }
     }
 }

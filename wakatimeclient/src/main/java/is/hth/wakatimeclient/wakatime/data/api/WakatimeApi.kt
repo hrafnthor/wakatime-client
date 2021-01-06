@@ -1,6 +1,7 @@
 package `is`.hth.wakatimeclient.wakatime.data.api
 
 import `is`.hth.wakatimeclient.wakatime.data.model.*
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 import java.time.LocalDate
@@ -20,19 +21,21 @@ interface WakatimeApi {
         private const val STATS = "$CURRENT_USER/stats"
         private const val HEARTBEATS = "$CURRENT_USER/heartbeats"
         private const val GOALS = "$CURRENT_USER/goals"
+        private const val DURATIONS_EXTERNAL = "$CURRENT_USER/external_durations"
+        private const val DURATIONS_EXTERNAL_BULK = "$DURATIONS_EXTERNAL.bulk"
     }
 
     /**
      * Retrieves the details of the currently authenticated user.
      */
     @GET(CURRENT_USER)
-    suspend fun getCurrentUser(): Response<ResponseWrapper<NetworkUser>>
+    suspend fun getCurrentUser(): Response<WrappedResponse<NetworkUser>>
 
     /**
      * Retrieves the total recorded time for the current user.
      */
     @GET("$CURRENT_USER/all_time_since_today")
-    suspend fun getTotalRecord(): Response<ResponseWrapper<TotalRecord>>
+    suspend fun getTotalRecord(): Response<WrappedResponse<TotalRecord>>
 
     /**
      * Retrieves the public leaderboards leaders.
@@ -50,7 +53,7 @@ interface WakatimeApi {
      * user is a member off.
      */
     @GET(PRIVATE_BOARDS)
-    suspend fun getPrivateLeaderboards(): Response<ResponseWrapper<List<Leaderboard>>>
+    suspend fun getPrivateLeaderboards(): Response<PagedResponse<List<Leaderboard>>>
 
     /**
      * Retrieves the leaders for the specified leaderboard that the currently
@@ -69,14 +72,16 @@ interface WakatimeApi {
      * working on.
      */
     @GET("$USERS/{userId}/projects")
-    suspend fun getProjects(@Path("userId") userId: String): Response<List<Project>>
+    suspend fun getProjects(
+        @Path("userId") userId: String
+    ): Response<List<Project>>
 
     /**
      * Retrieves a list of all [Project]s that Wakatime has observed the currently
      * authenticated user working on.
      */
     @GET("$CURRENT_USER/projects")
-    suspend fun getCurrentUsersProjects(): Response<ResponseWrapper<List<Project>>>
+    suspend fun getCurrentUsersProjects(): Response<WrappedResponse<List<Project>>>
 
     /**
      * Retrieves the stats for the current user over the supplied range, optionally filtered
@@ -92,14 +97,14 @@ interface WakatimeApi {
         @Query("timeout") timeout: Int? = null,
         @Query("writes_only") writesOnly: Boolean? = null,
         @Query("project") projectId: String? = null,
-    ): Response<ResponseWrapper<Stats>>
+    ): Response<PagedResponse<Stats>>
 
     /**
      * Retrieves the current user's coding activity for the given time range as a
      * list of summaries segmented by day
      * @param start [LocalDate] required: The start date of the time range in 'yyyy-MM-dd' format
      * @param end [LocalDate] required: The end date of the time range in 'yyyy-MM-dd' format
-     * @param projectId [String] optional: Filter the summaries to only those related to this project
+     * @param projectName [String] optional: Filter the summaries to only those related to this project
      * @param branches [Array] optional: Filter the summaries to only those related to these branch names
      * @param timeout [Int] optional: The timeout preference used when joining heartbeats into durations. Defaults to the user's timeout value
      * @param writesOnly [Boolean] optional: Defaults to user's 'writes only' preference
@@ -109,7 +114,7 @@ interface WakatimeApi {
     suspend fun getSummaries(
         @Query("start") start: String,
         @Query("end") end: String,
-        @Query("project") projectId: String?,
+        @Query("project") projectName: String?,
         @Query("branches") branches: String?,
         @Query("timeout") timeout: Int?,
         @Query("writes_only") writesOnly: Boolean?,
@@ -120,10 +125,10 @@ interface WakatimeApi {
      * Retrieves a list of [Agent]s used by the current user
      */
     @GET("$CURRENT_USER/user_agents")
-    suspend fun getAgents(): Response<ResponseWrapper<List<Agent>>>
+    suspend fun getAgents(): Response<PagedResponse<List<Agent>>>
 
     /**
-     * Retrieves all of the user's [Heartbeats] for the given date.
+     * Retrieves all of the user's [Heartbeat]s for the given date.
      *
      * @param date The day to return heartbeats for, in a YYYY-mm-dd format. Heartbeats will be returned
      * from 12:00 until 23:59 in the user's timezone for this day
@@ -131,7 +136,7 @@ interface WakatimeApi {
     @GET(HEARTBEATS)
     suspend fun getHeartbeats(
         @Query("date") date: String
-    ): Response<Heartbeats>
+    ): Response<ChronologicalResponse<Heartbeat>>
 
     /**
      * Posts a new heartbeat to the service
@@ -140,11 +145,74 @@ interface WakatimeApi {
     @POST(HEARTBEATS)
     suspend fun sendBeat(
         @Body beat: Heartbeat.Beat
-    ): Response<ResponseWrapper<Confirmation>>
+    ): Response<PagedResponse<Confirmation>>
 
     /**
      * Retrieves all of the user's [Goal]s
      */
     @GET(GOALS)
-    suspend fun getGoals(): Response<ResponseWrapper<List<Goal>>>
+    suspend fun getGoals(): Response<PagedResponse<List<Goal>>>
+
+    /**
+     * A user's external durations for the given day. External durations
+     * are not created by IDE plugins, but are activity from OAuth apps
+     * such as meetings.
+     *
+     * @param day [String] required: to request durations for. Durations will be returned
+     * from 00:00 until 23:59 in the user's timezone on this day
+     * @param project [String] optional: Only shows durations for this project
+     * @param branches [String] optional: Only show durations for these branches;
+     * comma separated list of branch names
+     * @param timezone [String] optional: The timezone for a given date. Defaults to
+     * the user's timezone
+     *
+     */
+    @GET(DURATIONS_EXTERNAL)
+    suspend fun getExternalDurations(
+        @Query("date") day: String,
+        @Query("project") project: String?,
+        @Query("branches") branches: String?,
+        @Query("timezone") timezone: String?
+    ): Response<ChronologicalResponse<ExternalDuration>>
+
+    /**
+     * Creates a duration representing activity for a user with start and end time,
+     * when Heartbeat pings aren’t available. For ex: meetings.
+     *
+     * External durations are not created by IDE plugins, only OAuth apps can create
+     * external durations. External durations must be created within one year from
+     * Today, and must not start before the associated user’s account was created.
+     *
+     * Use external_id to prevent creating duplicate durations.
+     * Using the same external_id will update any existing duration with the provided attributes.
+     */
+    @POST(DURATIONS_EXTERNAL)
+    suspend fun sendExternalDuration(
+        @Body payload: ExternalDuration.Payload
+    ): Response<PagedResponse<ExternalDuration>>
+
+    /**
+     * Creates a duration representing activity for a user with start and end time,
+     * when Heartbeat pings aren’t available. For ex: meetings.
+     *
+     * External durations are not created by IDE plugins, only OAuth apps can create
+     * external durations. External durations must be created within one year from
+     * Today, and must not start before the associated user’s account was created.
+     *
+     * Use external_id to prevent creating duplicate durations.
+     * Using the same external_id will update any existing duration with the provided attributes.
+     *
+     * Allows for the bulk delivery of [ExternalDuration]s.
+     *
+     * The bulk endpoint accepts an array of external durations, limited to 1,000 per
+     * POST request. The bulk endpoint will return 201 response status code with an array
+     * of status_codes for each duration sent. That’s because most invalid durations can
+     * be omitted without problems while still allowing your app’s valid durations.
+     *
+     * Parsing of the resulting response is currently left to the consumer.
+     */
+    @POST(DURATIONS_EXTERNAL_BULK)
+    suspend fun sendExternalDurations(
+        @Body payloads: List<ExternalDuration.Payload>
+    ): Response<ResponseBody>
 }
