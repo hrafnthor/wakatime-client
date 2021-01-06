@@ -5,6 +5,7 @@ import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 import `is`.hth.wakatimeclient.core.data.net.RemoteDataSource
 import `is`.hth.wakatimeclient.wakatime.data.model.*
+import okhttp3.ResponseBody
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,7 +39,9 @@ internal interface WakatimeRemoteDataSource {
      * If the required authentication scope access has not been given, the result will be for
      * page 1.
      */
-    suspend fun getPublicLeaders(request: Leaders.Request): Results<Leaders>
+    suspend fun getPublicLeaders(
+        request: Leaders.Request
+    ): Results<Leaders>
 
     /**
      * Fetches the private leaderboards that the currently authenticated user is member of.
@@ -49,7 +52,9 @@ internal interface WakatimeRemoteDataSource {
      * Fetches leaders from the requested private leaderboard
      * @param request Contains configuration for filtering the request
      */
-    suspend fun getPrivateLeaders(request: Leaders.Request): Results<Leaders>
+    suspend fun getPrivateLeaders(
+        request: Leaders.Request
+    ): Results<Leaders>
 
     /**
      * Fetches the projects that Wakatime has observed the currently authenticated user
@@ -61,13 +66,17 @@ internal interface WakatimeRemoteDataSource {
      * Fetches the [Stats] for the current user filtered by the supplied request
      * @param request defines the filtering to apply
      */
-    suspend fun getStats(request: Stats.Request): Results<Stats>
+    suspend fun getStats(
+        request: Stats.Request
+    ): Results<Stats>
 
     /**
      * Fetches the [Summaries] for the current user filtered by the supplied request
      * @param request defined the filtering to apply
      */
-    suspend fun getSummaries(request: Summaries.Request): Results<Summaries>
+    suspend fun getSummaries(
+        request: Summaries.Request
+    ): Results<Summaries>
 
     /**
      * Fetches the [Agent]s used by the current user
@@ -79,19 +88,71 @@ internal interface WakatimeRemoteDataSource {
      *
      * @param date to fetch heartbeats for
      */
-    suspend fun getHeartbeats(date: Date): Results<Heartbeats>
+    suspend fun getHeartbeats(
+        date: Date
+    ): Results<ChronologicalResponse<Heartbeat>>
 
     /**
      * Sends the supplied [Heartbeat.Beat] to the service for recording
      *
      * @param beat to record with the service
      */
-    suspend fun sendHeartbeat(beat: Heartbeat.Beat): Results<Confirmation>
+    suspend fun sendHeartbeat(
+        beat: Heartbeat.Beat
+    ): Results<Confirmation>
 
     /**
      * Fetches all of the user's [Goal]s
      */
     suspend fun getGoals(): Results<List<Goal>>
+
+    /**
+     * A user's external durations for the given day. External durations
+     * are not created by IDE plugins, but are activity from OAuth apps
+     * such as meetings.
+     */
+    suspend fun getExternalDurations(
+        request: ExternalDuration.Request
+    ): Results<ChronologicalResponse<ExternalDuration>>
+
+    /**
+     * Creates a duration representing activity for a user with start and end time,
+     * when Heartbeat pings aren’t available. For ex: meetings.
+     *
+     * External durations are not created by IDE plugins, only OAuth apps can create
+     * external durations. External durations must be created within one year from
+     * Today, and must not start before the associated user’s account was created.
+     *
+     * Use external_id to prevent creating duplicate durations.
+     * Using the same external_id will update any existing duration with the provided attributes.
+     */
+    suspend fun sendExternalDuration(
+        payload: ExternalDuration.Payload
+    ): Results<ExternalDuration>
+
+    /**
+     * Creates a duration representing activity for a user with start and end time,
+     * when Heartbeat pings aren’t available. For ex: meetings.
+     *
+     * External durations are not created by IDE plugins, only OAuth apps can create
+     * external durations. External durations must be created within one year from
+     * Today, and must not start before the associated user’s account was created.
+     *
+     * Use external_id to prevent creating duplicate durations.
+     * Using the same external_id will update any existing duration with the provided attributes.
+     *
+     * Allows for the bulk delivery of [ExternalDuration]s.
+     *
+     * The bulk endpoint accepts an array of external durations, limited to 1,000 per
+     * POST request. The bulk endpoint will return 201 response status code with an array
+     * of status_codes for each duration sent. That’s because most invalid durations can
+     * be omitted without problems while still allowing your app’s valid durations.
+     *
+     * Parsing of the resulting response is currently left to the consumer.
+     */
+    suspend fun sendExternalDurations(
+        payloads: List<ExternalDuration.Payload>
+    ): Results<ResponseBody>
 }
 
 internal class WakatimeRemoteDataSourceImpl(
@@ -176,7 +237,7 @@ internal class WakatimeRemoteDataSourceImpl(
             api.getSummaries(
                 start = request.start,
                 end = request.end,
-                projectId = request.projectName,
+                projectName = request.projectName,
                 branches = request.branches,
                 timeout = request.timeout,
                 timezone = request.timezone,
@@ -195,7 +256,7 @@ internal class WakatimeRemoteDataSourceImpl(
 
     override suspend fun getHeartbeats(
         date: Date
-    ): Results<Heartbeats> {
+    ): Results<ChronologicalResponse<Heartbeat>> {
         return makeCall {
             api.getHeartbeats(dateFormatter.format(date))
         }
@@ -219,5 +280,37 @@ internal class WakatimeRemoteDataSourceImpl(
             }, transform = {
                 it.data
             })
+    }
+
+    override suspend fun getExternalDurations(
+        request: ExternalDuration.Request
+    ): Results<ChronologicalResponse<ExternalDuration>> {
+        return makeCall {
+            api.getExternalDurations(
+                day = request.date,
+                project = request.projectName,
+                branches = request.branches,
+                timezone = request.timezone
+            )
+        }
+    }
+
+    override suspend fun sendExternalDuration(
+        payload: ExternalDuration.Payload
+    ): Results<ExternalDuration> {
+        return makeCall(
+            networkCall = {
+                api.sendExternalDuration(payload)
+            }, transform = {
+                it.data
+            })
+    }
+
+    override suspend fun sendExternalDurations(
+        payloads: List<ExternalDuration.Payload>
+    ): Results<ResponseBody> {
+        return makeCall {
+            api.sendExternalDurations(payloads)
+        }
     }
 }

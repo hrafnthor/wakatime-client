@@ -89,7 +89,7 @@ data class Goal internal constructor(
     /**
      * Goal step duration
      */
-    val delta: Duration,
+    val delta: Delta,
     /**
      * The owner of this goal
      */
@@ -124,7 +124,7 @@ data class Goal internal constructor(
     val invitedUsers: List<InvitedUser> = emptyList(),
     /**
      * A list of measurements taken at the correct time interval as per the
-     * configured delta [Duration] of the goal.
+     * configured delta [Delta] of the goal.
      */
     @SerialName("chart_data")
     val dataPoints: List<DataPoint> = emptyList(),
@@ -346,7 +346,7 @@ enum class GoalStatus {
  */
 @Serializable
 @Suppress("unused")
-enum class Duration {
+enum class Delta {
     @SerialName("day")
     DAY,
 

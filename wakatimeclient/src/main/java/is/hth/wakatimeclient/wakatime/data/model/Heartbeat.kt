@@ -230,30 +230,6 @@ data class Heartbeat internal constructor(
 }
 
 /**
- * All of the users heartbeats sent from plugins for the requested day
- */
-@Serializable
-data class Heartbeats(
-    /**
-     * A list of all heartbeats for the requested day
-     */
-    @SerialName("data")
-    val heartbeats: List<Heartbeat>,
-    /**
-     * The start of the time range used for the request
-     */
-    val start: String,
-    /**
-     * The end of the time range used for the request
-     */
-    val end: String,
-    /**
-     * The timezone used for this request in Olson Country/Region format
-     */
-    val timezone: String
-)
-
-/**
  * Confirmation of [Heartbeat] creation server side
  */
 @Serializable
@@ -275,65 +251,3 @@ data class Confirmation(
      */
     val type: Type
 )
-
-/**
- * Defines a set of types that a entity can take
- */
-@Suppress("unused")
-@Serializable
-enum class Type {
-    @SerialName("file")
-    FILE,
-
-    @SerialName("app")
-    APP,
-
-    @SerialName("domain")
-    DOMAIN
-}
-
-/**
- * Defines a set of categories that a heartbeat can have
- */
-@Suppress("unused")
-@Serializable
-enum class Category {
-    @SerialName("coding")
-    CODING,
-
-    @SerialName("building")
-    BUILDING,
-
-    @SerialName("indexing")
-    INDEXING,
-
-    @SerialName("debugging")
-    DEBUGGING,
-
-    @SerialName("browsing")
-    BROWSING,
-
-    @SerialName("writing docs")
-    DOCUMENTATION,
-
-    @SerialName("code reviewing")
-    CODEREVIEW,
-
-    @SerialName("researching")
-    RESEARCHING,
-
-    @SerialName("learning")
-    LEARNING,
-
-    @SerialName("designing")
-    DESIGNING,
-
-    @SerialName("running tests")
-    TESTS_RUNNING,
-
-    @SerialName("writing tests")
-    TESTS_WRITING,
-
-    @SerialName("manual testing")
-    TESTS_MANUAL
-}

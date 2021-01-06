@@ -2,7 +2,6 @@ package `is`.hth.wakatimeclient.wakatime.data.api
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.*
 
@@ -11,26 +10,19 @@ import kotlinx.serialization.json.*
  */
 @Serializable
 data class ServiceError(
-    @Transient
     @SerialName("error")
     val message: String = "",
     @SerialName("errors")
-    @Serializable(with = FieldError.FieldErrorTransformer::class)
+    @Serializable(Transformer::class)
     val fieldErrors: List<FieldError> = emptyList()
-)
-
-@Serializable
-data class FieldError(
-    val name: String,
-    val description: String
 ) {
 
     /**
      * Performs modifications on the incoming 'errors' object, breaking it apart into
      * separate [FieldError]s
      */
-    object FieldErrorTransformer : JsonTransformingSerializer<List<FieldError>>(
-        ListSerializer(serializer())
+    object Transformer : JsonTransformingSerializer<List<FieldError>>(
+        ListSerializer(FieldError.serializer())
     ) {
         override fun transformDeserialize(element: JsonElement): JsonElement {
             return when (element) {
@@ -48,3 +40,9 @@ data class FieldError(
         }
     }
 }
+
+@Serializable
+data class FieldError(
+    val name: String,
+    val description: String
+)
