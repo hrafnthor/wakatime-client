@@ -43,36 +43,36 @@ dependencies {
     //
     //  Language and compiler related dependencies
     //
-    implementation(Libs.kotlin_stdlib_jdk8)
-    implementation(Libs.kotlinx_serialization_core)
+    implementation(Kotlin.stdlib.jdk8)
+    implementation(KotlinX.serialization.core)
     //
     //  Androidx library dependencies
     //
-    implementation(Libs.lifecycle_livedata_ktx)
-    implementation(Libs.appcompat)
-    implementation(Libs.constraintlayout)
-    implementation(Libs.security_crypto)
-    implementation(Libs.core_ktx)
+    implementation(AndroidX.lifecycle.liveDataKtx)
+    implementation(AndroidX.appCompat)
+    implementation(AndroidX.constraintLayout)
+    implementation(AndroidX.security.crypto)
+    implementation(AndroidX.core.ktx)
     //
     //
     //  Third party utility dependencies
     //
-    api(Libs.appauth)
-    implementation(Libs.retrofit)
-    implementation(Libs.converter_gson)
-    implementation(Libs.retrofit2_kotlinx_serialization_converter)
-    implementation(Libs.timber)
+    api("net.openid:appauth:0.7.1")
+    implementation(Square.retrofit2.retrofit)
+    implementation(JakeWharton.retrofit2.converter.kotlinxSerialization)
+    implementation(JakeWharton.timber)
     //
     //  Testing dependencies
     //
-    testImplementation(Libs.junit_jupiter_api)
-    testRuntimeOnly(Libs.junit_jupiter_engine)
-    testImplementation(Libs.junit_jupiter_params)
-    testImplementation(Libs.mockk)
-    testImplementation(Libs.assertj_core)
+    testImplementation(Testing.JunitJupiter.api)
+    testRuntimeOnly(Testing.JunitJupiter.engine)
+    testImplementation(Testing.JunitJupiter.params)
+    testImplementation(Testing.MockK)
+    testImplementation("org.assertj:assertj-core:3.14.0")
+
     //
     //  Instrumented testing dependencies
     //
-    androidTestImplementation(Libs.androidx_test_runner)
-    androidTestImplementation(Libs.espresso_core)
+    androidTestImplementation(AndroidX.Test.runner)
+    androidTestImplementation(AndroidX.Test.Espresso.core)
 }

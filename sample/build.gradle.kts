@@ -5,7 +5,6 @@ plugins {
     id("kotlin-kapt")
 }
 
-
 android {
     compileSdkVersion(Properties.Common.compileSdkVersion)
 
@@ -24,7 +23,8 @@ android {
 
     buildTypes {
         getByName("debug") {
-            manifestPlaceholders["appAuthRedirectScheme"] =  Properties.Sample.redirectUri
+            // The defined OAuth redirect scheme as defined inside Wakatime's app dashboard
+            manifestPlaceholders["appAuthRedirectScheme"] = "vakta://grant-callback"
         }
         getByName("release") {
 
@@ -43,18 +43,20 @@ android {
 dependencies {
     implementation(fileTree(Pair("dir", "libs"), Pair("include", listOf("*.jar"))))
     implementation(project(":wakatimeclient"))
-    implementation(Libs.kotlin_stdlib_jdk7)
-    implementation(Libs.appcompat)
-    implementation(Libs.core_ktx)
-    implementation("androidx.activity:activity:1.1.0")
-    implementation("androidx.activity:activity-ktx:1.1.0")
-    implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.2.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.2.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:3.9.0")
 
-    implementation(Libs.constraintlayout)
-    androidTestImplementation(Libs.androidx_test_runner)
-    androidTestImplementation(Libs.espresso_core)
+    implementation(Kotlin.stdlib.jdk8)
+
+    implementation(AndroidX.appCompat)
+    implementation(AndroidX.core)
+    implementation(AndroidX.activityKtx)
+    implementation(AndroidX.constraintLayout)
+    implementation(AndroidX.lifecycle.extensions)
+    implementation(AndroidX.lifecycle.liveDataKtx)
+    implementation(AndroidX.lifecycle.runtimeKtx)
+    implementation(AndroidX.lifecycle.viewModelKtx)
+
+    implementation(Square.okHttp3.loggingInterceptor)
+
+    androidTestImplementation(AndroidX.test.runner)
+    androidTestImplementation(AndroidX.Test.Espresso.core)
 }
