@@ -1,30 +1,21 @@
 buildscript {
+
     repositories {
         google()
         jcenter()
-
     }
     dependencies {
-        classpath(Libs.com_android_tools_build_gradle)
-        classpath(Libs.kotlin_gradle_plugin)
-        classpath(Libs.android_junit5)
-        classpath("org.jetbrains.kotlin:kotlin-serialization:1.3.61")
+        classpath("com.android.tools.build:gradle:_")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:_")
+        classpath("de.mannodermaus.gradle.plugins:android-junit5:_")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:_")
     }
-}
-
-plugins {
-    // This plugin creates a separate module called 'buildSrc' containing all the
-    // library references and version numbers, as well as query for library updates
-    // Run 'buildSrcVersions' task for generation.
-    // See here for more: https://github.com/jmfayard/buildSrcVersions
-    buildSrcVersions
 }
 
 allprojects {
     repositories {
         google()
         jcenter()
-
     }
 }
 
