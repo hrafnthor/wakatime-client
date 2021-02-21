@@ -8,7 +8,10 @@ import `is`.hth.wakatimeclient.core.data.net.NetworkClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkClientImpl
 import `is`.hth.wakatimeclient.wakatime.SessionManager
 import `is`.hth.wakatimeclient.wakatime.SessionManagerImpl
-import `is`.hth.wakatimeclient.wakatime.data.api.*
+import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeErrorProcessor
+import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeNetworkClient
+import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeRemoteDataSource
+import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeRemoteDataSourceImpl
 import android.content.Context
 import android.net.Uri
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -25,13 +28,9 @@ class WakatimeClient private constructor(
     private val session: SessionManager,
     private val remote: WakatimeRemoteDataSource
 ) : WakatimeRemoteDataSource by remote,
-    WakatimeNetworkClient by net,
     SessionManager by session,
     AuthClient by auth {
 
-    /**
-     *
-     */
     class Builder private constructor(
         secret: String = "",
         clientId: String = "",
@@ -116,25 +115,25 @@ class WakatimeClient private constructor(
                     }
                 }.build()
 
-            val client = WakatimeNetworkClientImpl(netClient, WakatimeErrorProcessor())
+            val network = WakatimeNetworkClient(netClient, WakatimeErrorProcessor())
 
             val manager = SessionManagerImpl(
                 config = config,
                 storage = authClient.storage,
                 session = authClient.session(),
-                oauthApi = client.oauthApi(),
-                netProcessor = client.processor(),
+                oauthApi = network.oauthApi(),
+                netProcessor = network.processor(),
             )
 
             val remoteSource: WakatimeRemoteDataSource = WakatimeRemoteDataSourceImpl(
                 session = authClient.session(),
-                api = client.api(),
-                processor = client.processor(),
+                api = network.api(),
+                processor = network.processor(),
             )
 
             return WakatimeClient(
                 auth = authClient,
-                net = client,
+                net = network,
                 remote = remoteSource,
                 session = manager
             )

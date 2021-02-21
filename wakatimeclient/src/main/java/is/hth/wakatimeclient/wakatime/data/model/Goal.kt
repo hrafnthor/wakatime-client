@@ -198,20 +198,23 @@ data class InvitedUser internal constructor(
  * This serializer manually decodes the structure of the invited user's list
  * creating a custom object out of it, [InvitedUser]
  */
-object InvitedUserSerializer : KSerializer<InvitedUser> {
+internal object InvitedUserSerializer : KSerializer<InvitedUser> {
 
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("InvitedUser") {
-        element<String>(elementName = "display_name", isOptional = true)
-        element<String>(elementName = "email", isOptional = true)
-        element<String>(elementName = "full_name", isOptional = true)
-        element<String>(elementName = "id")
-        element<String>(elementName = "photo", isOptional = true)
-        element<InvitationStatus>(elementName = "status")
-        element<String>(elementName = "user_id")
-        element<String>(elementName = "username")
+    override val descriptor: SerialDescriptor
+        get() = buildClassSerialDescriptor("InvitedUser") {
+            element<String>(elementName = "display_name", isOptional = true)
+            element<String>(elementName = "email", isOptional = true)
+            element<String>(elementName = "full_name", isOptional = true)
+            element<String>(elementName = "id")
+            element<String>(elementName = "photo", isOptional = true)
+            element<InvitationStatus>(elementName = "status")
+            element<String>(elementName = "user_id")
+            element<String>(elementName = "username")
+        }
+
+    override fun serialize(encoder: Encoder, value: InvitedUser) {
+        throw NotImplementedError("The serialization method has not been implemented for 'InvitedUser'")
     }
-
-    override fun serialize(encoder: Encoder, value: InvitedUser) {}
 
     override fun deserialize(decoder: Decoder): InvitedUser {
         return decoder.decodeStructure(descriptor) {
@@ -273,7 +276,7 @@ data class Subscriber internal constructor(
  * This serializer manually decodes the structure of the subscriber list creating a custom
  * object out of it, [Subscriber].
  */
-object SubscribedUserSerializer : KSerializer<Subscriber> {
+internal object SubscribedUserSerializer : KSerializer<Subscriber> {
     override val descriptor: SerialDescriptor = buildClassSerialDescriptor("SubscribedUser") {
         element<String>(elementName = "display_name", isOptional = true)
         element<String>(elementName = "email", isOptional = true)
@@ -318,83 +321,4 @@ object SubscribedUserSerializer : KSerializer<Subscriber> {
             )
         }
     }
-}
-
-/**
- * Defines the statuses that goals can have given their progress at each point in time.
- */
-@Serializable
-@Suppress("unused")
-enum class GoalStatus {
-
-    @SerialName("success")
-    SUCCESS,
-
-    @SerialName("fail")
-    FAILURE,
-
-    @SerialName("pending")
-    PENDING,
-
-    @SerialName("ignored")
-    IGNORED
-}
-
-
-/**
- * Defines the duration deltas that Wakatime offers for goals
- */
-@Serializable
-@Suppress("unused")
-enum class Delta {
-    @SerialName("day")
-    DAY,
-
-    @SerialName("week")
-    WEEK
-}
-
-/**
- * Defines the email delivery frequency that Wakatime offers for goals
- */
-@Serializable
-@Suppress("unused")
-enum class Frequency {
-    @SerialName("Daily")
-    DAILY,
-
-    @SerialName("Every other day")
-    EVERY_OTHER_DAY,
-
-    @SerialName("Once per week")
-    ONCE_PER_WEEK,
-
-    @SerialName("Once per month")
-    ONCE_PER_MONTH
-}
-
-/**
- * Defines the statuses that an invitation to observe a goal can take
- */
-@Serializable
-@Suppress("unused")
-enum class InvitationStatus {
-
-    /**
-     * The user has accepted to observe the goal
-     */
-    @SerialName("Accepted")
-    ACCEPTED,
-
-    /**
-     * The user has been invited to observe the goal but has yet to accept it
-     */
-    @SerialName("Invitation sent")
-    INVITED,
-
-    /**
-     * The user has declined the invitation
-     */
-    @SerialName("Declined")
-    DECLINED
 }

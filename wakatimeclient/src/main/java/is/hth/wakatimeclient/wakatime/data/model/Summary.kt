@@ -1,10 +1,11 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
+import `is`.hth.wakatimeclient.wakatime.data.model.filters.MetaFilter
+import `is`.hth.wakatimeclient.wakatime.data.model.filters.ProjectFilter
+import `is`.hth.wakatimeclient.wakatime.data.model.filters.RequestDsl
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import java.text.DateFormat
-import java.text.SimpleDateFormat
 import java.util.*
 
 @Serializable
@@ -208,98 +209,146 @@ data class Summaries(
 
     companion object {
 
-        fun makeRequest(start: Calendar, end: Calendar): Request.Builder {
-            return Request.Builder(start, end)
+        inline fun makeRequest(
+            startDate: Calendar,
+            endDate: Calendar,
+            construct: Request.Builder.() -> Unit = {}
+        ) = Request.Builder(
+            startDate = startDate,
+            endDate = endDate
+        ).also(construct).build()
+
+        inline fun makeDashboardRequest(
+            organizationId: String,
+            dashboardId: String,
+            userId: String,
+            startDate: Calendar,
+            endDate: Calendar,
+            construct: DashboardRequest.Builder.() -> Unit = {}
+        ) = DashboardRequest.Builder(
+            organizationId = organizationId,
+            dashboardId = dashboardId,
+            userId = userId,
+            startDate = startDate,
+            endDate = endDate
+        ).also(construct).build()
+    }
+
+    /**
+     * Utility class for network request making for [Summaries].
+     *
+     * @param startDate Required. The requested start date for the request encoded as a Calendar
+     * @param endDate Required. The end date of the time range in 'yyyy-MM-dd' format.
+     * @param timezone Optional. The timezone for the given start and end dates. Defaults to the user's timezone.
+     * @param metaFilter Optional.
+     * @param projectFilter Optiona.
+     */
+    class Request(
+        val startDate: Calendar,
+        val endDate: Calendar,
+        val timezone: String?,
+        val metaFilter: MetaFilter?,
+        val projectFilter: ProjectFilter?,
+    ) {
+        @RequestDsl
+        @Suppress("unused")
+        class Builder(
+            private var startDate: Calendar,
+            private var endDate: Calendar,
+            private var timezone: String? = null,
+            private var metaFilter: MetaFilter? = null,
+            private var projectFilter: ProjectFilter? = null,
+        ) {
+            fun timezone(timezone: String?) = apply { this.timezone = timezone }
+            fun startDate(startDate: Calendar) = apply { this.startDate = startDate }
+            fun endDate(endDate: Calendar) = apply { this.endDate = endDate }
+            fun metaFilter(metaFilter: MetaFilter?) = apply { this.metaFilter = metaFilter }
+
+            fun projectFilter(projectFilter: ProjectFilter) = apply {
+                this.projectFilter = projectFilter
+            }
+
+            fun build(): Request = Request(
+                startDate = startDate,
+                endDate = endDate,
+                timezone = timezone,
+                metaFilter = metaFilter,
+                projectFilter = projectFilter
+            )
         }
     }
 
     /**
-     * Utility class for network request making for [Summaries]. Call [Summaries.makeRequest]
-     * to make a new request
+     * Utility class for network request making for [Summaries].
      *
-     * @param start Required. The start date of the time range in 'yyyy-MM-dd' format.
-     * @param end Required. The end date of the time range in 'yyyy-MM-dd' format.
-     * @param writesOnly Optional. If only writes should be returned. Defaults to user's 'writes only' preference
-     * @param timeout Optional. The timeout preference used when joining heartbeats into durations. Defaults
-     * to the user's timeout value.
-     * @param projectName Optional. Filter the summaries to only those related to this project.
-     * @param timezone Optional. The timezone for the given start and end dates. Defaults to the user's timezone.
-     * @param branches Optional. Filter the summaries to only those related to these branch names.
+     * @param startDate Required. The requested start date for the request encoded as a Calendar
+     * @param endDate Required. The end date of the time range in 'yyyy-MM-dd' format.
+     * @param projectFilter Optional.
      */
-    class Request private constructor(
-        val start: String,
-        val end: String,
-        val writesOnly: Boolean?,
-        val timezone: String?,
-        val timeout: Int?,
-        val projectName: String?,
-        val branches: String?
+    class DashboardRequest(
+        val organizationId: String,
+        val dashboardId: String,
+        val userId: String,
+        val startDate: Calendar,
+        val endDate: Calendar,
+        val projectFilter: ProjectFilter? = null
     ) {
-
+        @RequestDsl
         @Suppress("unused")
-        class Builder internal constructor(start: Calendar, end: Calendar) {
+        class Builder(
+            private var organizationId: String,
+            private var dashboardId: String,
+            private var userId: String,
+            private var startDate: Calendar,
+            private var endDate: Calendar,
+            private var projectFilter: ProjectFilter? = null
+        ) {
+            fun organizationId(organizationId: String) =
+                apply { this.organizationId = organizationId }
 
-            private var start: String = format(start)
-            private var end: String = format(end)
-            private var writesOnly: Boolean? = null
-            private var timeout: Int? = null
-            private var projectName: String? = null
-            private var timezone: String? = null
-            private var branches: String? = null
-
-            private val format: DateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
-
-            fun setStart(start: Calendar): Builder = apply {
-                this.start = format(start)
+            fun dashboardId(dashboardId: String) = apply { this.dashboardId = dashboardId }
+            fun userId(userId: String) = apply { this.userId = userId }
+            fun startDate(startDate: Calendar) = apply { this.startDate = startDate }
+            fun endDate(endDate: Calendar) = apply { this.endDate = endDate }
+            fun projectFilter(projectFilter: ProjectFilter?) = apply {
+                this.projectFilter = projectFilter
             }
 
-            fun setEnd(end: Calendar): Builder = apply {
-                this.end = format(end)
-            }
-
-            /**
-             * Assigns the list of branches to filter summaries for. Branch filtering will
-             * only work if a [projectName] has also been assigned to the request.
-             */
-            fun setBranches(projectName: String?, vararg branches: String?): Builder = apply {
-                this.projectName = projectName
-                if (projectName != null) {
-                    this.branches = branches
-                        .filterNotNull()
-                        .joinToString(separator = ",") { it }
-                }
-            }
-
-            fun setWritesOnly(writesOnly: Boolean?): Builder = apply {
-                this.writesOnly = writesOnly
-            }
-
-            fun setTimeout(timeout: Int?): Builder = apply {
-                this.timeout = timeout
-            }
-
-            fun setProjectName(projectName: String?): Builder = apply {
-                this.projectName = projectName
-            }
-
-            fun setTimezone(timezone: String?): Builder = apply {
-                this.timezone = timezone
-            }
-
-            /**
-             * Constructs a new [Request]
-             */
-            fun build(): Request = Request(
-                start = start,
-                end = end,
-                writesOnly = writesOnly,
-                timezone = timezone,
-                timeout = timeout,
-                projectName = projectName,
-                branches = branches
+            fun build() = DashboardRequest(
+                organizationId,
+                dashboardId,
+                userId,
+                startDate,
+                endDate,
+                projectFilter
             )
-
-            private fun format(cal: Calendar): String = format.format(cal.time)
         }
     }
+}
+
+@Suppress("unused")
+inline fun Summaries.Request.Builder.meta(
+    filter: MetaFilter.Builder.() -> Unit
+) {
+    val builder = MetaFilter.Builder()
+    builder.filter()
+    metaFilter(builder.build())
+}
+
+@Suppress("unused")
+inline fun Summaries.Request.Builder.project(
+    filter: ProjectFilter.Builder.() -> Unit
+) {
+    val builder = ProjectFilter.Builder()
+    builder.filter()
+    projectFilter(builder.build())
+}
+
+@Suppress("unused")
+inline fun Summaries.DashboardRequest.Builder.project(
+    filter: ProjectFilter.Builder.() -> Unit
+) {
+    val builder = ProjectFilter.Builder()
+    builder.filter()
+    projectFilter(builder.build())
 }

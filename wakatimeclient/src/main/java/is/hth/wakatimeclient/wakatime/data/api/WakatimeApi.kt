@@ -1,5 +1,7 @@
 package `is`.hth.wakatimeclient.wakatime.data.api
 
+import `is`.hth.wakatimeclient.core.data.auth.Scope.ReadLoggedTime
+import `is`.hth.wakatimeclient.core.data.auth.Scope.ReadOrganization
 import `is`.hth.wakatimeclient.wakatime.data.model.*
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -23,6 +25,10 @@ interface WakatimeApi {
         private const val GOALS = "$CURRENT_USER/goals"
         private const val DURATIONS_EXTERNAL = "$CURRENT_USER/external_durations"
         private const val DURATIONS_EXTERNAL_BULK = "$DURATIONS_EXTERNAL.bulk"
+        private const val ORGANIZATIONS = "$CURRENT_USER/orgs"
+        private const val DASHBOARDS = "$ORGANIZATIONS/{organizationId}/dashboards"
+        private const val DASHBOARD_MEMBERS = "$DASHBOARDS/{dashboardId}/members"
+        private const val MEMBERS_SUMMARY = "$DASHBOARD_MEMBERS/{userId}/summaries"
     }
 
     /**
@@ -97,7 +103,7 @@ interface WakatimeApi {
         @Query("timeout") timeout: Int? = null,
         @Query("writes_only") writesOnly: Boolean? = null,
         @Query("project") projectId: String? = null,
-    ): Response<PagedResponse<Stats>>
+    ): Response<WrappedResponse<Stats>>
 
     /**
      * Retrieves the current user's coding activity for the given time range as a
@@ -125,7 +131,7 @@ interface WakatimeApi {
      * Retrieves a list of [Agent]s used by the current user
      */
     @GET("$CURRENT_USER/user_agents")
-    suspend fun getAgents(): Response<PagedResponse<List<Agent>>>
+    suspend fun getAgents(): Response<WrappedResponse<List<Agent>>>
 
     /**
      * Retrieves all of the user's [Heartbeat]s for the given date.
@@ -149,6 +155,8 @@ interface WakatimeApi {
 
     /**
      * Retrieves all of the user's [Goal]s
+     *
+     * Requires the [ReadLoggedTime] authentication scope
      */
     @GET(GOALS)
     suspend fun getGoals(): Response<PagedResponse<List<Goal>>>
@@ -188,7 +196,7 @@ interface WakatimeApi {
      */
     @POST(DURATIONS_EXTERNAL)
     suspend fun sendExternalDuration(
-        @Body payload: ExternalDuration.Payload
+        @Body payload: ExternalDuration
     ): Response<PagedResponse<ExternalDuration>>
 
     /**
@@ -213,6 +221,68 @@ interface WakatimeApi {
      */
     @POST(DURATIONS_EXTERNAL_BULK)
     suspend fun sendExternalDurations(
-        @Body payloads: List<ExternalDuration.Payload>
+        @Body payloads: List<ExternalDuration>
     ): Response<ResponseBody>
+
+    /**
+     * List the user's organizations
+     *
+     * Requires the [ReadOrganization] authentication scope
+     */
+    @GET(ORGANIZATIONS)
+    suspend fun getOrganizations(): Response<PagedResponse<List<Organization>>>
+
+    /**
+     * Fetches all of the organizations [Dashboard]s
+     *
+     * Requires the [ReadOrganization] authentication scope
+     */
+    @GET(DASHBOARDS)
+    suspend fun getDashboards(
+        @Path("organizationId") organizationId: String
+    ): Response<PagedResponse<List<Dashboard>>>
+
+    /**
+     * Lists a dashboard's members
+     *
+     * Requires the [ReadOrganization] authentication scope
+     */
+    @GET(DASHBOARD_MEMBERS)
+    suspend fun getDashboardMembers(
+        @Path("organizationId") organizationId: String,
+        @Path("dashboardId") dashboardId: String
+    ): Response<PagedResponse<List<Member>>>
+
+    /**
+     * An organization dashboard member’s coding activity for the given time
+     * range as an array of summaries segmented by day.
+     *
+     * Requires the [ReadOrganization] authentication scope
+     */
+    @GET(MEMBERS_SUMMARY)
+    suspend fun getMemberSummaries(
+        @Path("organizationId") organizationId: String,
+        @Path("dashboardId") dashboardId: String,
+        @Path("userId") userId: String,
+        @Query("start") start: String,
+        @Query("end") end: String,
+        @Query("project") projectName: String?,
+        @Query("branches") branches: String?,
+    ): Response<Summaries>
+}
+
+interface OauthApi {
+
+    /**
+     * Revokes the [token] belonging to the client with matching [id] and [secret].
+     * The token can either be the access token or refresh token, depending on
+     * which should be revoked.
+     */
+    @FormUrlEncoded
+    @POST("/oauth/revoke")
+    suspend fun revoke(
+        @Field("client_id") id: String,
+        @Field("client_secret") secret: String,
+        @Field("token") token: String
+    ): Response<Unit>
 }

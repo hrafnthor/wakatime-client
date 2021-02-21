@@ -2,7 +2,6 @@ package `is`.hth.wakatimeclient.wakatime.data.api
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 
 @Serializable
@@ -37,14 +36,26 @@ data class PagedResponse<T>(
     /**
      * The current page for the data delivered, if applicable. If not, then -1.
      */
-    @Transient
     val page: Int = -1,
+    /**
+     * The index of the next page. If there is none, this value will be -1
+     */
+    @SerialName("next_page")
+    val next: Int = -1,
+    /**
+     * The index of the previous page. If there is none, this value will be -1
+     */
+    @SerialName("prev_page")
+    val previous: Int = -1,
     /**
      * The number of total available pages of data, if applicable. If not, then -1.
      */
-    @Transient
     @SerialName("total_pages")
-    val totalPages: Int = -1
+    val totalPages: Int = -1,
+    /**
+     * The total amount of items available over all pages
+     */
+    val total: Int = -1
 )
 
 @Serializable
