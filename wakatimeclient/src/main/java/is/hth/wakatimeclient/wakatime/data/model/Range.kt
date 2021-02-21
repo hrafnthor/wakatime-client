@@ -1,32 +1,38 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
  * Predefined chronological range constants
  */
 @Suppress("unused")
-sealed class HumanRange(val description: String) {
+@Serializable
+enum class HumanRange(val description: String) {
 
     /**
      * The last week
      */
-    object Week : HumanRange("last_7_days")
+    @SerialName("last_7_days")
+    WEEK("last_7_days"),
 
     /**
      * The last 30 days from today
      */
-    object Month : HumanRange("last_30_days")
+    @SerialName("last_30_days")
+    MONTH("last_30_days"),
 
     /**
      * The last 6 months since today
      */
-    object HalfYear : HumanRange("last_6_months")
+    @SerialName("last_6_months")
+    HALF_YEAR("last_6_months"),
 
     /**
      * The last year from today
      */
-    object Year : HumanRange("last_year")
+    @SerialName("last_year")
+    YEAR("last_year")
 }
 
 @Serializable

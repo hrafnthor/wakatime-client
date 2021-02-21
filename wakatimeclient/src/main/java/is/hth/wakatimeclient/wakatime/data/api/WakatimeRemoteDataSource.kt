@@ -2,6 +2,7 @@ package `is`.hth.wakatimeclient.wakatime.data.api
 
 import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient
+import `is`.hth.wakatimeclient.core.data.auth.Scope.ReadOrganization
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 import `is`.hth.wakatimeclient.core.data.net.RemoteDataSource
 import `is`.hth.wakatimeclient.wakatime.data.model.*
@@ -46,7 +47,7 @@ internal interface WakatimeRemoteDataSource {
     /**
      * Fetches the private leaderboards that the currently authenticated user is member of.
      */
-    suspend fun getLeaderboards(): Results<List<Leaderboard>>
+    suspend fun getLeaderboards(): Results<PagedResponse<List<Leaderboard>>>
 
     /**
      * Fetches leaders from the requested private leaderboard
@@ -104,7 +105,7 @@ internal interface WakatimeRemoteDataSource {
     /**
      * Fetches all of the user's [Goal]s
      */
-    suspend fun getGoals(): Results<List<Goal>>
+    suspend fun getGoals(): Results<PagedResponse<List<Goal>>>
 
     /**
      * A user's external durations for the given day. External durations
@@ -127,7 +128,7 @@ internal interface WakatimeRemoteDataSource {
      * Using the same external_id will update any existing duration with the provided attributes.
      */
     suspend fun sendExternalDuration(
-        payload: ExternalDuration.Payload
+        payload: ExternalDuration
     ): Results<ExternalDuration>
 
     /**
@@ -151,8 +152,40 @@ internal interface WakatimeRemoteDataSource {
      * Parsing of the resulting response is currently left to the consumer.
      */
     suspend fun sendExternalDurations(
-        payloads: List<ExternalDuration.Payload>
+        payloads: List<ExternalDuration>
     ): Results<ResponseBody>
+
+    /**
+     * List the user's organizations
+     *
+     * Requires the [ReadOrganization] authentication scope
+     */
+    suspend fun getOrganizations(): Results<PagedResponse<List<Organization>>>
+
+    /**
+     * Lists all of the organization's dashboards
+     *
+     * Requires the [ReadOrganization] authentication scope
+     */
+    suspend fun getDashboards(
+        organizationId: String
+    ): Results<PagedResponse<List<Dashboard>>>
+
+    /**
+     * List an organization’s members.
+     */
+    suspend fun getDashboardMembers(
+        organizationId: String,
+        dashboardId: String
+    ): Results<PagedResponse<List<Member>>>
+
+    /**
+     * An organization dashboard member’s coding activity for the
+     * given time range as an array of summaries segmented by day.
+     */
+    suspend fun getMemberSummaries(
+        request: Summaries.DashboardRequest
+    ): Results<Summaries>
 }
 
 internal class WakatimeRemoteDataSourceImpl(
@@ -187,12 +220,10 @@ internal class WakatimeRemoteDataSourceImpl(
         })
     }
 
-    override suspend fun getLeaderboards(): Results<List<Leaderboard>> {
-        return makeCall(networkCall = {
+    override suspend fun getLeaderboards(): Results<PagedResponse<List<Leaderboard>>> {
+        return makeCall {
             api.getPrivateLeaderboards()
-        }, transform = {
-            it.data
-        })
+        }
     }
 
     override suspend fun getPrivateLeaders(
@@ -221,9 +252,9 @@ internal class WakatimeRemoteDataSourceImpl(
         return makeCall(networkCall = {
             api.getStats(
                 range = request.range.description,
-                timeout = request.timeout,
-                writesOnly = request.writesOnly,
-                projectId = request.projectId
+                timeout = request.metaFilter?.timeout,
+                writesOnly = request.metaFilter?.writesOnly,
+                projectId = request.projectFilter?.projectName
             )
         }, transform = {
             it.data
@@ -235,13 +266,13 @@ internal class WakatimeRemoteDataSourceImpl(
     ): Results<Summaries> {
         return makeCall(networkCall = {
             api.getSummaries(
-                start = request.start,
-                end = request.end,
-                projectName = request.projectName,
-                branches = request.branches,
-                timeout = request.timeout,
+                start = format(request.startDate.time),
+                end = format(request.endDate.time),
+                projectName = request.projectFilter?.projectName,
+                branches = request.projectFilter?.branches,
+                timeout = request.metaFilter?.timeout,
                 timezone = request.timezone,
-                writesOnly = request.writesOnly
+                writesOnly = request.metaFilter?.writesOnly
             )
         })
     }
@@ -258,7 +289,7 @@ internal class WakatimeRemoteDataSourceImpl(
         date: Date
     ): Results<ChronologicalResponse<Heartbeat>> {
         return makeCall {
-            api.getHeartbeats(dateFormatter.format(date))
+            api.getHeartbeats(format(date))
         }
     }
 
@@ -273,13 +304,10 @@ internal class WakatimeRemoteDataSourceImpl(
             })
     }
 
-    override suspend fun getGoals(): Results<List<Goal>> {
-        return makeCall(
-            networkCall = {
-                api.getGoals()
-            }, transform = {
-                it.data
-            })
+    override suspend fun getGoals(): Results<PagedResponse<List<Goal>>> {
+        return makeCall {
+            api.getGoals()
+        }
     }
 
     override suspend fun getExternalDurations(
@@ -287,16 +315,16 @@ internal class WakatimeRemoteDataSourceImpl(
     ): Results<ChronologicalResponse<ExternalDuration>> {
         return makeCall {
             api.getExternalDurations(
-                day = request.date,
-                project = request.projectName,
-                branches = request.branches,
+                day = format(request.date.time),
+                project = request.projectFilter?.projectName,
+                branches = request.projectFilter?.branches,
                 timezone = request.timezone
             )
         }
     }
 
     override suspend fun sendExternalDuration(
-        payload: ExternalDuration.Payload
+        payload: ExternalDuration
     ): Results<ExternalDuration> {
         return makeCall(
             networkCall = {
@@ -307,10 +335,51 @@ internal class WakatimeRemoteDataSourceImpl(
     }
 
     override suspend fun sendExternalDurations(
-        payloads: List<ExternalDuration.Payload>
+        payloads: List<ExternalDuration>
     ): Results<ResponseBody> {
         return makeCall {
             api.sendExternalDurations(payloads)
         }
     }
+
+    override suspend fun getOrganizations(): Results<PagedResponse<List<Organization>>> {
+        return makeCall {
+            api.getOrganizations()
+        }
+    }
+
+    override suspend fun getDashboards(
+        organizationId: String
+    ): Results<PagedResponse<List<Dashboard>>> {
+        return makeCall {
+            api.getDashboards(organizationId)
+        }
+    }
+
+    override suspend fun getDashboardMembers(
+        organizationId: String,
+        dashboardId: String
+    ): Results<PagedResponse<List<Member>>> {
+        return makeCall {
+            api.getDashboardMembers(organizationId, dashboardId)
+        }
+    }
+
+    override suspend fun getMemberSummaries(
+        request: Summaries.DashboardRequest
+    ): Results<Summaries> {
+        return makeCall {
+            api.getMemberSummaries(
+                organizationId = request.organizationId,
+                dashboardId = request.dashboardId,
+                userId = request.userId,
+                start = format(request.startDate.time),
+                end = format(request.endDate.time),
+                branches = request.projectFilter?.branches,
+                projectName = request.projectFilter?.projectName
+            )
+        }
+    }
+
+    private fun format(date: Date): String = dateFormatter.format(date)
 }

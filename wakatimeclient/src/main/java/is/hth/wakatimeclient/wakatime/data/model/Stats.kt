@@ -1,5 +1,8 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
+import `is`.hth.wakatimeclient.wakatime.data.model.filters.MetaFilter
+import `is`.hth.wakatimeclient.wakatime.data.model.filters.ProjectFilter
+import `is`.hth.wakatimeclient.wakatime.data.model.filters.RequestDsl
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -114,54 +117,56 @@ data class Stats(
     val projects: List<Measurement>,
 ) {
 
+    @Suppress("unused")
     companion object {
 
-        /**
-         * Returns a [Request.Builder] for network request construction
-         */
-        fun makeRequest(range: HumanRange): Request.Builder = Request.Builder(range)
+        inline fun makeRequest(
+            range: HumanRange,
+            construct: Request.Builder.() -> Unit = {}
+        ) = Request.Builder(range).also(construct).build()
     }
 
-    class Request private constructor(builder: Builder) {
+    class Request(
+        val range: HumanRange,
+        val projectFilter: ProjectFilter?,
+        val metaFilter: MetaFilter?,
+    ) {
+        @RequestDsl
+        @SuppressWarnings("unused")
+        class Builder(
+            private var range: HumanRange,
+            private var projectFilter: ProjectFilter? = null,
+            private var metaFilter: MetaFilter? = null,
+        ) {
+            fun range(range: HumanRange) = apply { this.range = range }
+            fun metaFilter(metaFilter: MetaFilter?) = apply { this.metaFilter = metaFilter }
+            fun projectFilter(projectFilter: ProjectFilter?) =
+                apply { this.projectFilter = projectFilter }
 
-        /**
-         * The range to filter the stats by
-         */
-        val range: HumanRange = builder.range
-
-        /**
-         * The timeout value used to calculate these stats. Defaults the the user's timeout value.
-         */
-        val timeout: Int? = builder.timeout
-
-        /**
-         * The writes_only value used to calculate these stats. Defaults to the user's writes_only setting.
-         */
-        val writesOnly: Boolean? = builder.writesOnly
-
-        /**
-         * Filters the returned stats to the relevant project
-         */
-        val projectId: String? = builder.projectId
-
-        class Builder internal constructor(range: HumanRange){
-
-            var range: HumanRange = range
-                private set
-            var timeout: Int? = null
-                private set
-            var writesOnly: Boolean? = null
-                private set
-            var projectId: String? = null
-                private set
-
-            fun setRange(range: HumanRange): Builder = apply { this.range = range }
-
-            fun setTimeout(timeout: Int?): Builder = apply { this.timeout = timeout }
-
-            fun writesOnly(writesOnly: Boolean?): Builder = apply { this.writesOnly = writesOnly }
-
-            fun filterByProject(projectId: String?): Builder = apply { this.projectId = projectId }
+            fun build() = Request(
+                range = range,
+                projectFilter = projectFilter,
+                metaFilter = metaFilter,
+            )
         }
     }
+}
+
+@Suppress("unused")
+inline fun Stats.Request.Builder.project(
+    filter: ProjectFilter.Builder.() -> Unit
+) {
+    val builder = ProjectFilter.Builder()
+    builder.filter()
+    projectFilter(builder.build())
+}
+
+
+@Suppress("unused")
+inline fun Stats.Request.Builder.meta(
+    filter: MetaFilter.Builder.() -> Unit
+) {
+    val builder = MetaFilter.Builder()
+    builder.filter()
+    metaFilter(builder.build())
 }

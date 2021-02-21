@@ -133,15 +133,23 @@ data class Heartbeat internal constructor(
          */
         val dependencies: String?,
         /**
-         *
+         * The total number of lines in the entity (when entity type is file)
          */
         val lines: Int?,
         /**
+         * The current cursor column position, if applicable. If no value is received from the service,
+         * then this value will be -1. If this value should not be sent to the service then
+         * it should be set as -1
          *
+         * Defaults to -1.
          */
         val lineno: Int?,
         /**
+         * The current line row number of cursor, if applicable. If no value is received from the service,
+         * then this value will be -1. If this value should not be sent to the service then
+         * it should be set as -1.
          *
+         * Defaults to -1.
          */
         val cursorpos: Int?,
         /**
@@ -160,21 +168,20 @@ data class Heartbeat internal constructor(
     ) {
 
         @Suppress("unused")
-        class Builder internal constructor(
+        class Builder(
             private var entity: String,
             private var time: Float,
             private var type: Type,
-            private var category: Category
+            private var category: Category,
+            private var project: String? = null,
+            private var branch: String? = null,
+            private var language: String? = null,
+            private var dependencies: String? = null,
+            private var lines: Int? = null,
+            private var lineno: Int? = null,
+            private var cursorpos: Int? = null,
+            private var isWrite: Boolean? = null,
         ) {
-
-            private var project: String? = null
-            private var branch: String? = null
-            private var language: String? = null
-            private var dependencies: String? = null
-            private var lines: Int? = null
-            private var lineno: Int? = null
-            private var cursorpos: Int? = null
-            private var isWrite: Boolean? = null
 
             fun setProject(project: String?): Builder = apply { this.project = project }
 
@@ -183,8 +190,7 @@ data class Heartbeat internal constructor(
             fun setLanguage(language: String?): Builder = apply { this.language = language }
 
             fun setDependencies(dependencies: Set<String>?): Builder = apply {
-                this.dependencies = dependencies
-                    ?.joinToString(separator = ",") { it }
+                this.dependencies = dependencies?.joinToString(separator = ",") { it }
             }
 
             fun setLines(lines: Int?): Builder = apply { this.lines = lines }
@@ -223,9 +229,12 @@ data class Heartbeat internal constructor(
          * @param type The type for this beat
          * @param category The category for this beat
          */
-        fun makeABeat(entity: String, time: Float, type: Type, category: Category): Beat.Builder {
-            return Beat.Builder(entity, time, type, category)
-        }
+        fun makeABeat(
+            entity: String,
+            time: Float,
+            type: Type,
+            category: Category
+        ): Beat.Builder = Beat.Builder(entity, time, type, category)
     }
 }
 

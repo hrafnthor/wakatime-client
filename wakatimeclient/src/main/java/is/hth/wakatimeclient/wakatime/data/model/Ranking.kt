@@ -51,6 +51,7 @@ data class Leaders(
     /**
      * A request object for [Leaders] defining querying values
      */
+    @Suppress("unused")
     class Request private constructor(
         val leaderboardId: String,
         val language: String?,
@@ -58,11 +59,10 @@ data class Leaders(
     ) {
 
         class Builder internal constructor(
-            private val leaderboardId: String
+            private val leaderboardId: String,
+            private var language: String? = null,
+            private var page: Int? = null,
         ) {
-
-            private var language: String? = null
-            private var page: Int? = null
 
             fun setLanguage(language: String?): Builder = apply {
                 this.language = language
@@ -79,6 +79,7 @@ data class Leaders(
         }
     }
 
+    @Suppress("unused")
     companion object {
 
         /**

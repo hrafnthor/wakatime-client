@@ -1,9 +1,10 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
+import `is`.hth.wakatimeclient.wakatime.data.model.filters.ProjectFilter
+import `is`.hth.wakatimeclient.wakatime.data.model.filters.RequestDsl
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.text.DateFormat
-import java.text.SimpleDateFormat
+import kotlinx.serialization.Transient
 import java.util.*
 
 @Serializable
@@ -11,6 +12,7 @@ data class ExternalDuration internal constructor(
     /**
      * A unique id of this external duration
      */
+    @Transient
     val id: String = "",
     /**
      * A unique identifier for this duration on the external provider
@@ -28,14 +30,17 @@ data class ExternalDuration internal constructor(
     /**
      * The project name this duration was logged against, if any was given
      */
+    @Transient
     val project: String = "",
     /**
      * The branch this duration was logged against, if any was given
      */
+    @Transient
     val branch: String = "",
     /**
      *  The language this duration was logged against, if any was given
      */
+    @Transient
     val language: String = "",
     /**
      * The type for this activity
@@ -58,105 +63,106 @@ data class ExternalDuration internal constructor(
 ) {
 
     @Suppress("unused")
-    class Request(date: Calendar) {
+    companion object {
 
-        private val format: DateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
+        inline fun request(
+            date: Calendar,
+            construct: Request.Builder.() -> Unit = {}
+        ) = Request.Builder(date).also(construct).build()
 
-        val date: String = format.format(date.time)
-        var testing: String? = null
-            private set
-        var projectName: String? = null
-            private set
-        var branches: String? = null
-            private set
-        var timezone: String? = null
-            private set
-
-        fun setProjectName(projectName: String?): Request = apply {
-            this.projectName = projectName
-        }
-
-        fun setTimezone(timezone: String?): Request = apply {
-            this.timezone = timezone
-        }
-
-        /**
-         * Assigns the list of branches to filter summaries for. Branch filtering will
-         * only work if a [projectName] has also been assigned to the request.
-         */
-        fun setBranches(projectName: String?, vararg branches: String?): Request = apply {
-            this.projectName = projectName
-            if (projectName != null) {
-                this.branches = branches
-                    .filterNotNull()
-                    .joinToString(separator = ",") { it }
-            }
-        }
+        inline fun send(
+            externalId: String,
+            entity: String,
+            type: Type,
+            category: Category,
+            startTime: Float,
+            endTime: Float,
+            construct: Builder.() -> Unit = {}
+        ) = Builder(
+            externalId = externalId,
+            entity = entity,
+            type = type,
+            category = category,
+            startTime = startTime,
+            endTime = endTime,
+        ).also(construct).build()
     }
 
-    @Serializable
+    @RequestDsl
     @Suppress("unused")
-    class Payload(
-        /**
-         * @see ExternalDuration.externalId
-         */
-        @SerialName("external_id")
-        val externalId: String,
-        /**
-         * @see ExternalDuration.entity
-         */
-        val entity: String,
-        /**
-         * @see ExternalDuration.type
-         */
-        val type: Type,
-        /**
-         * @see ExternalDuration.category
-         */
-        val category: Category,
-        /**
-         * @see ExternalDuration.startTime
-         */
-        @SerialName("start_time")
-        val startTime: Float,
-        /**
-         * @see ExternalDuration.endTime
-         */
-        @SerialName("end_time")
-        val endTime: Float
+    class Builder(
+        private var externalId: String,
+        private var entity: String,
+        private var type: Type,
+        private var category: Category,
+        private var startTime: Float,
+        private var endTime: Float,
+        private var language: String? = null,
+        private var projectFilter: ProjectFilter? = null,
     ) {
+        fun externalId(externalId: String) = apply { this.externalId = externalId }
+        fun entity(entity: String) = apply { this.entity = entity }
+        fun type(type: Type) = apply { this.type = type }
+        fun category(category: Category) = apply { this.category = category }
+        fun startTime(startTime: Float) = apply { this.startTime = startTime }
+        fun endTime(endTime: Float) = apply { this.endTime = endTime }
+        fun language(language: String?) = apply { this.language = language }
+        fun projectFilter(projectFilter: ProjectFilter?) =
+            apply { this.projectFilter = projectFilter }
 
-        /**
-         * @see ExternalDuration.project
-         */
-        var projectName: String? = null
-            private set
+        fun build() = ExternalDuration(
+            externalId = externalId,
+            entity = entity,
+            type = type,
+            category = category,
+            startTime = startTime,
+            endTime = endTime,
+            language = language ?: "",
+            project = projectFilter?.projectName ?: "",
+            branch = projectFilter?.branches ?: ""
+        )
+    }
 
-        /**
-         * @see ExternalDuration.branch
-         */
-        var branch: String? = null
-            private set
+    @Suppress("unused")
+    class Request(
+        val date: Calendar,
+        val timezone: String?,
+        val projectFilter: ProjectFilter?
+    ) {
+        @RequestDsl
+        class Builder(
+            private var date: Calendar,
+            private var timezone: String? = null,
+            private var projectFilter: ProjectFilter? = null,
+        ) {
+            fun timezone(timezone: String?) = apply { this.timezone = timezone }
+            fun date(date: Calendar) = apply { this.date = date }
+            fun projectFilter(projectFilter: ProjectFilter?) =
+                apply { this.projectFilter = projectFilter }
 
-        /**
-         *  @see ExternalDuration.language
-         */
-        var language: String? = null
-            private set
-
-        fun setProjectName(projectName: String?): Payload = apply {
-            this.projectName = projectName
-        }
-
-        fun setBranch(projectName: String?, branch: String?): Payload = apply {
-            this.projectName = projectName
-            if (projectName != null) {
-                this.branch = branch
-            }
-        }
-
-        fun setLanguage(language: String?): Payload = apply {
-            this.language = language
+            fun build() = Request(
+                date = date,
+                timezone = timezone,
+                projectFilter = projectFilter
+            )
         }
     }
+}
+
+@Suppress("unused")
+inline fun ExternalDuration.Builder.project(
+    filter: ProjectFilter.Builder.() -> Unit
+) {
+    val builder = ProjectFilter.Builder()
+    builder.filter()
+    projectFilter(builder.build())
+}
+
+@Suppress("unused")
+inline fun ExternalDuration.Request.Builder.project(
+    filter: ProjectFilter.Builder.() -> Unit
+) {
+    val builder = ProjectFilter.Builder()
+    builder.filter()
+    projectFilter(builder.build())
 }

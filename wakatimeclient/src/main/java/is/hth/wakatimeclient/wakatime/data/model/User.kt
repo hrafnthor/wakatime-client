@@ -12,6 +12,7 @@ data class User(
     /**
      * The user's photo url if any is set and it is public
      */
+    @SerialName("photo")
     val photoUrl: String = "",
     /**
      * represents the “hireable” badge on user profiles
