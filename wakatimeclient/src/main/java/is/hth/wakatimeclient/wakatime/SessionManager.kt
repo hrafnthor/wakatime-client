@@ -25,7 +25,7 @@ interface SessionManager {
      * occur will be delivered in the final report.
      *
      * If the operation runs to completion it will return a
-     * [Results.Success.Values] containing a [Report].
+     * [Results.Success.Value] containing a [Report].
      */
     suspend fun logout(force: Boolean): Results<Report>
 }
@@ -77,7 +77,7 @@ internal class SessionManagerImpl(
             storage.resetAuthState()
         }
 
-        return Results.Success.Values(Report(forced = force, errors = errors))
+        return Results.Success.Value(Report(forced = force, errors = errors))
     }
 
     private suspend fun revoke(id: String, secret: String, token: String): Results<Nothing> {

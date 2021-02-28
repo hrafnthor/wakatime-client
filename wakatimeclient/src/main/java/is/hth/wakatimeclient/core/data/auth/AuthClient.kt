@@ -27,7 +27,7 @@ interface AuthClient {
      * Processes the received [Intent] results from the OAuth flow started
      * with calling [createAuthenticationIntent]
      */
-    suspend fun onAuthenticationResult(result: Intent): Boolean
+    suspend fun onAuthenticationResult(result: Intent): Results<Boolean>
 
     /**
      *
@@ -80,26 +80,20 @@ interface AuthClient {
         suspend fun update(force: Boolean): Results<Unit>
     }
 
-    /**
-     *
-     */
     interface Builder {
 
         /**
-         *
+         * For setting custom filtering requirements on which browsers are allowed
          */
         fun setBrowserMatcher(matcher: BrowserMatcher): Builder
 
         /**
-         *
+         * The [AuthStorage] which will be used for storing the authentication information
          */
         fun setStorage(storage: AuthStorage): Builder
     }
 }
 
-/**
- *
- */
 internal class AuthClientImpl internal constructor(
     private val config: AuthConfig,
     internal val storage: AuthStorage,
@@ -126,7 +120,7 @@ internal class AuthClientImpl internal constructor(
         return authService.getAuthorizationRequestIntent(request, intent)
     }
 
-    override suspend fun onAuthenticationResult(result: Intent): Boolean =
+    override suspend fun onAuthenticationResult(result: Intent): Results<Boolean> =
         suspendCoroutine { continuation ->
             val response = AuthorizationResponse.fromIntent(result)
             val exception = AuthorizationException.fromIntent(result)
@@ -134,12 +128,20 @@ internal class AuthClientImpl internal constructor(
             storage.update {
                 it.update(response, exception)
             }
-
-            if (response == null) {
-                Timber.e(exception)
-                continuation.resume(false)
-            } else fetchAuthorizationToken(config, response) {
-                continuation.resume(it.isSuccess)
+            when {
+                response == null && exception != null -> {
+                    val code = exception.code
+                    val message = exception.message ?: "No exception message given!"
+                    continuation.resume(Results.Failure(Error.Auth.Authentication(code, message)))
+                }
+                response != null -> fetchAuthorizationToken(config, response) {
+                    continuation.resume(it)
+                }
+                else -> {
+                    val message =
+                        "Authentication flow resulted in neither actionable response nor exception!"
+                    continuation.resume(Results.Failure(Error.Auth.Unknown(-1, message)))
+                }
             }
         }
 
@@ -154,7 +156,7 @@ internal class AuthClientImpl internal constructor(
     private fun fetchAuthorizationToken(
         config: AuthConfig,
         response: AuthorizationResponse,
-        receiver: (Result<Boolean>) -> Unit
+        receiver: (Results<Boolean>) -> Unit
     ) {
         val map = hashMapOf(Pair("client_secret", config.clientSecret))
         val request = response.createTokenExchangeRequest(map)
@@ -164,9 +166,12 @@ internal class AuthClientImpl internal constructor(
             }
 
             if (exception == null) {
-                receiver(Result.success(state.isAuthorized))
+                receiver(Results.Success.Value(state.isAuthorized))
             } else {
-                receiver(Result.failure(exception))
+                val code = exception.code
+                val message = exception.message ?: "No exception message given!"
+                Timber.d("Authorization token fetch failed with exception $code | $message")
+                receiver(Results.Failure(Error.Auth.TokenFetch(code, message)))
             }
         }
     }
@@ -218,45 +223,43 @@ internal class AuthClientImpl internal constructor(
 
         override fun apiKey(): String = storage.getKey() ?: ""
 
-        override suspend fun update(force: Boolean): Results<Unit> = suspendCoroutine {
-            if (storage.getMethod() is Method.OAuth) {
-                val state = storage.getState()
+        override suspend fun update(force: Boolean): Results<Unit> =
+            suspendCoroutine { continuation ->
+                if (storage.getMethod() is Method.OAuth) {
+                    val state = storage.getState()
 
-                // if forcing a token update mark it so
-                state.needsTokenRefresh = if (force) force else state.needsTokenRefresh
-                when {
-                    state.needsTokenRefresh -> state.performActionWithFreshTokens(service) { _, _, exception ->
-                        val results = if (exception == null) {
-                            Results.Success.Empty
-                        } else {
-                            val message: String = exception.message ?: ""
-                            val error = Error.Authentication.TokenRefresh(message)
-                            Results.Failure(error)
+                    // if forcing a token update mark it so
+                    state.needsTokenRefresh = if (force) force else state.needsTokenRefresh
+                    when {
+                        state.needsTokenRefresh -> state.performActionWithFreshTokens(service) { _, _, exception ->
+                            val results = if (exception == null) {
+                                Results.Success.Empty
+                            } else {
+                                val message: String = exception.message ?: ""
+                                val error = Error.Auth.TokenRefresh(exception.code, message)
+                                Results.Failure(error)
+                            }
+                            continuation.resumeWith(Result.success(results))
                         }
-                        it.resumeWith(Result.success(results))
+                        state.isAuthorized -> {
+                            // Authentication is valid and does not need refreshing
+                            continuation.resumeWith(Result.success(Results.Success.Empty))
+                        }
+                        else -> {
+                            // No authentication was found
+                            val msg = "No authentication found! Halting token refresh operation"
+                            val result = Results.Failure(Error.Auth.Unauthorized(msg))
+                            continuation.resumeWith(Result.success(result))
+                        }
                     }
-                    state.isAuthorized -> {
-                        // Authentication is valid and does not need refreshing
-                        it.resumeWith(Result.success(Results.Success.Empty))
-                    }
-                    else -> {
-                        // No authentication was found
-                        val msg = "No authentication found! Halting token refresh operation"
-                        val result = Results.Failure(Error.Authentication.Unauthorized(msg))
-                        it.resumeWith(Result.success(result))
-                    }
-                }
-            } else it.resumeWith(Result.success(Results.Success.Empty))
-        }
+                } else continuation.resumeWith(Result.success(Results.Success.Empty))
+            }
 
         private fun getState(): AuthState = storage.getState()
 
         override fun authenticationMethod(): Method = storage.getMethod()
     }
 
-    /**
-     *
-     */
     internal class Builder(
         private val apiKey: String,
         private val config: AuthConfig

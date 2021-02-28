@@ -40,7 +40,7 @@ internal open class RemoteDataSource(
             with(networkCall()) {
                 val body: T? = body()
                 when {
-                    isSuccessful && body != null -> Results.Success.Values(transform(body))
+                    isSuccessful && body != null -> Results.Success.Value(transform(body))
                     isSuccessful -> Results.Success.Empty
                     else -> Results.Failure(processor.onError(this))
                 }

@@ -18,7 +18,7 @@ sealed class Results<out T> {
         /**
          * Resulting values were produced
          */
-        class Values<T>(val values: T) : Success<T>()
+        class Value<T>(val value: T) : Success<T>()
     }
 
     /**
