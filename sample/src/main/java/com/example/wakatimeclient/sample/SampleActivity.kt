@@ -21,9 +21,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import net.openid.appauth.browser.BrowserMatcher
 import net.openid.appauth.browser.BrowserSelector
-import net.openid.appauth.browser.Browsers
 import okhttp3.logging.HttpLoggingInterceptor
 import kotlin.coroutines.CoroutineContext
 
@@ -70,18 +68,10 @@ class SampleActivity : AppCompatActivity(),
         }
 
         model.authentication.observe(this, Observer { authenticated ->
-            when (authenticated) {
-                is Results.Success.Value -> {
-                    if (authenticated.value) {
-                        onRefresh()
-                    } else {
-                        Toast.makeText(this, "Not authenticated!", Toast.LENGTH_LONG).show()
-                    }
-                }
-                is Results.Failure -> {
-                    Toast.makeText(this, "Not authenticated!", Toast.LENGTH_LONG).show()
-                }
-                else -> Toast.makeText(this, "Not authenticated!", Toast.LENGTH_LONG).show()
+            if (authenticated is Results.Success.Value && authenticated.value) {
+                onRefresh()
+            } else {
+                Toast.makeText(this, "Not authenticated!", Toast.LENGTH_LONG).show()
             }
         })
 
