@@ -5,7 +5,6 @@ import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.Scope
 import `is`.hth.wakatimeclient.wakatime.data.model.CurrentUser
-import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -22,7 +21,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import net.openid.appauth.browser.BrowserMatcher
 import net.openid.appauth.browser.BrowserSelector
+import net.openid.appauth.browser.Browsers
 import okhttp3.logging.HttpLoggingInterceptor
 import kotlin.coroutines.CoroutineContext
 
@@ -69,10 +70,18 @@ class SampleActivity : AppCompatActivity(),
         }
 
         model.authentication.observe(this, Observer { authenticated ->
-            if (authenticated) {
-                onRefresh()
-            } else {
-                Toast.makeText(this, "Not authenticated!", Toast.LENGTH_LONG).show()
+            when (authenticated) {
+                is Results.Success.Value -> {
+                    if (authenticated.value) {
+                        onRefresh()
+                    } else {
+                        Toast.makeText(this, "Not authenticated!", Toast.LENGTH_LONG).show()
+                    }
+                }
+                is Results.Failure -> {
+                    Toast.makeText(this, "Not authenticated!", Toast.LENGTH_LONG).show()
+                }
+                else -> Toast.makeText(this, "Not authenticated!", Toast.LENGTH_LONG).show()
             }
         })
 
@@ -83,7 +92,7 @@ class SampleActivity : AppCompatActivity(),
 
     override fun onActivityResult(request: Int, result: Int, data: Intent?) {
         super.onActivityResult(request, result, data)
-        if (request == AUTHENTICATION_REQUEST_CODE && result == Activity.RESULT_OK && data != null) {
+        if (request == AUTHENTICATION_REQUEST_CODE && data != null) {
             model.onAuthenticationResult(data)
         } else {
             longToast(getString(R.string.authentication_failed))
@@ -111,7 +120,8 @@ class SampleActivity : AppCompatActivity(),
                 Scope.Email,
                 Scope.ReadPrivateLeaderboards,
                 Scope.ReadLoggedTime,
-                Scope.ReadStats
+                Scope.ReadStats,
+                Scope.WriteLoggedTime
             )
             val intent = model.getAuthenticationRequest(scopes)
             startActivityForResult(intent, AUTHENTICATION_REQUEST_CODE)
@@ -126,7 +136,12 @@ class SampleActivity : AppCompatActivity(),
     //              SampleActivityDataSource implementation
     //////////////////////////////////////////////////////////////////////////
 
-    override fun onAuthentication(): LiveData<Boolean> = model.authentication
+    override fun onAuthentication(): LiveData<Boolean> = Transformations.map(model.authentication) {
+        when (it) {
+            is Results.Success.Value -> it.value
+            else -> false
+        }
+    }
 
     override fun onUser(): LiveData<CurrentUser> = model.currentUser
 
@@ -143,9 +158,8 @@ class SampleViewModel(
 
     private var job = Job()
 
-    private val _authenticated: MutableLiveData<Boolean> =
-        MutableLiveData(client.session().isAuthorized())
-    val authentication: LiveData<Boolean> = _authenticated
+    private val _authenticated: MutableLiveData<Results<Boolean>> = MutableLiveData()
+    val authentication: LiveData<Results<Boolean>> = _authenticated
 
     private val _currentUser: MutableLiveData<CurrentUser> = MutableLiveData()
     val currentUser: LiveData<CurrentUser> = _currentUser
@@ -155,6 +169,10 @@ class SampleViewModel(
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.IO + job
+
+    init {
+        _authenticated.postValue(Results.Success.Value(client.session().isAuthorized()))
+    }
 
     override fun onCleared() {
         super.onCleared()
@@ -174,7 +192,7 @@ class SampleViewModel(
     fun logout() {
         launch(context = coroutineContext) {
             when (val results = client.logout(false)) {
-                is Results.Success -> _authenticated.postValue(false)
+                is Results.Success -> _authenticated.postValue(Results.Success.Value(false))
                 is Results.Failure -> _error.postValue(results.error)
             }
         }
@@ -183,7 +201,7 @@ class SampleViewModel(
     fun loadCurrentUser() {
         launch(context = coroutineContext) {
             when (val results = client.getCurrentUser()) {
-                is Results.Success.Values -> _currentUser.postValue(results.values)
+                is Results.Success.Value -> _currentUser.postValue(results.value)
                 is Results.Failure -> _error.postValue(results.error)
             }
         }
@@ -200,6 +218,7 @@ class SampleViewModelFactory(
     }
 }
 
+@Suppress("unused")
 object Injector {
 
     private fun getApiClient(context: Context): WakatimeClient {

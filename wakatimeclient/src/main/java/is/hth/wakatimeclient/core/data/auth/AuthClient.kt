@@ -11,7 +11,6 @@ import okhttp3.Authenticator
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
-import timber.log.Timber
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -164,15 +163,20 @@ internal class AuthClientImpl internal constructor(
             val state = storage.update {
                 it.update(result, exception)
             }
-
-            if (exception == null) {
-                receiver(Results.Success.Value(state.isAuthorized))
-            } else {
-                val code = exception.code
-                val message = exception.message ?: "No exception message given!"
-                Timber.d("Authorization token fetch failed with exception $code | $message")
-                receiver(Results.Failure(Error.Auth.TokenFetch(code, message)))
+            val results = when {
+                state.isAuthorized && exception == null -> {
+                    Results.Success.Value(true)
+                }
+                exception != null -> {
+                    val message = exception.message ?: "No exception message given!"
+                    Results.Failure(Error.Auth.TokenFetch(exception.code, message))
+                }
+                else -> {
+                    val message = "Token fetch operation resulted in neither success nor failure!"
+                    Results.Failure(Error.Auth.Unknown(-1, message))
+                }
             }
+            receiver(results)
         }
     }
 
@@ -235,7 +239,8 @@ internal class AuthClientImpl internal constructor(
                             val results = if (exception == null) {
                                 Results.Success.Empty
                             } else {
-                                val message: String = exception.message ?: ""
+                                val message: String =
+                                    exception.message ?: "Token refresh operation failed"
                                 val error = Error.Auth.TokenRefresh(exception.code, message)
                                 Results.Failure(error)
                             }
