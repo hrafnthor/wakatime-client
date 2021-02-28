@@ -4,7 +4,6 @@ plugins {
     id("kotlin-android-extensions")
     id("kotlin-kapt")
     id("kotlinx-serialization")
-    id("de.mannodermaus.android-junit5")
 }
 
 android {
@@ -45,6 +44,7 @@ dependencies {
     //
     implementation(Kotlin.stdlib.jdk8)
     implementation(KotlinX.serialization.core)
+    implementation(KotlinX.serialization.json)
     //
     //  Androidx library dependencies
     //
@@ -57,7 +57,7 @@ dependencies {
     //
     //  Third party utility dependencies
     //
-    api("net.openid:appauth:0.7.1")
+    api("net.openid:appauth:0.8.0")
     implementation(Square.retrofit2.retrofit)
     implementation(JakeWharton.retrofit2.converter.kotlinxSerialization)
     implementation(JakeWharton.timber)

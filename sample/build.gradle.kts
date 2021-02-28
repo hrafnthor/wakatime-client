@@ -54,6 +54,7 @@ dependencies {
     implementation(AndroidX.lifecycle.liveDataKtx)
     implementation(AndroidX.lifecycle.runtimeKtx)
     implementation(AndroidX.lifecycle.viewModelKtx)
+    implementation(AndroidX.swipeRefreshLayout)
 
     implementation(Square.okHttp3.loggingInterceptor)
 

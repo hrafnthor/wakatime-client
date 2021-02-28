@@ -2,12 +2,18 @@ buildscript {
 
     repositories {
         google()
-        jcenter()
+        mavenCentral()
+        jcenter {
+            content {
+                includeModule("org.jetbrains.trove4j", "trove4j")
+            }
+        }
+
     }
     dependencies {
         classpath("com.android.tools.build:gradle:_")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:_")
-        classpath("de.mannodermaus.gradle.plugins:android-junit5:_")
+//        classpath("de.mannodermaus.gradle.plugins:android-junit5:_")
         classpath("org.jetbrains.kotlin:kotlin-serialization:_")
     }
 }
@@ -15,7 +21,7 @@ buildscript {
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 }
 
