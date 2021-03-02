@@ -229,12 +229,13 @@ data class Heartbeat internal constructor(
          * @param type The type for this beat
          * @param category The category for this beat
          */
-        fun makeABeat(
+        inline fun makeABeat(
             entity: String,
             time: Float,
             type: Type,
-            category: Category
-        ): Beat.Builder = Beat.Builder(entity, time, type, category)
+            category: Category,
+            construct: Beat.Builder.() -> Unit = {}
+        ): Beat = Beat.Builder(entity, time, type, category).also(construct).build()
     }
 }
 
