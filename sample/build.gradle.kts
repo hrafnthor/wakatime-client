@@ -41,23 +41,28 @@ android {
 }
 
 dependencies {
+    //#region Local
+    implementation(enforcedPlatform(project(":bom")))
     implementation(fileTree(Pair("dir", "libs"), Pair("include", listOf("*.jar"))))
     implementation(project(":wakatimeclient"))
+    //#endregion
 
-    implementation(Kotlin.stdlib.jdk8)
+    //#region Kotlin
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    //#endregion
 
-    implementation(AndroidX.appCompat)
-    implementation(AndroidX.core)
-    implementation(AndroidX.activityKtx)
-    implementation(AndroidX.constraintLayout)
-    implementation(AndroidX.lifecycle.extensions)
-    implementation(AndroidX.lifecycle.liveDataKtx)
-    implementation(AndroidX.lifecycle.runtimeKtx)
-    implementation(AndroidX.lifecycle.viewModelKtx)
-    implementation(AndroidX.swipeRefreshLayout)
+    //#region Androidx
+    implementation("androidx.core:core-ktx")
+    implementation("androidx.appcompat:appcompat")
+    implementation("androidx.activity:activity-ktx")
+    implementation("androidx.fragment:fragment-ktx")
+    implementation("androidx.constraintlayout:constraintlayout")
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout")
+    //#endregion
 
-    implementation(Square.okHttp3.loggingInterceptor)
-
-    androidTestImplementation(AndroidX.test.runner)
-    androidTestImplementation(AndroidX.Test.Espresso.core)
+    //#region AndroidX Lifecycle
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx")
+    //#endregion
 }
