@@ -53,9 +53,7 @@ dependencies {
     //#region Androidx
     implementation("androidx.core:core-ktx")
     implementation("androidx.appcompat:appcompat")
-    //implementation("androidx.security:security-crypto")
-    implementation("androidx.security:security-crypto:1.0.0-rc03")
-
+    implementation("androidx.security:security-crypto")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx")
     //#endregion
 

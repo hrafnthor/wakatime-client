@@ -45,7 +45,7 @@ dependencies {
         api("androidx.constraintlayout:constraintlayout:$androidx_constraintlayout_version")
 
         val androidx_security_version: String by project
-        api("androidx.security:security-crypto$androidx_security_version")
+        api("androidx.security:security-crypto:$androidx_security_version")
 
         val androidx_swiperefreshlayout_version: String by project
         api("androidx.swiperefreshlayout:swiperefreshlayout:$androidx_swiperefreshlayout_version")
