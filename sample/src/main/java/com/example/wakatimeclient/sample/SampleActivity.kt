@@ -4,18 +4,19 @@ import `is`.hth.wakatimeclient.WakatimeClient
 import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.Scope
-import `is`.hth.wakatimeclient.wakatime.data.model.CurrentUser
+import `is`.hth.wakatimeclient.wakatime.data.model.*
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts.*
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.*
+import androidx.lifecycle.Observer
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.example.wakatimeclient.sample.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
@@ -207,9 +208,7 @@ object Injector {
 
     private fun getApiClient(context: Context): WakatimeClient {
         return WakatimeClient.Builder(base64EncodedApiKey = "<Your base64 encoded api key here")
-            .authenticator {
-
-            }.build(context)
+            .build(context)
     }
 
     private fun getOauthClient(context: Context): WakatimeClient {
