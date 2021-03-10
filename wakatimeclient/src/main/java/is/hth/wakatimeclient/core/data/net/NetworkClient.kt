@@ -5,7 +5,7 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.Authenticator
 import okhttp3.Cache
-import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.Retrofit
@@ -57,7 +57,7 @@ internal class NetworkClientImpl private constructor(
     override fun <T> createService(clazz: Class<T>): T = retrofit.create(clazz)
 
     override fun clearCache() {
-        client.cache()?.delete()
+        client.cache?.delete()
     }
 
     internal class Builder(
@@ -106,7 +106,7 @@ internal class NetworkClientImpl private constructor(
             val factory: Converter.Factory = Json {
                 ignoreUnknownKeys = true
                 coerceInputValues = true
-            }.asConverterFactory(MediaType.get(Mime.ApplicationJson.toString()))
+            }.asConverterFactory(Mime.ApplicationJson.toString().toMediaType())
 
             val client: OkHttpClient = clientBuilder
                 .authenticator(authenticator)

@@ -196,7 +196,7 @@ internal class AuthClientImpl internal constructor(
                     is Method.OAuth -> "Bearer ${session.accessToken()}"
                     is Method.ApiKey -> "Basic ${session.apiKey()}"
                 }
-                response.request()
+                response.request
                     .newBuilder()
                     .header(authorizationHeader, header)
                     .build()
