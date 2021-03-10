@@ -209,7 +209,10 @@ data class Summaries(
 
     companion object {
 
-        inline fun makeRequest(
+        /**
+         * Make a request for [Summaries] for the currently authenticated user
+         */
+        inline fun request(
             startDate: Calendar,
             endDate: Calendar,
             construct: Request.Builder.() -> Unit = {}
@@ -218,7 +221,10 @@ data class Summaries(
             endDate = endDate
         ).also(construct).build()
 
-        inline fun makeDashboardRequest(
+        /**
+         * Make a request for [Summaries] for a specific user on a specific dashboard
+         */
+        inline fun requestDashboard(
             organizationId: String,
             dashboardId: String,
             userId: String,
@@ -253,27 +259,18 @@ data class Summaries(
         @RequestDsl
         @Suppress("unused")
         class Builder(
-            private var startDate: Calendar,
-            private var endDate: Calendar,
-            private var timezone: String? = null,
-            private var metaFilter: MetaFilter? = null,
-            private var projectFilter: ProjectFilter? = null,
+            var startDate: Calendar,
+            var endDate: Calendar,
+            var timezone: String? = null,
+            var meta: MetaFilter? = null,
+            var project: ProjectFilter? = null,
         ) {
-            fun timezone(timezone: String?) = apply { this.timezone = timezone }
-            fun startDate(startDate: Calendar) = apply { this.startDate = startDate }
-            fun endDate(endDate: Calendar) = apply { this.endDate = endDate }
-            fun metaFilter(metaFilter: MetaFilter?) = apply { this.metaFilter = metaFilter }
-
-            fun projectFilter(projectFilter: ProjectFilter) = apply {
-                this.projectFilter = projectFilter
-            }
-
             fun build(): Request = Request(
                 startDate = startDate,
                 endDate = endDate,
                 timezone = timezone,
-                metaFilter = metaFilter,
-                projectFilter = projectFilter
+                metaFilter = meta,
+                projectFilter = project
             )
         }
     }
@@ -296,31 +293,20 @@ data class Summaries(
         @RequestDsl
         @Suppress("unused")
         class Builder(
-            private var organizationId: String,
-            private var dashboardId: String,
-            private var userId: String,
-            private var startDate: Calendar,
-            private var endDate: Calendar,
-            private var projectFilter: ProjectFilter? = null
+            var organizationId: String,
+            var dashboardId: String,
+            var userId: String,
+            var startDate: Calendar,
+            var endDate: Calendar,
+            var project: ProjectFilter? = null
         ) {
-            fun organizationId(organizationId: String) =
-                apply { this.organizationId = organizationId }
-
-            fun dashboardId(dashboardId: String) = apply { this.dashboardId = dashboardId }
-            fun userId(userId: String) = apply { this.userId = userId }
-            fun startDate(startDate: Calendar) = apply { this.startDate = startDate }
-            fun endDate(endDate: Calendar) = apply { this.endDate = endDate }
-            fun projectFilter(projectFilter: ProjectFilter?) = apply {
-                this.projectFilter = projectFilter
-            }
-
             fun build() = DashboardRequest(
                 organizationId,
                 dashboardId,
                 userId,
                 startDate,
                 endDate,
-                projectFilter
+                project
             )
         }
     }
@@ -332,7 +318,7 @@ inline fun Summaries.Request.Builder.meta(
 ) {
     val builder = MetaFilter.Builder()
     builder.filter()
-    metaFilter(builder.build())
+    meta = builder.build()
 }
 
 @Suppress("unused")
@@ -341,7 +327,7 @@ inline fun Summaries.Request.Builder.project(
 ) {
     val builder = ProjectFilter.Builder()
     builder.filter()
-    projectFilter(builder.build())
+    project = builder.build()
 }
 
 @Suppress("unused")
@@ -350,5 +336,5 @@ inline fun Summaries.DashboardRequest.Builder.project(
 ) {
     val builder = ProjectFilter.Builder()
     builder.filter()
-    projectFilter(builder.build())
+    project = builder.build()
 }

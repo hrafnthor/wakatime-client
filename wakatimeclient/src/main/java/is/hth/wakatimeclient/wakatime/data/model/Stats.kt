@@ -120,7 +120,10 @@ data class Stats(
     @Suppress("unused")
     companion object {
 
-        inline fun makeRequest(
+        /**
+         * Make a request for the authenticated user's [Stats] over the defined range
+         */
+        inline fun request(
             range: HumanRange,
             construct: Request.Builder.() -> Unit = {}
         ) = Request.Builder(range).also(construct).build()
@@ -128,25 +131,20 @@ data class Stats(
 
     class Request(
         val range: HumanRange,
-        val projectFilter: ProjectFilter?,
-        val metaFilter: MetaFilter?,
+        val project: ProjectFilter?,
+        val meta: MetaFilter?,
     ) {
         @RequestDsl
         @SuppressWarnings("unused")
         class Builder(
-            private var range: HumanRange,
-            private var projectFilter: ProjectFilter? = null,
-            private var metaFilter: MetaFilter? = null,
+            var range: HumanRange,
+            var project: ProjectFilter? = null,
+            var meta: MetaFilter? = null,
         ) {
-            fun range(range: HumanRange) = apply { this.range = range }
-            fun metaFilter(metaFilter: MetaFilter?) = apply { this.metaFilter = metaFilter }
-            fun projectFilter(projectFilter: ProjectFilter?) =
-                apply { this.projectFilter = projectFilter }
-
             fun build() = Request(
                 range = range,
-                projectFilter = projectFilter,
-                metaFilter = metaFilter,
+                project = project,
+                meta = meta,
             )
         }
     }
@@ -158,7 +156,7 @@ inline fun Stats.Request.Builder.project(
 ) {
     val builder = ProjectFilter.Builder()
     builder.filter()
-    projectFilter(builder.build())
+    project = builder.build()
 }
 
 
@@ -168,5 +166,5 @@ inline fun Stats.Request.Builder.meta(
 ) {
     val builder = MetaFilter.Builder()
     builder.filter()
-    metaFilter(builder.build())
+    meta = builder.build()
 }

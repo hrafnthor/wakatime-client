@@ -252,9 +252,9 @@ internal class WakatimeRemoteDataSourceImpl(
         return makeCall(networkCall = {
             api.getStats(
                 range = request.range.description,
-                timeout = request.metaFilter?.timeout,
-                writesOnly = request.metaFilter?.writesOnly,
-                projectId = request.projectFilter?.projectName
+                timeout = request.meta?.timeout,
+                writesOnly = request.meta?.writesOnly,
+                projectId = request.project?.projectName
             )
         }, transform = {
             it.data
@@ -316,8 +316,8 @@ internal class WakatimeRemoteDataSourceImpl(
         return makeCall {
             api.getExternalDurations(
                 day = format(request.date.time),
-                project = request.projectFilter?.projectName,
-                branches = request.projectFilter?.branches,
+                project = request.project?.projectName,
+                branches = request.project?.branches,
                 timezone = request.timezone
             )
         }

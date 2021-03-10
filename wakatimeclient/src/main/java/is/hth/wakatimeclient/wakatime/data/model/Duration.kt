@@ -65,11 +65,17 @@ data class ExternalDuration internal constructor(
     @Suppress("unused")
     companion object {
 
+        /**
+         * Make a request for the authenticated user's [ExternalDuration]s for the given date
+         */
         inline fun request(
             date: Calendar,
             construct: Request.Builder.() -> Unit = {}
         ) = Request.Builder(date).also(construct).build()
 
+        /**
+         * Make a [ExternalDuration] payload for delivering new information to Wakatime
+         */
         inline fun send(
             externalId: String,
             entity: String,
@@ -91,25 +97,15 @@ data class ExternalDuration internal constructor(
     @RequestDsl
     @Suppress("unused")
     class Builder(
-        private var externalId: String,
-        private var entity: String,
-        private var type: Type,
-        private var category: Category,
-        private var startTime: Float,
-        private var endTime: Float,
-        private var language: String? = null,
-        private var projectFilter: ProjectFilter? = null,
+        var externalId: String,
+        var entity: String,
+        var type: Type,
+        var category: Category,
+        var startTime: Float,
+        var endTime: Float,
+        var language: String? = null,
+        var project: ProjectFilter? = null,
     ) {
-        fun externalId(externalId: String) = apply { this.externalId = externalId }
-        fun entity(entity: String) = apply { this.entity = entity }
-        fun type(type: Type) = apply { this.type = type }
-        fun category(category: Category) = apply { this.category = category }
-        fun startTime(startTime: Float) = apply { this.startTime = startTime }
-        fun endTime(endTime: Float) = apply { this.endTime = endTime }
-        fun language(language: String?) = apply { this.language = language }
-        fun projectFilter(projectFilter: ProjectFilter?) =
-            apply { this.projectFilter = projectFilter }
-
         fun build() = ExternalDuration(
             externalId = externalId,
             entity = entity,
@@ -118,8 +114,8 @@ data class ExternalDuration internal constructor(
             startTime = startTime,
             endTime = endTime,
             language = language ?: "",
-            project = projectFilter?.projectName ?: "",
-            branch = projectFilter?.branches ?: ""
+            project = project?.projectName ?: "",
+            branch = project?.branches ?: ""
         )
     }
 
@@ -127,23 +123,18 @@ data class ExternalDuration internal constructor(
     class Request(
         val date: Calendar,
         val timezone: String?,
-        val projectFilter: ProjectFilter?
+        val project: ProjectFilter?
     ) {
         @RequestDsl
         class Builder(
-            private var date: Calendar,
-            private var timezone: String? = null,
-            private var projectFilter: ProjectFilter? = null,
+            var date: Calendar,
+            var timezone: String? = null,
+            var project: ProjectFilter? = null,
         ) {
-            fun timezone(timezone: String?) = apply { this.timezone = timezone }
-            fun date(date: Calendar) = apply { this.date = date }
-            fun projectFilter(projectFilter: ProjectFilter?) =
-                apply { this.projectFilter = projectFilter }
-
             fun build() = Request(
                 date = date,
                 timezone = timezone,
-                projectFilter = projectFilter
+                project = project
             )
         }
     }
@@ -155,7 +146,7 @@ inline fun ExternalDuration.Builder.project(
 ) {
     val builder = ProjectFilter.Builder()
     builder.filter()
-    projectFilter(builder.build())
+    project = builder.build()
 }
 
 @Suppress("unused")
@@ -164,5 +155,5 @@ inline fun ExternalDuration.Request.Builder.project(
 ) {
     val builder = ProjectFilter.Builder()
     builder.filter()
-    projectFilter(builder.build())
+    project = builder.build()
 }

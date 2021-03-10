@@ -169,37 +169,23 @@ data class Heartbeat internal constructor(
 
         @Suppress("unused")
         class Builder(
-            private var entity: String,
-            private var time: Float,
-            private var type: Type,
-            private var category: Category,
-            private var project: String? = null,
-            private var branch: String? = null,
-            private var language: String? = null,
+            var entity: String,
+            var time: Float,
+            var type: Type,
+            var category: Category,
+            var project: String? = null,
+            var branch: String? = null,
+            var language: String? = null,
             private var dependencies: String? = null,
-            private var lines: Int? = null,
-            private var lineno: Int? = null,
-            private var cursorpos: Int? = null,
-            private var isWrite: Boolean? = null,
+            var lines: Int? = null,
+            var lineno: Int? = null,
+            var cursorpos: Int? = null,
+            var isWrite: Boolean? = null,
         ) {
 
-            fun setProject(project: String?): Builder = apply { this.project = project }
-
-            fun setBranch(branch: String?): Builder = apply { this.branch = branch }
-
-            fun setLanguage(language: String?): Builder = apply { this.language = language }
-
-            fun setDependencies(dependencies: Set<String>?): Builder = apply {
-                this.dependencies = dependencies?.joinToString(separator = ",") { it }
+            fun dependencies(vararg dependencies: String?): Builder = apply {
+                this.dependencies = dependencies.filterNotNull().joinToString(separator = ",") { it }
             }
-
-            fun setLines(lines: Int?): Builder = apply { this.lines = lines }
-
-            fun setLineNo(lineno: Int?): Builder = apply { this.lineno = lineno }
-
-            fun setCursorPosition(cursorpos: Int?): Builder = apply { this.cursorpos = cursorpos }
-
-            fun setWrite(isWrite: Boolean?): Builder = apply { this.isWrite = isWrite }
 
             fun build(): Beat = Beat(
                 entity = entity,
@@ -222,14 +208,14 @@ data class Heartbeat internal constructor(
     companion object {
 
         /**
-         * Creates a new [Beat.Builder] for sending a heartbeat to the server
+         * Creates a new [Beat] for sending a heartbeat to the server
          *
          * @param entity The entity that the beat is logging time against, such as an absolute file path or domain
          * @param time epoch timestamp; numbers after decimal point are fractions of a second
          * @param type The type for this beat
          * @param category The category for this beat
          */
-        inline fun makeABeat(
+        inline fun send(
             entity: String,
             time: Float,
             type: Type,
