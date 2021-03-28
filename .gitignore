@@ -4,13 +4,15 @@
 .cxx
 
 # IntelliJ
-.idea
 *.iml
-*.iws
-*.ipr
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
 classes
 gen-external-apklibs
-
 
 # Gradle
 .gradle
