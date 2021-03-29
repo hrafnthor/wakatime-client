@@ -207,7 +207,7 @@ class SampleViewModelFactory(
 object Injector {
 
     private fun getApiClient(context: Context): WakatimeClient {
-        return WakatimeClient.Builder(base64EncodedApiKey = "<Your base64 encoded api key here")
+        return WakatimeClient.Builder(base64EncodedApiKey = "Your base64 encoded api key here")
             .build(context)
     }
 
