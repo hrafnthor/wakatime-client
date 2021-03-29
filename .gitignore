@@ -5,6 +5,7 @@
 
 # IntelliJ
 *.iml
+/.idea/*.xml
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
