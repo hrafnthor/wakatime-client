@@ -69,16 +69,11 @@ internal class DefaultAuthStorage private constructor(
         private const val KEY_METHOD = "method"
 
         fun construct(context: Context): AuthStorage {
-            return DefaultAuthStorage(
-                getSharedPreferences(
-                    context,
-                    "${context.packageName}_auth_prefs"
-                )
-            )
+            return DefaultAuthStorage(getSharedPreferences(context, "${context.packageName}_auth_prefs"))
         }
 
-        private fun getSharedPreferences(context: Context, name: String): SharedPreferences =
-            when {
+        private fun getSharedPreferences(context: Context, name: String): SharedPreferences {
+            return when {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> EncryptedSharedPreferences.create(
                     name,
                     MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC),
@@ -91,6 +86,7 @@ internal class DefaultAuthStorage private constructor(
                     context.getSharedPreferences(name, Context.MODE_PRIVATE)
                 }
             }
+        }
     }
 
     override fun getState(): AuthState {
@@ -119,8 +115,7 @@ internal class DefaultAuthStorage private constructor(
         }
     }
 
-    override fun update(func: (AuthState) -> Unit): AuthState =
-        getState().apply(func).let(this::setState)
+    override fun update(func: (AuthState) -> Unit): AuthState = getState().apply(func).let(this::setState)
 
     override fun getMethod(): Method {
         val value = preferences.getString(KEY_METHOD, "") ?: ""
