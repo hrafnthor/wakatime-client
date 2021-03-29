@@ -34,7 +34,7 @@ class WakatimeClient private constructor(
     class Builder private constructor(
         secret: String = "",
         clientId: String = "",
-        private val apiKey: String = "",
+        apiKey: String = "",
         redirectUri: Uri = Uri.parse(""),
         method: Method
     ) {
@@ -85,21 +85,18 @@ class WakatimeClient private constructor(
         /**
          * Configure the [AuthClient] that will be used for authentication against Wakatime's API
          */
-        fun authenticator(action: (AuthClient.Builder.() -> Unit)): Builder =
-            apply { action(authBuilder) }
+        fun authenticator(action: (AuthClient.Builder.() -> Unit)): Builder = apply { action(authBuilder) }
 
         /**
          * Configure the [NetworkClient] that will be used for interacting against Wakatime's API
          */
-        fun network(action: (NetworkClient.Builder.() -> Unit)): Builder =
-            apply { action(netBuilder) }
+        fun network(action: (NetworkClient.Builder.() -> Unit)): Builder = apply { action(netBuilder) }
 
         /**
          * Assigns the global cache lifetime in minutes used to determine if new
          * values should be fetched over the network. The default value is 5 minutes.
          */
-        fun cacheLifetimeInSeconds(minutes: Int): Builder =
-            apply { cacheLifetimeInSeconds = abs(minutes) }
+        fun cacheLifetimeInSeconds(minutes: Int): Builder = apply { cacheLifetimeInSeconds = abs(minutes) }
 
         /**
          * Constructs a [WakatimeClient] based on the current configuration

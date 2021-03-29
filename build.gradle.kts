@@ -3,12 +3,6 @@ buildscript {
     repositories {
         google()
         mavenCentral()
-        jcenter {
-            content {
-                includeModule("org.jetbrains.trove4j", "trove4j")
-            }
-        }
-
     }
     dependencies {
         classpath("com.android.tools.build:gradle:4.1.2")

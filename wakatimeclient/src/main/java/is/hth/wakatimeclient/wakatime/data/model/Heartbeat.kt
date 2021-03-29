@@ -176,11 +176,11 @@ data class Heartbeat internal constructor(
             var project: String? = null,
             var branch: String? = null,
             var language: String? = null,
-            private var dependencies: String? = null,
             var lines: Int? = null,
             var lineno: Int? = null,
             var cursorpos: Int? = null,
             var isWrite: Boolean? = null,
+            private var dependencies: String? = null,
         ) {
 
             fun dependencies(vararg dependencies: String?): Builder = apply {
