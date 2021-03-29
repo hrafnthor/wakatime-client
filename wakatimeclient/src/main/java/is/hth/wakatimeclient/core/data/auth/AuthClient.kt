@@ -284,7 +284,9 @@ internal class AuthClientImpl internal constructor(
             }
 
             storage.setMethod(config.method)
-            storage.setKey(apiKey)
+            if (config.method is Method.ApiKey) {
+                storage.setKey(apiKey)
+            }
 
             val appauthConfig = AppAuthConfiguration.Builder()
                 .setBrowserMatcher(matcher)
