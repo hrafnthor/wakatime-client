@@ -1,7 +1,6 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("kotlin-android-extensions")
     id("kotlin-kapt")
 }
 
@@ -25,9 +24,6 @@ android {
         getByName("debug") {
             // The defined OAuth redirect scheme as defined inside Wakatime's app dashboard
             manifestPlaceholders["appAuthRedirectScheme"] = "vakta://grant-callback"
-        }
-        getByName("release") {
-
         }
     }
     compileOptions {
