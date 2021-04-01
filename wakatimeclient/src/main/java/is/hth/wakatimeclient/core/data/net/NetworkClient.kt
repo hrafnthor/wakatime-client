@@ -10,6 +10,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Converter
 import retrofit2.Retrofit
 import java.io.File
+import kotlin.math.abs
 
 interface NetworkClient {
 
@@ -26,15 +27,16 @@ interface NetworkClient {
     interface Builder {
 
         /**
-         * Exposes the underlying [OkHttpClient.Builder] for configurations
-         * exceeding what this builder implements.
+         * Exposes the underlying [OkHttpClient.Builder] for configurations outside the scope of
+         * what this builder implements.
          * Be advised that any [Authenticator] set though the resulting builder will be overwritten,
-         * so [Builder.setAuthenticator] should be used for that instead.
+         * so [Builder.setAuthenticator] should be used if a custom authenticator is needed.
          */
         fun getOKHttpBuilder(): OkHttpClient.Builder
 
         /**
-         *
+         * Exposes the underlying [Retrofit.Builder] for configurations outside of the scope
+         * of what this builder implements.
          */
         fun getRetrofitBuilder(): Retrofit.Builder
 
@@ -45,6 +47,14 @@ interface NetworkClient {
          * In the case of using a API key, a custom [Authenticator] will be needed.
          */
         fun setAuthenticator(authenticator: Authenticator): Builder
+
+        /**
+         * Assigns the global cache lifetime in seconds used to determine if new
+         * values should be fetched over the network. The default value is 5 minutes.
+         * @param cacheDir The location of where the cache will be stored, for instance Context.cacheDir
+         * @param cacheLifetimeInSeconds The lifetime of the cache in seconds
+         */
+        fun enableCache(cacheDir: File, cacheLifetimeInSeconds: Int): Builder
     }
 }
 
@@ -66,7 +76,10 @@ internal class NetworkClientImpl private constructor(
 
         private val clientBuilder = OkHttpClient.Builder()
         private val retrofitBuilder = Retrofit.Builder()
+
         private lateinit var authenticator: Authenticator
+        private var cacheLifetimeInSeconds: Int = 0
+        private var cacheDir: File? = null
 
         override fun getOKHttpBuilder(): OkHttpClient.Builder = clientBuilder
 
@@ -74,31 +87,20 @@ internal class NetworkClientImpl private constructor(
 
         override fun setAuthenticator(
             authenticator: Authenticator
-        ): NetworkClient.Builder = apply {
-            this.authenticator = authenticator
-        }
+        ): NetworkClient.Builder = apply { this.authenticator = authenticator }
 
-        fun setAuthenticatorIfNeeded(
-            authenticator: Authenticator
-        ): Builder = apply {
-            if (!this::authenticator.isInitialized) setAuthenticator(authenticator)
-        }
-
-        /**
-         * Turns on forced network layer caching
-         */
-        internal fun enableCache(
+        override fun enableCache(
             cacheDir: File,
             cacheLifetimeInSeconds: Int
         ): Builder = apply {
-            if (cacheLifetimeInSeconds > 0) {
-                with(getOKHttpBuilder()) {
-                    val cacheSize: Long = (10 * 1028 * 1028).toLong()
-                    cache(Cache(cacheDir, cacheSize))
-                    addInterceptor(ReadInterceptor(cacheLifetimeInSeconds))
-                    addNetworkInterceptor(WriteInterceptor(cacheLifetimeInSeconds))
-                }
-            }
+            this.cacheLifetimeInSeconds = abs(cacheLifetimeInSeconds)
+            this.cacheDir = cacheDir
+        }
+
+        internal fun setAuthenticatorIfNeeded(
+            authenticator: Authenticator
+        ): Builder = apply {
+            if (!this::authenticator.isInitialized) setAuthenticator(authenticator)
         }
 
         @ExperimentalSerializationApi
@@ -110,6 +112,16 @@ internal class NetworkClientImpl private constructor(
 
             val client: OkHttpClient = clientBuilder
                 .authenticator(authenticator)
+                .apply {
+                    cacheDir?.let { directory ->
+                        if (cacheLifetimeInSeconds > 0) {
+                            val cacheSize: Long = (10 * 1028 * 1028).toLong()
+                            cache(Cache(directory, cacheSize))
+                            addInterceptor(ReadInterceptor(cacheLifetimeInSeconds))
+                            addInterceptor(WriteInterceptor(cacheLifetimeInSeconds))
+                        }
+                    }
+                }
                 .build()
 
             val retrofit: Retrofit = retrofitBuilder
