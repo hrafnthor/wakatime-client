@@ -9,7 +9,7 @@ android {
     buildToolsVersion = "30.0.3"
     defaultConfig {
         applicationId = "is.hth.wakatimeclient.sample"
-        minSdkVersion(16)
+        minSdkVersion(23)
         targetSdkVersion(30)
         versionCode = 1
         versionName = "1.0"
@@ -48,6 +48,7 @@ dependencies {
     implementation("androidx.appcompat:appcompat")
     implementation("androidx.activity:activity-ktx")
     implementation("androidx.fragment:fragment-ktx")
+    implementation("androidx.security:security-crypto")
     implementation("androidx.constraintlayout:constraintlayout")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout")
     //#endregion
