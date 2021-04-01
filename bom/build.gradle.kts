@@ -8,17 +8,20 @@ javaPlatform {
 
 dependencies {
     constraints {
-        api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.31")
+        val kotlin_version: String by project
+        api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
 
         //#region KotlinX Serialization
-        api("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
-        api("org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0")
+        val kotlinx_serialization_version: String by project
+        api("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version")
+        api("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinx_serialization_version")
         //#endregion
 
         val material_version: String by project
         api("com.google.android.material:material:$material_version")
 
-        api("net.openid:appauth:0.8.0")
+        val appauth_version: String by project
+        api("net.openid:appauth:$appauth_version")
 
         val timber_version: String by project
         api("com.jakewharton.timber:timber:$timber_version")
