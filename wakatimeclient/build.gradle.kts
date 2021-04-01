@@ -6,10 +6,11 @@ plugins {
 }
 
 android {
-    compileSdkVersion(Properties.Common.compileSdkVersion)
+    compileSdkVersion(30)
+    buildToolsVersion = "30.0.3"
     defaultConfig {
-        minSdkVersion(Properties.Common.minimumSdkVersion)
-        targetSdkVersion(Properties.Common.targetSdkVersion)
+        minSdkVersion(16)
+        targetSdkVersion(30)
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -20,26 +21,22 @@ android {
         }
         getByName("release") {
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             )
         }
     }
-    buildToolsVersion = Properties.Common.buildToolVersion
     compileOptions {
-        sourceCompatibility = Properties.Common.javaCompatibility
-        targetCompatibility = Properties.Common.javaCompatibility
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
-
     kotlinOptions {
-        jvmTarget = Properties.Common.javaCompatibility.toString()
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
 
 dependencies {
     //#region Local
     implementation(enforcedPlatform(project(":bom")))
-    implementation(fileTree(Pair("dir", "libs"), Pair("include", listOf("*.jar"))))
     //#endregion
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
