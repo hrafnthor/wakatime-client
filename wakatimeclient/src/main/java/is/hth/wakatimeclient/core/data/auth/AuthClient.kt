@@ -180,18 +180,18 @@ internal class AuthClientImpl internal constructor(
         override fun isAuthorized(): Boolean {
             return when (authenticationMethod()) {
                 Method.ApiKey -> apiKey().isNotEmpty()
-                Method.OAuth -> getState().isAuthorized
+                Method.OAuth -> storage.getState().isAuthorized
             }
         }
 
         override fun authorizedScopes(): Set<Scope> {
-            val scopes = getState().scopeSet?.joinToString(separator = ",") { it } ?: ""
+            val scopes = storage.getState().scopeSet?.joinToString(separator = ",") { it } ?: ""
             return Scope.extractScopes(scopes)
         }
 
-        override fun accessToken(): String = getState().accessToken ?: ""
+        override fun accessToken(): String = storage.getState().accessToken ?: ""
 
-        override fun refreshToken(): String = getState().refreshToken ?: ""
+        override fun refreshToken(): String = storage.getState().refreshToken ?: ""
 
         override fun apiKey(): String = storage.getKey() ?: ""
 
@@ -226,8 +226,6 @@ internal class AuthClientImpl internal constructor(
                 }
             } else continuation.resumeWith(Result.success(Results.Success.Empty))
         }
-
-        private fun getState(): AuthState = storage.getState()
 
         override fun authenticationMethod(): Method = storage.getMethod()
     }
