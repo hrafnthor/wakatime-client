@@ -54,7 +54,7 @@ internal class SessionManagerImpl(
 
     override suspend fun logout(force: Boolean): Results<Report> {
         val errors: MutableSet<Error> = mutableSetOf()
-        if (session.isAuthorized() && session.authenticationMethod() is Method.OAuth) {
+        if (session.isAuthorized() && session.authenticationMethod() == Method.OAuth) {
             // Revoke the access token
             val accessRevoke = revoke(config.clientId, config.clientSecret, session.accessToken())
             if (accessRevoke is Results.Failure) {

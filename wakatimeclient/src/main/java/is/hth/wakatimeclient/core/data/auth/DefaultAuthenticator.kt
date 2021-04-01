@@ -14,8 +14,8 @@ internal class DefaultAuthenticator(
         return if (response.header(authorizationHeader) == null && session.isAuthorized()) {
             // Authorization exists and has not been attempted for this request yet
             val header = when (session.authenticationMethod()) {
-                is Method.OAuth -> "Bearer ${session.accessToken()}"
-                is Method.ApiKey -> "Basic ${session.apiKey()}"
+                Method.OAuth -> "Bearer ${session.accessToken()}"
+                Method.ApiKey -> "Basic ${session.apiKey()}"
             }
             response.request
                 .newBuilder()

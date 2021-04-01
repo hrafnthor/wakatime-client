@@ -196,7 +196,7 @@ internal class AuthClientImpl internal constructor(
         override fun apiKey(): String = storage.getKey() ?: ""
 
         override suspend fun update(force: Boolean): Results<Unit> = suspendCoroutine { continuation ->
-            if (storage.getMethod() is Method.OAuth) {
+            if (storage.getMethod() == Method.OAuth) {
                 val state = storage.getState()
 
                 // if forcing a token update mark it so
