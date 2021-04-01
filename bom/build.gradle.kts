@@ -12,9 +12,9 @@ dependencies {
         api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
 
         //#region KotlinX Serialization
-        val kotlin_serialization_version: String by project
-        api("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlin_serialization_version")
-        api("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlin_serialization_version")
+        val kotlinx_serialization_version: String by project
+        api("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version")
+        api("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinx_serialization_version")
         //#endregion
 
         val material_version: String by project
