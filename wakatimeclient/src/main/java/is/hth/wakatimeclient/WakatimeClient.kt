@@ -31,7 +31,7 @@ class WakatimeClient private constructor(
 
     class Builder private constructor(
         secret: String = "",
-        clientId: String = "",
+        appId: String = "",
         apiKey: String = "",
         redirectUri: Uri = Uri.parse(""),
         method: Method
@@ -60,18 +60,18 @@ class WakatimeClient private constructor(
          */
         constructor(
             secret: String,
-            clientId: String,
+            appId: String,
             redirectUri: Uri
         ) : this(
             secret = secret,
-            clientId = clientId,
+            appId = appId,
             redirectUri = redirectUri,
             method = Method.OAuth
         )
 
         private val config: AuthConfig = AuthConfig(
             clientSecret = secret,
-            clientId = clientId,
+            appId = appId,
             redirectUri = redirectUri,
             host = Uri.parse("https://wakatime.com"),
             method = method
