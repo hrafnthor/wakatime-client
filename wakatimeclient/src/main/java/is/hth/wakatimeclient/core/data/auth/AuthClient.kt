@@ -7,10 +7,6 @@ import android.content.Intent
 import net.openid.appauth.*
 import net.openid.appauth.browser.AnyBrowserMatcher
 import net.openid.appauth.browser.BrowserMatcher
-import okhttp3.Authenticator
-import okhttp3.Request
-import okhttp3.Response
-import okhttp3.Route
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -27,11 +23,6 @@ interface AuthClient {
      * with calling [createAuthenticationIntent]
      */
     suspend fun onAuthenticationResult(result: Intent): Results<Boolean>
-
-    /**
-     *
-     */
-    fun authenticator(): Authenticator
 
     /**
      *
@@ -100,7 +91,6 @@ internal class AuthClientImpl internal constructor(
 ) : AuthClient {
 
     private val session: AuthClient.Session = SessionImpl(storage, authService)
-    private val authenticator: Authenticator = AuthenticatorImpl(session)
 
     override fun createAuthenticationIntent(scopes: List<Scope>): Intent {
         val serviceConfig = AuthorizationServiceConfiguration(
@@ -144,8 +134,6 @@ internal class AuthClientImpl internal constructor(
             }
         }
 
-    override fun authenticator(): Authenticator = authenticator
-
     override fun session(): AuthClient.Session = session
 
     //
@@ -183,26 +171,6 @@ internal class AuthClientImpl internal constructor(
     //
     //                      Internal class definitions
     //////////////////////////////////////////////////////////////////////////
-
-    private class AuthenticatorImpl(
-        private val session: AuthClient.Session
-    ) : Authenticator {
-
-        override fun authenticate(route: Route?, response: Response): Request? {
-            val authorizationHeader = "Authorization"
-            return if (response.header(authorizationHeader) == null && session.isAuthorized()) {
-                // Authorization exists and has not been attempted for this request yet
-                val header = when (session.authenticationMethod()) {
-                    is Method.OAuth -> "Bearer ${session.accessToken()}"
-                    is Method.ApiKey -> "Basic ${session.apiKey()}"
-                }
-                response.request
-                    .newBuilder()
-                    .header(authorizationHeader, header)
-                    .build()
-            } else null
-        }
-    }
 
     private class SessionImpl(
         private val storage: AuthStorage,
