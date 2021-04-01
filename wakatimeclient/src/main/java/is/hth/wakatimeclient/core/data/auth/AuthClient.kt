@@ -76,17 +76,12 @@ interface AuthClient {
          * For setting custom filtering requirements on which browsers are allowed
          */
         fun setBrowserMatcher(matcher: BrowserMatcher): Builder
-
-        /**
-         * The [AuthStorage] which will be used for storing the authentication information
-         */
-        fun setStorage(storage: AuthStorage): Builder
     }
 }
 
 internal class AuthClientImpl internal constructor(
     private val config: AuthConfig,
-    internal val storage: AuthStorage,
+    internal val storage: AuthStorageWrapper,
     private val authService: AuthorizationService
 ) : AuthClient {
 
@@ -173,7 +168,7 @@ internal class AuthClientImpl internal constructor(
     //////////////////////////////////////////////////////////////////////////
 
     private class SessionImpl(
-        private val storage: AuthStorage,
+        private val storage: AuthStorageWrapper,
         private val service: AuthorizationService
     ) : AuthClient.Session {
 
@@ -193,7 +188,7 @@ internal class AuthClientImpl internal constructor(
 
         override fun refreshToken(): String = storage.getState().refreshToken ?: ""
 
-        override fun apiKey(): String = storage.getKey() ?: ""
+        override fun apiKey(): String = storage.getKey()
 
         override suspend fun update(force: Boolean): Results<Unit> = suspendCoroutine { continuation ->
             if (storage.getMethod() == Method.OAuth) {
@@ -235,23 +230,16 @@ internal class AuthClientImpl internal constructor(
         private val config: AuthConfig
     ) : AuthClient.Builder {
 
-        private lateinit var storage: AuthStorage
         private var matcher: BrowserMatcher = AnyBrowserMatcher.INSTANCE
 
-        override fun setBrowserMatcher(matcher: BrowserMatcher): AuthClient.Builder =
-            apply { this.matcher = matcher }
+        override fun setBrowserMatcher(matcher: BrowserMatcher): AuthClient.Builder = apply { this.matcher = matcher }
 
-        override fun setStorage(storage: AuthStorage): AuthClient.Builder =
-            apply { this.storage = storage }
+        internal fun build(context: Context, storage: AuthStorage): AuthClientImpl {
+            val wrapper = AuthStorageWrapper(storage)
+            wrapper.setMethod(config.method)
 
-        internal fun build(context: Context): AuthClientImpl {
-            if (this::storage.isInitialized.not()) {
-                storage = DefaultAuthStorage.construct(context.applicationContext)
-            }
-
-            storage.setMethod(config.method)
-            if (config.method is Method.ApiKey) {
-                storage.setKey(apiKey)
+            if (config.method == Method.ApiKey) {
+                wrapper.setKey(apiKey)
             }
 
             val appauthConfig = AppAuthConfiguration.Builder()
@@ -260,7 +248,7 @@ internal class AuthClientImpl internal constructor(
 
             return AuthClientImpl(
                 config = config,
-                storage = storage,
+                storage = wrapper,
                 authService = AuthorizationService(context.applicationContext, appauthConfig)
             )
         }

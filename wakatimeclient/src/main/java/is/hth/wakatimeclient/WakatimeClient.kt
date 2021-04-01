@@ -93,8 +93,8 @@ class WakatimeClient private constructor(
          * Constructs a [WakatimeClient] based on the current configuration
          */
         @ExperimentalSerializationApi
-        fun build(context: Context): WakatimeClient {
-            val authClient: AuthClientImpl = authBuilder.build(context)
+        fun build(context: Context, storage: AuthStorage): WakatimeClient {
+            val authClient: AuthClientImpl = authBuilder.build(context, storage)
             val netClient: NetworkClient = netBuilder
                 .setAuthenticatorIfNeeded(DefaultAuthenticator(authClient.session()))
                 .build()

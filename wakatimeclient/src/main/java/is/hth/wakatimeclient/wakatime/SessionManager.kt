@@ -4,7 +4,7 @@ import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.auth.AuthConfig
-import `is`.hth.wakatimeclient.core.data.auth.AuthStorage
+import `is`.hth.wakatimeclient.core.data.auth.AuthStorageWrapper
 import `is`.hth.wakatimeclient.core.data.auth.Method
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 import `is`.hth.wakatimeclient.core.safeOperation
@@ -47,7 +47,7 @@ data class Report(
 internal class SessionManagerImpl(
     private val config: AuthConfig,
     private val oauthApi: OauthApi,
-    private val storage: AuthStorage,
+    private val storage: AuthStorageWrapper,
     private val session: AuthClient.Session,
     private val netProcessor: NetworkErrorProcessor
 ) : SessionManager {
@@ -74,7 +74,7 @@ internal class SessionManagerImpl(
                     return refreshRevoke
                 }
             }
-            storage.resetAuthState()
+            storage.clear()
         }
 
         return Results.Success.Value(Report(forced = force, errors = errors))
