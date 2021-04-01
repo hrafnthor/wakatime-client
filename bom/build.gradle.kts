@@ -20,7 +20,8 @@ dependencies {
         val material_version: String by project
         api("com.google.android.material:material:$material_version")
 
-        api("net.openid:appauth:0.8.0")
+        val appauth_version: String by project
+        api("net.openid:appauth:$appauth_version")
 
         val timber_version: String by project
         api("com.jakewharton.timber:timber:$timber_version")
