@@ -63,20 +63,11 @@ sealed class Error(val code: Int, val message: String) {
     sealed class Network(code: Int, message: String) : Error(code, message) {
 
         /**
-         * You are authenticated, but do not have permission to access the resource.
+         * A 400 Bad Request error occurred
          */
-        class Forbidden(message: String) : Network(CODE, message) {
+        class BadRequest(message: String) : Network(CODE, message) {
             companion object {
-                const val CODE = 201
-            }
-        }
-
-        /**
-         * No network access was found
-         */
-        class NoNetwork(message: String) : Network(CODE, message) {
-            companion object {
-                const val CODE = 202
+                const val CODE = 400
             }
         }
 
@@ -85,7 +76,16 @@ sealed class Error(val code: Int, val message: String) {
          */
         class Unauthorized(message: String) : Network(CODE, message) {
             companion object {
-                const val CODE = 203
+                const val CODE = 401
+            }
+        }
+
+        /**
+         * You are authenticated, but do not have permission to access the resource.
+         */
+        class Forbidden(message: String) : Network(CODE, message) {
+            companion object {
+                const val CODE = 403
             }
         }
 
@@ -94,16 +94,7 @@ sealed class Error(val code: Int, val message: String) {
          */
         class NotFound(message: String) : Network(CODE, message) {
             companion object {
-                const val CODE = 204
-            }
-        }
-
-        /**
-         * The host's IP address could not be determined
-         */
-        class UnknownHost(message: String) : Network(CODE, message) {
-            companion object {
-                const val CODE = 205
+                const val CODE = 404
             }
         }
 
@@ -112,7 +103,7 @@ sealed class Error(val code: Int, val message: String) {
          */
         class Unavailable(message: String) : Network(CODE, message) {
             companion object {
-                const val CODE = 206
+                const val CODE = 503
             }
         }
 
@@ -122,25 +113,7 @@ sealed class Error(val code: Int, val message: String) {
          */
         class Timeout(message: String) : Network(CODE, message) {
             companion object {
-                const val CODE = 207
-            }
-        }
-
-        /**
-         * A 400 Bad Request error occurred
-         */
-        class BadRequest(message: String) : Network(CODE, message) {
-            companion object {
-                const val CODE = 208
-            }
-        }
-
-        /**
-         * Serialization of what ever payload was being processed failed
-         */
-        class Serialization(message: String) : Network(CODE, message) {
-            companion object {
-                const val CODE = 209
+                const val CODE = 408
             }
         }
 
@@ -149,7 +122,7 @@ sealed class Error(val code: Int, val message: String) {
          */
         class TooManyRequests(message: String) : Network(CODE, message) {
             companion object {
-                const val CODE = 210
+                const val CODE = 429
             }
         }
 
@@ -158,7 +131,34 @@ sealed class Error(val code: Int, val message: String) {
          */
         class Internal(message: String) : Network(CODE, message) {
             companion object {
-                const val CODE = 211
+                const val CODE = 470
+            }
+        }
+
+        /**
+         * No network access was found
+         */
+        class NoNetwork(message: String) : Network(CODE, message) {
+            companion object {
+                const val CODE = 471
+            }
+        }
+
+        /**
+         * The host's IP address could not be determined
+         */
+        class UnknownHost(message: String) : Network(CODE, message) {
+            companion object {
+                const val CODE = 472
+            }
+        }
+
+        /**
+         * Serialization of what ever payload was being processed failed
+         */
+        class Serialization(message: String) : Network(CODE, message) {
+            companion object {
+                const val CODE = 473
             }
         }
 
