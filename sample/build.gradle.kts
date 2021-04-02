@@ -70,4 +70,6 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx")
     //#endregion
+
+    implementation("com.squareup.okhttp3:logging-interceptor")
 }

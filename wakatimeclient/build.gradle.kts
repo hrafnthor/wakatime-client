@@ -56,7 +56,6 @@ dependencies {
 
     implementation("com.squareup.retrofit2:retrofit")
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter")
-    implementation("com.squareup.okhttp3:logging-interceptor")
     implementation("com.jakewharton.timber:timber")
 
     //#region Kotest
