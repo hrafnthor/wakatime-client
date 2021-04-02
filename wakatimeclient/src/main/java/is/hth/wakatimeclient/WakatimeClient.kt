@@ -1,9 +1,8 @@
 package `is`.hth.wakatimeclient
 
-import `is`.hth.wakatimeclient.core.data.auth.AuthClient
+import `is`.hth.wakatimeclient.core.data.auth.*
 import `is`.hth.wakatimeclient.core.data.auth.AuthClientImpl
-import `is`.hth.wakatimeclient.core.data.auth.AuthConfig
-import `is`.hth.wakatimeclient.core.data.auth.Method
+import `is`.hth.wakatimeclient.core.data.auth.DefaultAuthenticator
 import `is`.hth.wakatimeclient.core.data.net.NetworkClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkClientImpl
 import `is`.hth.wakatimeclient.wakatime.SessionManager
@@ -16,7 +15,6 @@ import android.content.Context
 import android.net.Uri
 import kotlinx.serialization.ExperimentalSerializationApi
 import timber.log.Timber
-import kotlin.math.abs
 
 /**
  *
@@ -33,7 +31,7 @@ class WakatimeClient private constructor(
 
     class Builder private constructor(
         secret: String = "",
-        clientId: String = "",
+        appId: String = "",
         apiKey: String = "",
         redirectUri: Uri = Uri.parse(""),
         method: Method
@@ -62,19 +60,18 @@ class WakatimeClient private constructor(
          */
         constructor(
             secret: String,
-            clientId: String,
+            appId: String,
             redirectUri: Uri
         ) : this(
             secret = secret,
-            clientId = clientId,
+            appId = appId,
             redirectUri = redirectUri,
             method = Method.OAuth
         )
 
-        private var cacheLifetimeInSeconds: Int = 0
         private val config: AuthConfig = AuthConfig(
             clientSecret = secret,
-            clientId = clientId,
+            appId = appId,
             redirectUri = redirectUri,
             host = Uri.parse("https://wakatime.com"),
             method = method
@@ -93,24 +90,14 @@ class WakatimeClient private constructor(
         fun network(action: (NetworkClient.Builder.() -> Unit)): Builder = apply { action(netBuilder) }
 
         /**
-         * Assigns the global cache lifetime in minutes used to determine if new
-         * values should be fetched over the network. The default value is 5 minutes.
-         */
-        fun cacheLifetimeInSeconds(minutes: Int): Builder = apply { cacheLifetimeInSeconds = abs(minutes) }
-
-        /**
          * Constructs a [WakatimeClient] based on the current configuration
          */
         @ExperimentalSerializationApi
-        fun build(context: Context): WakatimeClient {
-            val authClient: AuthClientImpl = authBuilder.build(context)
+        fun build(context: Context, storage: AuthStorage): WakatimeClient {
+            val authClient: AuthClientImpl = authBuilder.build(context, storage)
             val netClient: NetworkClient = netBuilder
-                .setAuthenticatorIfNeeded(authClient.authenticator())
-                .also {
-                    if (cacheLifetimeInSeconds > 0) {
-                        it.enableCache(context.cacheDir, cacheLifetimeInSeconds)
-                    }
-                }.build()
+                .setAuthenticatorIfNeeded(DefaultAuthenticator(authClient.session()))
+                .build()
 
             val network = WakatimeNetworkClient(netClient, WakatimeErrorProcessor())
 

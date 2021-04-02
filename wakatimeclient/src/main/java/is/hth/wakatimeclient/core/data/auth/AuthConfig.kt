@@ -13,7 +13,7 @@ data class AuthConfig(
     /**
      *
      */
-    val clientId: String,
+    val appId: String,
     /**
      *
      */

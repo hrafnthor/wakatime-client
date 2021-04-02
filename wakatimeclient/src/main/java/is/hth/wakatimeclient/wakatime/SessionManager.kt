@@ -4,7 +4,7 @@ import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.auth.AuthConfig
-import `is`.hth.wakatimeclient.core.data.auth.AuthStorage
+import `is`.hth.wakatimeclient.core.data.auth.AuthStorageWrapper
 import `is`.hth.wakatimeclient.core.data.auth.Method
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 import `is`.hth.wakatimeclient.core.safeOperation
@@ -47,16 +47,16 @@ data class Report(
 internal class SessionManagerImpl(
     private val config: AuthConfig,
     private val oauthApi: OauthApi,
-    private val storage: AuthStorage,
+    private val storage: AuthStorageWrapper,
     private val session: AuthClient.Session,
     private val netProcessor: NetworkErrorProcessor
 ) : SessionManager {
 
     override suspend fun logout(force: Boolean): Results<Report> {
         val errors: MutableSet<Error> = mutableSetOf()
-        if (session.isAuthorized() && session.authenticationMethod() is Method.OAuth) {
+        if (session.isAuthorized() && session.authenticationMethod() == Method.OAuth) {
             // Revoke the access token
-            val accessRevoke = revoke(config.clientId, config.clientSecret, session.accessToken())
+            val accessRevoke = revoke(config.appId, config.clientSecret, session.accessToken())
             if (accessRevoke is Results.Failure) {
                 if (force) {
                     errors.add(accessRevoke.error)
@@ -66,7 +66,7 @@ internal class SessionManagerImpl(
             }
 
             // Revoke the refresh token
-            val refreshRevoke = revoke(config.clientId, config.clientSecret, session.refreshToken())
+            val refreshRevoke = revoke(config.appId, config.clientSecret, session.refreshToken())
             if (refreshRevoke is Results.Failure) {
                 if (force) {
                     errors.add(refreshRevoke.error)
@@ -74,7 +74,7 @@ internal class SessionManagerImpl(
                     return refreshRevoke
                 }
             }
-            storage.resetAuthState()
+            storage.clear()
         }
 
         return Results.Success.Value(Report(forced = force, errors = errors))
