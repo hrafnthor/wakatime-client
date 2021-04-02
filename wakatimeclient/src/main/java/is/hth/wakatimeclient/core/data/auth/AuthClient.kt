@@ -122,8 +122,7 @@ internal class AuthClientImpl internal constructor(
                     continuation.resume(it)
                 }
                 else -> {
-                    val message =
-                        "Authentication flow resulted in neither actionable response nor exception!"
+                    val message = "Authentication flow resulted in neither actionable response nor exception!"
                     continuation.resume(Results.Failure(Error.Auth.Unknown(-1, message)))
                 }
             }
