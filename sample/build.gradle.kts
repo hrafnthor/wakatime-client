@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.dsl.BuildType
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -21,7 +23,13 @@ android {
     buildTypes {
         getByName("debug") {
             // The defined OAuth redirect scheme as defined inside Wakatime's app dashboard
-            manifestPlaceholders["appAuthRedirectScheme"] = "vakta://grant-callback"
+            val redirectScheme = "<Your redirect scheme>"
+            val redirectHost = "<Your redirect host>"
+            manifestPlaceholders["appAuthRedirectScheme"] = redirectScheme
+            manifestPlaceholders["appAuthRedirectHost"] = redirectHost
+            setBuildConfigField("APPID", "<Your Wakatime generated app id")
+            setBuildConfigField("SECRET", "<Your Wakatime generated secret>")
+            setBuildConfigField("REDIRECT_URI", "$redirectScheme://$redirectHost")
         }
     }
     compileOptions {
@@ -31,6 +39,10 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
+}
+
+fun BuildType.setBuildConfigField(key: String, value: String) {
+    buildConfigField("String", key, "\"$value\"")
 }
 
 dependencies {
