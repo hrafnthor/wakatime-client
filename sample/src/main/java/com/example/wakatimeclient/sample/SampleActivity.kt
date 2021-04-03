@@ -105,14 +105,7 @@ class SampleActivity : AppCompatActivity(),
         if (BrowserSelector.getAllBrowsers(view.context).isEmpty()) {
             longToast("No browsers found")
         } else {
-            val scopes = listOf(
-                Scope.Email,
-                Scope.ReadPrivateLeaderboards,
-                Scope.ReadLoggedTime,
-                Scope.ReadStats,
-                Scope.WriteLoggedTime
-            )
-            val intent = model.getAuthenticationRequest(scopes)
+            val intent = model.getAuthenticationRequest(Scope.values().toList())
             authenticationRequest.launch(intent)
         }
     }
