@@ -1,10 +1,17 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.*
 
-@Serializable
-data class Commit(
+@Serializable(with = CommitSerializer::class)
+data class Commit internal constructor(
     /**
      * Unique id of the commit
      */
@@ -23,89 +30,33 @@ data class Commit(
     @SerialName("truncated_hash")
     val truncatedHash: String = "",
     /**
-     *  url of author's avatar image
-     */
-    @SerialName("author_avatar_url")
-    val authorAvatarUrl: String = "",
-    /**
-     *  time when commit was authored in ISO 8601 format
-     */
-    @SerialName("author_date")
-    val authorDate: String = "",
-    /**
-     * The email address of the author
-     */
-    @SerialName("author_email")
-    val authorEmail: String = "",
-    /**
-     * link to author's profile on GitHub, Bitbucket, GitLab, etc
-     */
-    @SerialName("author_html_url")
-    val authorHtmlUrl: String = "",
-    /**
-     * The authors name
-     */
-    @SerialName("author_name")
-    val authorName: String = "",
-    /**
-     *  api url for author's profile
-     */
-    @SerialName("author_url")
-    val authorUrl: String = "",
-    /**
-     * The author's username
-     */
-    @SerialName("author_username")
-    val authorUsername: String = "",
-    /**
      * branch name, for ex: master
      */
     val branch: String = "",
     /**
-     * url of committer's avatar image
+     * The author's description of this commit
      */
-    @SerialName("committer_avatar_url")
-    val committerAvatarUrl: String = "",
+    val message: String = "",
     /**
-     *  commit time in ISO 8601 format
+     * link to an html page with details about current commit
      */
-    @SerialName("committer_date")
-    val committerDate: String = "",
-    /**
-     *  email address of committer
-     */
-    @SerialName("committer_email")
-    val committerEmail: String = "",
-    /**
-     * link to the committer's profile on GitHub, Bitbucket, GitLab, etc
-     */
-    @SerialName("committer_html_url")
-    val committerHtmlUrl: String = "",
-    /**
-     *
-     */
-    @SerialName("committer_name")
-    val committerName: String = "",
-    /**
-     * api url for committer's profile
-     */
-    @SerialName("committer_url")
-    val committerUrl: String = "",
-    /**
-     * Committers username
-     */
-    @SerialName("committer_username")
-    val committerUserName: String = "",
+    @SerialName("html_url")
+    val htmlUrl: String = "",
     /**
      * time commit was synced in ISO 8601 format
      */
     @SerialName("created_at")
     val createdAt: String = "",
     /**
-     * link to an html page with details about current commit
+     *  Authoring time of the commit in ISO 8601 format
      */
-    @SerialName("html_url")
-    val htmlUrl: String = "",
+    @SerialName("author_date")
+    val authoringDate: String = "",
+    /**
+     *  commit time in ISO 8601 format
+     */
+    @SerialName("committer_date")
+    val committerDate: String = "",
     /**
      * Time coded in editor for this commit
      */
@@ -117,10 +68,6 @@ data class Commit(
     @SerialName("human_readable_with_seconds")
     val humanReadableWithSeconds: String = "",
     /**
-     * The author's description of this commit
-     */
-    val message: String = "",
-    /**
      * Total time coded in editor for this commit in seconds
      */
     @SerialName("total_seconds")
@@ -129,10 +76,142 @@ data class Commit(
      * Api url with details about current commit
      */
     val url: String = "",
+    /**
+     * The author of this commit
+     */
+    val author: Entity,
+    /**
+     * The committer of this commit
+     */
+    val committer: Entity
 )
 
 @Serializable
-data class Commits(
+data class Entity internal constructor(
+    /**
+     * The entity's name
+     */
+    val name: String = "",
+    /**
+     * The entity's username
+     */
+    val username: String = "",
+    /**
+     * The email address associated with this entity
+     */
+    val email: String = "",
+    /**
+     *  url of entity's avatar image
+     */
+    val avatarUrl: String = "",
+    /**
+     * link to entity's profile on GitHub, Bitbucket, GitLab, etc
+     */
+    val profileUrl: String = "",
+    /**
+     * Link to entity's api profile on Github, Bitbucket, Gitlab, etc
+     */
+    val apiUrl: String = ""
+)
+
+/**
+ * Handles serialization of the [Commit] model, and creating author and committer
+ * entities out of the data.
+ */
+internal object CommitSerializer : KSerializer<Commit> {
+
+    override val descriptor: SerialDescriptor
+        get() = buildClassSerialDescriptor("Commit")
+
+    override fun serialize(encoder: Encoder, value: Commit) {
+        throw NotImplementedError("Commit serialization not implemented yet!")
+    }
+
+    override fun deserialize(decoder: Decoder): Commit {
+        require(decoder is JsonDecoder)
+        val element = decoder.decodeJsonElement()
+        if (element is JsonObject) {
+            val id: String = getValue("id", "", element) { it.content }
+            val ref: String = getValue("ref", "", element) { it.content }
+            val hash: String = getValue("truncated_hash", "", element) { it.content }
+            val branch: String = getValue("branch", "", element) { it.content }
+            val message: String = getValue("message", "", element) { it.content }
+            val htmlUrl: String = getValue("html_url", "", element) { it.content }
+            val createdAt: String = getValue("created_at", "", element) { it.content }
+            val authoringDate: String = getValue("author_date", "", element) { it.content }
+            val committerDate: String = getValue("committer_date", "", element) { it.content }
+            val humanTotal: String = getValue("human_readable_total", "", element) { it.content }
+            val humanTotalSeconds: String = getValue("human_readable_with_seconds", "", element) { it.content }
+            val totalSeconds: Float = getValue("total_seconds", -1F, element) { it.float }
+            val url: String = getValue("url", "", element) { it.content }
+
+            val authorAvatarUrl: String = getValue("author_avatar_url", "", element) { it.content }
+            val authorEmail: String = getValue("author_email", "", element) { it.content }
+            val authorProfileUrl: String = getValue("author_html_url", "", element) { it.content }
+            val authorName: String = getValue("author_name", "", element) { it.content }
+            val authorApiUrl: String = getValue("author_url", "", element) { it.content }
+            val authorUsername: String = getValue("author_username", "", element) { it.content }
+
+            val commitAvatarUrl: String = getValue("committer_avatar_url", "", element) { it.content }
+            val commitEmail: String = getValue("committer_email", "", element) { it.content }
+            val commitProfileUrl: String = getValue("committer_html_url", "", element) { it.content }
+            val commitName: String = getValue("committer_name", "", element) { it.content }
+            val commitApiUrl: String = getValue("committer_url", "", element) { it.content }
+            val commitUsername: String = getValue("committer_username", "", element) { it.content }
+
+            return Commit(
+                id = id,
+                ref = ref,
+                hash = hash,
+                branch = branch,
+                message = message,
+                htmlUrl = htmlUrl,
+                createdAt = createdAt,
+                authoringDate = authoringDate,
+                committerDate = committerDate,
+                humanReadableTotal = humanTotal,
+                humanReadableWithSeconds = humanTotalSeconds,
+                totalSeconds = totalSeconds,
+                url = url,
+                author = Entity(
+                    name = authorName,
+                    username = authorUsername,
+                    email = authorEmail,
+                    avatarUrl = authorAvatarUrl,
+                    profileUrl = authorProfileUrl,
+                    apiUrl = authorApiUrl
+                ),
+                committer = Entity(
+                    name = commitName,
+                    username = commitUsername,
+                    email = commitEmail,
+                    avatarUrl = commitAvatarUrl,
+                    profileUrl = commitProfileUrl,
+                    apiUrl = commitApiUrl
+                )
+            )
+        }
+        throw SerializationException("JsonObject was expected!")
+    }
+
+    private fun <T> getValue(
+        key: String,
+        default: T,
+        element: JsonObject,
+        extract: (JsonPrimitive) -> T
+    ): T {
+        return if (key in element) {
+            when (val value = element.getValue(key)) {
+                is JsonNull -> default
+                is JsonPrimitive -> extract(value)
+                else -> default
+            }
+        } else default
+    }
+}
+
+@Serializable
+data class Commits internal constructor(
     /**
      * current author or null if showing commits from all authors
      */

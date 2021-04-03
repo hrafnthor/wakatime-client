@@ -75,12 +75,20 @@ data class PagedResponse<T>(
     val totalItems: Int = -1
 )
 
+/**
+ * This serializer manually parses the structure of the PagedResponse payload
+ * and modifies the structure in cases where that is needed
+ */
 internal class PagedResponseSerializer<T : Any>(
     private val dataSerializer: KSerializer<T>
 ) : KSerializer<PagedResponse<T>> {
 
     override val descriptor: SerialDescriptor
-        get() = buildClassSerialDescriptor("PagedResponse") {}
+        get() = buildClassSerialDescriptor("PagedResponse")
+
+    override fun serialize(encoder: Encoder, value: PagedResponse<T>) {
+        throw NotImplementedError("Serialization of PagedResponse had not been implemented yet!")
+    }
 
     override fun deserialize(decoder: Decoder): PagedResponse<T> {
         require(decoder is JsonDecoder)
@@ -95,6 +103,7 @@ internal class PagedResponseSerializer<T : Any>(
             }.let {
                 decoder.json.decodeFromJsonElement(dataSerializer, it)
             }
+
             val page: Int = getValue("page", -1, element) { it.int }
             val nextPage: Int = getValue("next_page", -1, element) { it.int }
             val nextPageUrl: String = getValue("next_page_url", "", element) { it.content }
@@ -115,10 +124,6 @@ internal class PagedResponseSerializer<T : Any>(
             )
         }
         throw SerializationException("'JsonObject' expected!")
-    }
-
-    override fun serialize(encoder: Encoder, value: PagedResponse<T>) {
-        throw NotImplementedError("Serialization of PagedResponse had not been implemented yet!")
     }
 
     private fun <T> getValue(
