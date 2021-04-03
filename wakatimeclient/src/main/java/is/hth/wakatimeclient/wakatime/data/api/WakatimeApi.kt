@@ -269,6 +269,39 @@ interface WakatimeApi {
         @Query("project") projectName: String?,
         @Query("branches") branches: String?,
     ): Response<Summaries>
+
+    /**
+     * List of commits for a WakaTime project showing the time spent coding in each commit.
+     *
+     * Requires the [ReadLoggedTime] authentication scope.
+     *
+     * @param projectName The human readable name of the project as shown on Wakatime
+     * @param author optional: Filter commits to only those authored by the given username.
+     * @param branch optional: Filter commits to a branch; defaults to the repo’s default branch name.
+     * @param page optional: Page number of commits.
+     */
+    @GET("users/current/projects/{projectName}/commits")
+    suspend fun getProjectCommits(
+        @Path("projectName") projectName: String,
+        @Query("author") author: String?,
+        @Query("branch") branch: String?,
+        @Query("page") page: Int?
+    ): Response<PagedResponse<Commits>>
+
+    /**
+     * A single commit from a WakaTime project showing the time spent coding on the commit.
+     *
+     * Requires the [ReadLoggedTime] authentication scope.
+     *
+     * @param projectName The human readable name of the project as shown on Wakatime
+     * @param branch optional: Filter the commit to a branch; defaults to the repo’s default branch name.
+     */
+    @GET("users/current/projects/{projectName}/commits/{hash}")
+    suspend fun getProjectCommit(
+        @Path("projectName") projectName: String,
+        @Path("hash") hash: String,
+        @Query("branch") branch: String?
+    ): Response<String>
 }
 
 interface OauthApi {
