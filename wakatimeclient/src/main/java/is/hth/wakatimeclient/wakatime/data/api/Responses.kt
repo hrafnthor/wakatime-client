@@ -41,12 +41,24 @@ data class PagedResponse<T>(
      * The index of the next page. If there is none, this value will be -1
      */
     @SerialName("next_page")
-    val next: Int = -1,
+    val nextPage: Int = -1,
+    /**
+     * The url for the next page. If this is the last page then empty
+     */
+    @Transient
+    @SerialName("next_page_url")
+    val nextPageUrl: String = "",
     /**
      * The index of the previous page. If there is none, this value will be -1
      */
     @SerialName("prev_page")
-    val previous: Int = -1,
+    val previousPage: Int = -1,
+    /**
+     * The url for the previous page. If this is the first page then empty
+     */
+    @Transient
+    @SerialName("prev_page_url")
+    val previousPageUrl: String = "",
     /**
      * The number of total available pages of data, if applicable. If not, then -1.
      */
@@ -55,7 +67,8 @@ data class PagedResponse<T>(
     /**
      * The total amount of items available over all pages
      */
-    val total: Int = -1
+    @SerialName("total")
+    val totalItems: Int = -1
 )
 
 @Serializable
