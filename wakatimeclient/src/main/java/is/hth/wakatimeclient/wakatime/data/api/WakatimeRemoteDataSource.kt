@@ -63,6 +63,13 @@ internal interface WakatimeRemoteDataSource {
      */
     suspend fun getProjects(): Results<List<Project>>
 
+    suspend fun getCommits(
+        projectName: String,
+        author: String?,
+        branch: String?,
+        page: Int?
+    ): Results<PagedResponse<Commits>>
+
     /**
      * Fetches the [Stats] for the current user filtered by the supplied request
      * @param request defines the filtering to apply
@@ -244,6 +251,22 @@ internal class WakatimeRemoteDataSourceImpl(
         }, transform = {
             it.data
         })
+    }
+
+    override suspend fun getCommits(
+        projectName: String,
+        author: String?,
+        branch: String?,
+        page: Int?
+    ): Results<PagedResponse<Commits>> {
+        return makeCall {
+            api.getProjectCommits(
+                projectName = projectName,
+                author = author,
+                branch = branch,
+                page = page
+            )
+        }
     }
 
     override suspend fun getStats(
