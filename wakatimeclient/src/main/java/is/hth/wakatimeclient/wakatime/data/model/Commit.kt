@@ -77,6 +77,10 @@ data class Commit internal constructor(
      */
     val url: String = "",
     /**
+     *
+     */
+    val isAuthorFound: Boolean,
+    /**
      * The author of this commit
      */
     val author: Entity,
@@ -133,7 +137,8 @@ internal object CommitSerializer : KSerializer<Commit> {
         if (element is JsonObject) {
             val id: String = getValue("id", "", element) { it.content }
             val ref: String = getValue("ref", "", element) { it.content }
-            val hash: String = getValue("truncated_hash", "", element) { it.content }
+            val hash: String = getValue("hash", "", element) { it.content }
+            val truncatedHash: String = getValue("truncated_hash", "", element) { it.content }
             val branch: String = getValue("branch", "", element) { it.content }
             val message: String = getValue("message", "", element) { it.content }
             val htmlUrl: String = getValue("html_url", "", element) { it.content }
@@ -144,6 +149,7 @@ internal object CommitSerializer : KSerializer<Commit> {
             val humanTotalSeconds: String = getValue("human_readable_with_seconds", "", element) { it.content }
             val totalSeconds: Float = getValue("total_seconds", -1F, element) { it.float }
             val url: String = getValue("url", "", element) { it.content }
+            val authorFound: Boolean = getValue("is_author_found", false, element) { it.boolean }
 
             val authorAvatarUrl: String = getValue("author_avatar_url", "", element) { it.content }
             val authorEmail: String = getValue("author_email", "", element) { it.content }
@@ -163,6 +169,7 @@ internal object CommitSerializer : KSerializer<Commit> {
                 id = id,
                 ref = ref,
                 hash = hash,
+                truncatedHash = truncatedHash,
                 branch = branch,
                 message = message,
                 htmlUrl = htmlUrl,
@@ -173,6 +180,7 @@ internal object CommitSerializer : KSerializer<Commit> {
                 humanReadableWithSeconds = humanTotalSeconds,
                 totalSeconds = totalSeconds,
                 url = url,
+                isAuthorFound = authorFound,
                 author = Entity(
                     name = authorName,
                     username = authorUsername,
@@ -211,7 +219,7 @@ internal object CommitSerializer : KSerializer<Commit> {
 }
 
 @Serializable
-data class Commits internal constructor(
+data class ProjectCommits internal constructor(
     /**
      * current author or null if showing commits from all authors
      */
@@ -232,4 +240,24 @@ data class Commits internal constructor(
      *
      */
     val commits: List<Commit>
+)
+
+@Serializable
+data class ProjectCommit internal constructor(
+    /**
+     * The branch name containing the commits
+     */
+    val branch: String = "",
+    /**
+     * The project's sync status
+     */
+    val status: String = "",
+    /**
+     *
+     */
+    val project: Project,
+    /**
+     *
+     */
+    val commit: Commit
 )

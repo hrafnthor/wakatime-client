@@ -63,12 +63,33 @@ internal interface WakatimeRemoteDataSource {
      */
     suspend fun getProjects(): Results<List<Project>>
 
+    /**
+     * Fetches commits for the supplied project name
+     *
+     * @param projectName the name of the project for which to fetch git commits for
+     * @param author optional: the name of the author by which the results should be filtered
+     * @param branch optional: the name of the branch by which the results should be filtered. Defaults to the repo's default branch name
+     * @param page optional: the page number to fetch
+     */
     suspend fun getCommits(
         projectName: String,
         author: String?,
         branch: String?,
         page: Int?
-    ): Results<PagedResponse<Commits>>
+    ): Results<PagedResponse<ProjectCommits>>
+
+    /**
+     * Fetches a specific commit from a specific project name
+     *
+     * @param projectName the name of the associated project
+     * @param hash the hash of the commit which should be fetched
+     * @param branch optional: the name of the branch by which the results should be filtered. Defaults to the repo's default branch name
+     */
+    suspend fun getCommit(
+        projectName: String,
+        hash: String,
+        branch: String?
+    ): Results<ProjectCommit>
 
     /**
      * Fetches the [Stats] for the current user filtered by the supplied request
@@ -258,13 +279,27 @@ internal class WakatimeRemoteDataSourceImpl(
         author: String?,
         branch: String?,
         page: Int?
-    ): Results<PagedResponse<Commits>> {
+    ): Results<PagedResponse<ProjectCommits>> {
         return makeCall {
             api.getProjectCommits(
                 projectName = projectName,
                 author = author,
                 branch = branch,
                 page = page
+            )
+        }
+    }
+
+    override suspend fun getCommit(
+        projectName: String,
+        hash: String,
+        branch: String?
+    ): Results<ProjectCommit> {
+        return makeCall {
+            api.getProjectCommit(
+                projectName = projectName,
+                hash = hash,
+                branch = branch
             )
         }
     }

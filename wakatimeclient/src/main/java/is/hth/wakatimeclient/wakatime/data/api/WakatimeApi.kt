@@ -269,7 +269,7 @@ interface WakatimeApi {
         @Query("author") author: String?,
         @Query("branch") branch: String?,
         @Query("page") page: Int?
-    ): Response<PagedResponse<Commits>>
+    ): Response<PagedResponse<ProjectCommits>>
 
     /**
      * A single commit from a WakaTime project showing the time spent coding on the commit.
@@ -284,7 +284,7 @@ interface WakatimeApi {
         @Path("projectName") projectName: String,
         @Path("hash") hash: String,
         @Query("branch") branch: String?
-    ): Response<String>
+    ): Response<ProjectCommit>
 }
 
 interface OauthApi {
