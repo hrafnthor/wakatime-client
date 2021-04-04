@@ -73,9 +73,9 @@ internal interface WakatimeRemoteDataSource {
      */
     suspend fun getCommits(
         projectName: String,
-        author: String?,
-        branch: String?,
-        page: Int?
+        author: String? = null,
+        branch: String? = null,
+        page: Int? = null
     ): Results<PagedResponse<ProjectCommits>>
 
     /**
@@ -88,7 +88,7 @@ internal interface WakatimeRemoteDataSource {
     suspend fun getCommit(
         projectName: String,
         hash: String,
-        branch: String?
+        branch: String? = null
     ): Results<ProjectCommit>
 
     /**
