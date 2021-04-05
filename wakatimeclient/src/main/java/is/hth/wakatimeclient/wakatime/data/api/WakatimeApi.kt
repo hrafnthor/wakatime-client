@@ -313,6 +313,16 @@ interface WakatimeApi {
         @Path("hash") hash: String,
         @Query("branch") branch: String?
     ): Response<ProjectCommit>
+
+    /**
+     * List data exports for the user. A data export can also be created at
+     * https://wakatime.com/settings, and contains all the user’s coding stats as
+     * daily Summaries in JSON format since the user’s account was created.
+     *
+     * Requires the [ReadLoggedTime] authentication scope.
+     */
+    @GET("users/current/data_dumps")
+    suspend fun getExports(): Response<PagedResponse<List<Export>>>
 }
 
 interface OauthApi {
