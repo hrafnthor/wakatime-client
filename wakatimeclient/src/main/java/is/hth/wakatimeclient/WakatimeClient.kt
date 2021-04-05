@@ -79,7 +79,7 @@ class WakatimeClient private constructor(
         /**
          * Configure the [AuthClient] that will be used for authentication against Wakatime's API
          */
-        fun authenticator(action: (AuthClient.Builder.() -> Unit)): Builder = apply { action(authBuilder) }
+        fun authentication(action: (AuthClient.Builder.() -> Unit)): Builder = apply { action(authBuilder) }
 
         /**
          * Configure the [NetworkClient] that will be used for interacting against Wakatime's API
