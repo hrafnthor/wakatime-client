@@ -56,7 +56,7 @@ internal class SessionManagerImpl(
         val errors: MutableSet<Error> = mutableSetOf()
         if (session.isAuthorized() && session.authenticationMethod() == Method.OAuth) {
             // Revoke the access token
-            val accessRevoke = revoke(config.appId, config.clientSecret, session.accessToken())
+            val accessRevoke = revoke(config.clientId, config.clientSecret, session.accessToken())
             if (accessRevoke is Results.Failure) {
                 if (force) {
                     errors.add(accessRevoke.error)
@@ -66,7 +66,7 @@ internal class SessionManagerImpl(
             }
 
             // Revoke the refresh token
-            val refreshRevoke = revoke(config.appId, config.clientSecret, session.refreshToken())
+            val refreshRevoke = revoke(config.clientId, config.clientSecret, session.refreshToken())
             if (refreshRevoke is Results.Failure) {
                 if (force) {
                     errors.add(refreshRevoke.error)

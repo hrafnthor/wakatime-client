@@ -16,9 +16,6 @@ import android.net.Uri
 import kotlinx.serialization.ExperimentalSerializationApi
 import timber.log.Timber
 
-/**
- *
- */
 @Suppress("unused")
 class WakatimeClient private constructor(
     private val auth: AuthClientImpl,
@@ -30,8 +27,8 @@ class WakatimeClient private constructor(
     AuthClient by auth {
 
     class Builder private constructor(
-        secret: String = "",
-        appId: String = "",
+        clientSecret: String = "",
+        clientId: String = "",
         apiKey: String = "",
         redirectUri: Uri = Uri.parse(""),
         method: Method
@@ -59,19 +56,19 @@ class WakatimeClient private constructor(
          * values.
          */
         constructor(
-            secret: String,
-            appId: String,
+            clientId: String,
+            clientSecret: String,
             redirectUri: Uri
         ) : this(
-            secret = secret,
-            appId = appId,
+            clientId = clientId,
+            clientSecret = clientSecret,
             redirectUri = redirectUri,
             method = Method.OAuth
         )
 
         private val config: AuthConfig = AuthConfig(
-            clientSecret = secret,
-            appId = appId,
+            clientId = clientId,
+            clientSecret = clientSecret,
             redirectUri = redirectUri,
             host = Uri.parse("https://wakatime.com"),
             method = method
