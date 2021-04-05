@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
  * Defines the default visibility that projects can have when shared
  */
 @Serializable
+@Suppress("unused")
 enum class Visibility {
     @SerialName("visible")
     VISIBLE,
@@ -157,4 +158,20 @@ enum class Category {
 
     @SerialName("manual testing")
     TESTS_MANUAL
+}
+
+@Serializable
+@Suppress("unused")
+enum class ProcessingStatus {
+    @SerialName("Pending…")
+    PENDING,
+
+    @SerialName("Processing coding activity…")
+    PROCESSING,
+
+    @SerialName("Uploading…")
+    UPLOADING,
+
+    @SerialName("Completed")
+    COMPLETED
 }

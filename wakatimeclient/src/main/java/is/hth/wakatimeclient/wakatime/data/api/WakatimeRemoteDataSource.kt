@@ -214,6 +214,8 @@ internal interface WakatimeRemoteDataSource {
     suspend fun getMemberSummaries(
         request: Summaries.DashboardRequest
     ): Results<Summaries>
+
+    suspend fun getExports(): Results<PagedResponse<List<Export>>>
 }
 
 internal class WakatimeRemoteDataSourceImpl(
@@ -436,6 +438,12 @@ internal class WakatimeRemoteDataSourceImpl(
                 branches = request.projectFilter?.branches,
                 projectName = request.projectFilter?.projectName
             )
+        }
+    }
+
+    override suspend fun getExports(): Results<PagedResponse<List<Export>>> {
+        return makeCall {
+            api.getExports()
         }
     }
 
