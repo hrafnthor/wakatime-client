@@ -10,10 +10,10 @@ import kotlinx.serialization.Serializable
 @Suppress("unused")
 enum class Visibility {
     @SerialName("visible")
-    VISIBLE,
+    Visible,
 
     @SerialName("hidden")
-    HIDDEN
+    Hidden
 }
 
 /**
@@ -24,16 +24,16 @@ enum class Visibility {
 enum class GoalStatus {
 
     @SerialName("success")
-    SUCCESS,
+    Success,
 
     @SerialName("fail")
-    FAILURE,
+    Failure,
 
     @SerialName("pending")
-    PENDING,
+    Pending,
 
     @SerialName("ignored")
-    IGNORED
+    Ignored
 }
 
 
@@ -44,10 +44,10 @@ enum class GoalStatus {
 @Suppress("unused")
 enum class Delta {
     @SerialName("day")
-    DAY,
+    Day,
 
     @SerialName("week")
-    WEEK
+    Week
 }
 
 /**
@@ -57,19 +57,19 @@ enum class Delta {
 @Suppress("unused")
 enum class Frequency {
     @SerialName("Daily")
-    DAILY,
+    Daily,
 
     @SerialName("Every other day")
-    EVERY_OTHER_DAY,
+    EveryOtherDay,
 
     @SerialName("Once per week")
-    ONCE_PER_WEEK,
+    OncePerWeek,
 
     @SerialName("Once per month")
-    ONCE_PER_MONTH,
+    OncePerMonth,
 
     @SerialName("")
-    NONE
+    None
 }
 
 /**
@@ -83,19 +83,19 @@ enum class InvitationStatus {
      * The user has accepted to observe the goal
      */
     @SerialName("Accepted")
-    ACCEPTED,
+    Accepted,
 
     /**
      * The user has been invited to observe the goal but has yet to accept it
      */
     @SerialName("Invitation sent")
-    INVITED,
+    Invited,
 
     /**
      * The user has declined the invitation
      */
     @SerialName("Declined")
-    DECLINED
+    Declined
 }
 
 /**
@@ -105,13 +105,13 @@ enum class InvitationStatus {
 @Serializable
 enum class Type {
     @SerialName("file")
-    FILE,
+    File,
 
     @SerialName("app")
-    APP,
+    App,
 
     @SerialName("domain")
-    DOMAIN
+    Domain
 }
 
 /**
@@ -121,57 +121,57 @@ enum class Type {
 @Serializable
 enum class Category {
     @SerialName("coding")
-    CODING,
+    Coding,
 
     @SerialName("building")
-    BUILDING,
+    Building,
 
     @SerialName("indexing")
-    INDEXING,
+    Indexing,
 
     @SerialName("debugging")
-    DEBUGGING,
+    Debugging,
 
     @SerialName("browsing")
-    BROWSING,
+    Browsing,
 
     @SerialName("writing docs")
-    DOCUMENTATION,
+    Documentation,
 
     @SerialName("code reviewing")
-    CODEREVIEW,
+    CodeReview,
 
     @SerialName("researching")
-    RESEARCHING,
+    Researching,
 
     @SerialName("learning")
-    LEARNING,
+    Learning,
 
     @SerialName("designing")
-    DESIGNING,
+    Designing,
 
     @SerialName("running tests")
-    TESTS_RUNNING,
+    TestsRunning,
 
     @SerialName("writing tests")
-    TESTS_WRITING,
+    TestsWriting,
 
     @SerialName("manual testing")
-    TESTS_MANUAL
+    TestsManual
 }
 
 @Serializable
 @Suppress("unused")
 enum class ProcessingStatus {
     @SerialName("Pending…")
-    PENDING,
+    Pending,
 
     @SerialName("Processing coding activity…")
-    PROCESSING,
+    Processing,
 
     @SerialName("Uploading…")
-    UPLOADING,
+    Uploading,
 
     @SerialName("Completed")
-    COMPLETED
+    Completed
 }
