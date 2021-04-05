@@ -38,9 +38,9 @@ data class PagedResponse<T>(
      */
     val data: T,
     /**
-     * The current page for the data delivered, if applicable. If not, then -1.
+     * The current page for the data delivered, if applicable. If not, then 1.
      */
-    val page: Int = -1,
+    val page: Int = 1,
     /**
      * The index of the next page. If there is none, this value will be -1
      */
