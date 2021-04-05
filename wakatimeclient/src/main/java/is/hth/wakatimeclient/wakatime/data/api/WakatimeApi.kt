@@ -1,7 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.api
 
-import `is`.hth.wakatimeclient.core.data.auth.Scope.ReadLoggedTime
-import `is`.hth.wakatimeclient.core.data.auth.Scope.ReadOrganization
+import `is`.hth.wakatimeclient.core.data.auth.Scope.*
 import `is`.hth.wakatimeclient.wakatime.data.model.*
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -16,12 +15,16 @@ interface WakatimeApi {
 
     /**
      * Retrieves the details of the currently authenticated user.
+     *
+     * Requires the [Email] authentication scope
      */
     @GET("users/current")
     suspend fun getCurrentUser(): Response<WrappedResponse<NetworkUser>>
 
     /**
      * Retrieves the total recorded time for the current user.
+     *
+     * Requires the [ReadStats] authentication scope
      */
     @GET("users/current/all_time_since_today")
     suspend fun getTotalRecord(): Response<WrappedResponse<TotalRecord>>
@@ -40,6 +43,8 @@ interface WakatimeApi {
     /**
      * Retrieves all of the private leaderboards that the currently authenticated
      * user is a member off.
+     *
+     * Requires the [ReadPrivateLeaderboards] authentication scope
      */
     @GET("users/current/leaderboards")
     suspend fun getPrivateLeaderboards(): Response<PagedResponse<List<Leaderboard>>>
@@ -48,6 +53,8 @@ interface WakatimeApi {
      * Retrieves the leaders for the specified leaderboard that the currently
      * authenticated user is a member off. Results can be filtered by [language]
      * and [page] number
+     *
+     * Requires the [ReadPrivateLeaderboards] authentication scope
      */
     @GET("users/current/leaderboards/{leaderboardId}")
     suspend fun getPrivateLeaders(
@@ -59,6 +66,8 @@ interface WakatimeApi {
     /**
      * Retrieves a list of all [Project]s that Wakatime has observed this user
      * working on.
+     *
+     * Requires the [ReadLoggedTime] authentication scope
      */
     @GET("users/{userId}/projects")
     suspend fun getProjects(
@@ -68,6 +77,8 @@ interface WakatimeApi {
     /**
      * Retrieves a list of all [Project]s that Wakatime has observed the currently
      * authenticated user working on.
+     *
+     * Requires the [ReadLoggedTime] authentication scope
      */
     @GET("users/current/projects")
     suspend fun getCurrentUsersProjects(): Response<WrappedResponse<List<Project>>>
@@ -75,6 +86,9 @@ interface WakatimeApi {
     /**
      * Retrieves the stats for the current user over the supplied range, optionally filtered
      * by the other inputs
+     *
+     * Requires the [ReadStats] authentication scope
+     *
      * @param timeout The timeout value used to calculate these stats. Defaults the the user's timeout value.
      * @param writesOnly The writes_only value used to calculate these stats. Defaults to the user's writes_only setting.
      * @param projectId Show more detailed stats limited to this project
@@ -90,7 +104,10 @@ interface WakatimeApi {
 
     /**
      * Retrieves the current user's coding activity for the given time range as a
-     * list of summaries segmented by day
+     * list of summaries segmented by
+     *
+     * Requires the [ReadLoggedTime] authentication scope
+     *
      * @param start [LocalDate] required: The start date of the time range in 'yyyy-MM-dd' format
      * @param end [LocalDate] required: The end date of the time range in 'yyyy-MM-dd' format
      * @param projectName [String] optional: Filter the summaries to only those related to this project
@@ -112,12 +129,16 @@ interface WakatimeApi {
 
     /**
      * Retrieves a list of [Agent]s used by the current user
+     *
+     * Requires the [ReadLoggedTime] authentication scope
      */
     @GET("users/current/user_agents")
     suspend fun getAgents(): Response<WrappedResponse<List<Agent>>>
 
     /**
      * Retrieves all of the user's [Heartbeat]s for the given date.
+     *
+     * Requires the [ReadLoggedTime] authentication scope
      *
      * @param date The day to return heartbeats for, in a YYYY-mm-dd format. Heartbeats will be returned
      * from 12:00 until 23:59 in the user's timezone for this day
@@ -130,6 +151,8 @@ interface WakatimeApi {
     /**
      * Posts a new heartbeat to the service
      * @param beat to register with the server
+     *
+     *  Requires the [WriteLoggedTime] authentication scope
      */
     @POST("users/current/heartbeats")
     suspend fun sendBeat(
@@ -157,6 +180,7 @@ interface WakatimeApi {
      * @param timezone [String] optional: The timezone for a given date. Defaults to
      * the user's timezone
      *
+     * Requires the [ReadLoggedTime] authentication scope
      */
     @GET("users/current/external_durations")
     suspend fun getExternalDurations(
@@ -176,6 +200,8 @@ interface WakatimeApi {
      *
      * Use external_id to prevent creating duplicate durations.
      * Using the same external_id will update any existing duration with the provided attributes.
+     *
+     * Requires the [WriteLoggedTime] authentication scope
      */
     @POST("users/current/external_durations")
     suspend fun sendExternalDuration(
@@ -201,6 +227,8 @@ interface WakatimeApi {
      * be omitted without problems while still allowing your app’s valid durations.
      *
      * Parsing of the resulting response is currently left to the consumer.
+     *
+     * Requires the [WriteLoggedTime] authentication scope
      */
     @POST("users/current/external_durations.bulk")
     suspend fun sendExternalDurations(
