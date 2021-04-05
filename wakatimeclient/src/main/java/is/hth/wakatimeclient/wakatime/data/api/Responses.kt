@@ -1,7 +1,11 @@
 package `is`.hth.wakatimeclient.wakatime.data.api
 
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.*
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.json.*
 
 
 @Serializable
@@ -27,7 +31,7 @@ data class ChronologicalResponse<T>(
 /**
  * A web service response JSON wrapper
  */
-@Serializable
+@Serializable(with = PagedResponseSerializer::class)
 data class PagedResponse<T>(
     /**
      * The payload received from the service
@@ -41,12 +45,24 @@ data class PagedResponse<T>(
      * The index of the next page. If there is none, this value will be -1
      */
     @SerialName("next_page")
-    val next: Int = -1,
+    val nextPage: Int = -1,
+    /**
+     * The url for the next page. If this is the last page then empty
+     */
+    @Transient
+    @SerialName("next_page_url")
+    val nextPageUrl: String = "",
     /**
      * The index of the previous page. If there is none, this value will be -1
      */
     @SerialName("prev_page")
-    val previous: Int = -1,
+    val previousPage: Int = -1,
+    /**
+     * The url for the previous page. If this is the first page then empty
+     */
+    @Transient
+    @SerialName("prev_page_url")
+    val previousPageUrl: String = "",
     /**
      * The number of total available pages of data, if applicable. If not, then -1.
      */
@@ -55,8 +71,76 @@ data class PagedResponse<T>(
     /**
      * The total amount of items available over all pages
      */
-    val total: Int = -1
+    @SerialName("total")
+    val totalItems: Int = -1
 )
+
+/**
+ * This serializer manually parses the structure of the PagedResponse payload
+ * and modifies the structure in cases where that is needed
+ */
+internal class PagedResponseSerializer<T : Any>(
+    private val dataSerializer: KSerializer<T>
+) : KSerializer<PagedResponse<T>> {
+
+    override val descriptor: SerialDescriptor
+        get() = buildClassSerialDescriptor("PagedResponse")
+
+    override fun serialize(encoder: Encoder, value: PagedResponse<T>) {
+        throw NotImplementedError("Serialization of PagedResponse had not been implemented yet!")
+    }
+
+    override fun deserialize(decoder: Decoder): PagedResponse<T> {
+        require(decoder is JsonDecoder)
+        val element = decoder.decodeJsonElement()
+        if (element is JsonObject) {
+            val data: T = if ("data" in element) {
+                // The payload object is being delivered through the 'data' variable
+                element.getValue("data")
+            } else {
+                // Parse the payload object from the root element it self
+                element
+            }.let {
+                decoder.json.decodeFromJsonElement(dataSerializer, it)
+            }
+
+            val page: Int = getValue("page", -1, element) { it.int }
+            val nextPage: Int = getValue("next_page", -1, element) { it.int }
+            val nextPageUrl: String = getValue("next_page_url", "", element) { it.content }
+            val previousPage: Int = getValue("prev_page", -1, element) { it.int }
+            val previousPageUrl: String = getValue("prev_page_url", "", element) { it.content }
+            val totalPages: Int = getValue("total_pages", -1, element) { it.int }
+            val totalItems: Int = getValue("total", -1, element) { it.int }
+
+            return PagedResponse(
+                data = data,
+                page = page,
+                nextPage = nextPage,
+                nextPageUrl = nextPageUrl,
+                previousPage = previousPage,
+                previousPageUrl = previousPageUrl,
+                totalPages = totalPages,
+                totalItems = totalItems
+            )
+        }
+        throw SerializationException("'JsonObject' expected!")
+    }
+
+    private fun <T> getValue(
+        key: String,
+        default: T,
+        element: JsonObject,
+        extract: (JsonPrimitive) -> T
+    ): T {
+        return if (key in element) {
+            when (val value = element.getValue(key)) {
+                is JsonNull -> default
+                is JsonPrimitive -> extract(value)
+                else -> default
+            }
+        } else default
+    }
+}
 
 @Serializable
 data class WrappedResponse<T>(

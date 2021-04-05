@@ -26,8 +26,10 @@ dependencies {
         val timber_version: String by project
         api("com.jakewharton.timber:timber:$timber_version")
 
+        //#region OKHttp3
         val okhttp3_version: String by project
         api("com.squareup.okhttp3:logging-interceptor:$okhttp3_version")
+        //#endregion
 
         //#region Retrofit2
         val retrofit2_version: String by project

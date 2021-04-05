@@ -286,7 +286,9 @@ internal object SubscribedUserSerializer : KSerializer<Subscriber> {
         element<String>(elementName = "username", isOptional = true)
     }
 
-    override fun serialize(encoder: Encoder, value: Subscriber) {}
+    override fun serialize(encoder: Encoder, value: Subscriber) {
+        throw NotImplementedError("Serialization method has not been implemented for 'Subscriber'")
+    }
 
     override fun deserialize(decoder: Decoder): Subscriber {
         return decoder.decodeStructure(descriptor) {

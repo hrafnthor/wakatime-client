@@ -14,10 +14,6 @@ data class Project(
      */
     val name: String = "",
     /**
-     * The associated repository if any is connected
-     */
-    val repository: String = "",
-    /**
      * The postfix url for the project specific dashboard
      */
     val url: String = "",
@@ -35,5 +31,9 @@ data class Project(
      * Indicates whether this project's dashboard has had a public url created by Wakatime.
      */
     @SerialName("has_public_url")
-    val hasPublicUrl: Boolean
+    val hasPublicUrl: Boolean,
+    /**
+     * The associated repository if any is connected
+     */
+    val repository: Repository
 )

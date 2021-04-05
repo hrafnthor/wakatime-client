@@ -17,7 +17,7 @@ internal class DefaultAuthenticator(
                 Method.OAuth -> "Bearer ${session.accessToken()}"
                 Method.ApiKey -> "Basic ${session.apiKey()}"
             }
-            response.request
+            response.request()
                 .newBuilder()
                 .header(authorizationHeader, header)
                 .build()
