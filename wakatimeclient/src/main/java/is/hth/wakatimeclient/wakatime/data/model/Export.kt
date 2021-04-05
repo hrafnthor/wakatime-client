@@ -19,7 +19,7 @@ data class Export(
     @SerialName("percentage_complete")
     val percentage: Float = 0f,
     /**
-     * When the export has reached [ProcessingStatus.COMPLETED] there will be a url for
+     * When the export has reached [ProcessingStatus.Completed] there will be a url for
      * downloading the activity.
      */
     @SerialName("download_url")

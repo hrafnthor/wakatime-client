@@ -281,7 +281,7 @@ data class Dashboard(
      * The email update frequency of the board
      */
     @SerialName("email_frequency")
-    val emailFrequency: Frequency = Frequency.NONE,
+    val emailFrequency: Frequency = Frequency.None,
     /**
      * A list of unrestricted viewers. If restricted viewing is disabled
      * (see [hasRestrictedViewing]) the all viewers will be returned.

@@ -77,12 +77,12 @@ data class Goal internal constructor(
      */
     val status: GoalStatus,
     /**
-     * [GoalStatus.FAILURE] when there are more failure days or weeks than success, otherwise [GoalStatus.SUCCESS]
+     * [GoalStatus.Failure] when there are more failure days or weeks than success, otherwise [GoalStatus.Success]
      */
     @SerialName("average_status")
     val averageStatus: GoalStatus,
     /**
-     * [GoalStatus] over all delta periods, either [GoalStatus.SUCCESS], [GoalStatus.FAILURE] or [GoalStatus.IGNORED]
+     * [GoalStatus] over all delta periods, either [GoalStatus.Success], [GoalStatus.Failure] or [GoalStatus.Ignored]
      */
     @SerialName("cumulative_status")
     val cumulativeStatus: GoalStatus,
@@ -223,7 +223,7 @@ internal object InvitedUserSerializer : KSerializer<InvitedUser> {
             var name = ""
             var id = ""
             var photo = ""
-            var status = InvitationStatus.ACCEPTED
+            var status = InvitationStatus.Accepted
             var userId = ""
             var username = ""
             while (true) {
@@ -294,7 +294,7 @@ internal object SubscribedUserSerializer : KSerializer<Subscriber> {
         return decoder.decodeStructure(descriptor) {
             var displayName = ""
             var email = ""
-            var frequency = Frequency.DAILY
+            var frequency = Frequency.Daily
             var fullName = ""
             var id = ""
             var username = ""
