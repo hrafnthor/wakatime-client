@@ -22,6 +22,22 @@ WakatimeClient.Builder(
     redirectUri = Uri.parse("Your client's redirect uri")
 )....
 ```
+Then register an `Activity` in the `AndroidManifest` which will receive the results from the OAuth flow and process them. If your redirectUri was 'myapplication://authentication-results' then configure the receiver as follows
+
+```
+ <activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
+    <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+
+        <data
+            android:host="authentication-results"
+            android:scheme="myapplication" />
+    </intent-filter>
+</activity>
+```
 Going for an OAuth flow like this will allow your implementation to be used by other users, logging in using their own credentials against Wakatime's services.
 
 **Make sure that you do not bundle the id and secret within the application, as it is trivial to retrieve these values from an APK**
@@ -63,3 +79,4 @@ Lastly the client requires an implementation of `AuthStorage` for storing creden
 ```kotlin
 builder.build(context, <AuthStorage>)
 ```
+
