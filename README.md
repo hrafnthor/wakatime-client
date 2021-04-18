@@ -81,6 +81,48 @@ builder.network {
 Lastly the client requires an implementation of `AuthStorage` for storing credentials and related information.
 
 ```kotlin
-builder.build(context, <AuthStorage>)
+builder.build(context, <Your implementation of AuthStorage>)
+```
+The reason this is left to the implementer is that there are multiple ways of securing authentication data on Android, and the best practices are constantly evolving and changing. By leaving this implementation detail out, this project allows for unforseen future changes without having to react to them it self.
+
+## Usage
+
+When the client is finally configured the way it should, it becomes trivial to fetch or send data to Wakatime. 
+
+For instance, sending a heartbeat for writing this markdown would not be much more complex than doing
+
+```kotlin
+val results: Results<Confirmation> = client.sendHeartbeat(Heartbeat.send(
+    entity = "<ID>",
+    time =0f, 
+    type = Type.App, 
+    category = Category.Documentation) {
+        branch = "develop"
+        project = "wakatime-client"
+        language = "markdown"
+})
+```
+
+Or fetching summaries for a specific project branche's over a defined period
+
+```kotlin
+val results: Results<Summaries> = client.getSummaries(Summaries.request(start, end) {
+    timezone = end.timeZone.displayName
+    project {
+        projectName = "wakatime-client"
+        branches("develop", "master")
+    }
+    meta { 
+        writesOnly = true
+    }
+})
+```
+Reacting to the results is also straight forward, as each call arrives wrapped in a receiver
+
+```kotlin
+when (val results = client.getCurrentUser()) {
+    is Results.Success.Value -> displayUser(results.value)
+    is Results.Failure -> displayError(results.error)
+}
 ```
 
