@@ -58,7 +58,7 @@ WakatimeClient.Builder(
 
 ### Configuration
 
-The client builder exposes the internal network client, as well as the authentication client, for further configuration such as adding network interceptors or configuring timeout limits
+The client builder exposes the internal network client for further configuration such as adding network interceptors or configuring timeout limits
 
 ```kotlin
 builder.network {
@@ -68,10 +68,14 @@ builder.network {
 
     getOKHttpBuilder().apply {
         addInterceptor(interceptor)
-        callTimeout(15, TimeUnit.SECONDS)
+        callTimeout(<Your value>, TimeUnit)
     }
+    
+    // If caching should be done by the client, it can be configured here
+    enableCache(context.cacheDir, cacheLifetimeInSeconds = 30)
 }...
 ```
+
 ### Credential storage
 
 Lastly the client requires an implementation of `AuthStorage` for storing credentials and related information.
