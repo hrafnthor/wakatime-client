@@ -13,7 +13,7 @@ The client supports both an OAuth 2.0 flow (courtesy of [AppAuth](https://github
 
 When going for the OAuth 2.0 authentication flow, you first need to create a new application within Wakatime's [app dashboard](https://wakatime.com/apps).
 
-Once created you'll need to supply the client instance with the `app_secret`, `app_id` and `redirect_uri` as shown below
+Once created you'll need to supply the client instance with the `clientSecret`, `clientId` and `redirectUri` as shown below
 
 ```kotlin
 WakatimeClient.Builder(
