@@ -71,7 +71,7 @@ data class Heartbeat internal constructor(
      */
     val branch: String = "",
     /**
-     * Entity heartbeat is logging time against, such as an absolute file path or domain
+     * The entity that the beat is logging time against, such as an absolute file path or domain
      */
     val entity: String = "",
     /**
@@ -133,7 +133,7 @@ data class Heartbeat internal constructor(
          */
         val dependencies: String?,
         /**
-         * The total number of lines in the entity (when entity type is file)
+         * The total number of lines in the entity (when type is [Type.File])
          */
         val lines: Int?,
         /**
@@ -167,6 +167,19 @@ data class Heartbeat internal constructor(
         val type: Type,
     ) {
 
+        /**
+         * @param entity the entity that the beat is logging time against, such as an absolute file path or domain
+         * @param time UNIX epoch timestamp; numbers after decimal point are fractions of a second
+         * @param type the type of entity that the beat is being sent for
+         * @param category of work that the beat is for
+         * @param project (optional) the name of the project being worked on
+         * @param branch (optional) the name of the branch being worked on
+         * @param language (optional) the language name being used
+         * @param lines (optional) the total number of lines in the entity (when the type is [Type.File]])
+         * @param lineno (optional) the current cursor column position, if applicable.
+         * @param cursorpos (optinal) the current line row number of cursor, if applicable.
+         * @param isWrite (optional)
+         */
         @Suppress("unused")
         class Builder(
             var entity: String,
@@ -183,6 +196,9 @@ data class Heartbeat internal constructor(
             private var dependencies: String? = null,
         ) {
 
+            /**
+             * A list of dependencies detected from the entity file, if applicable.
+             */
             fun dependencies(vararg dependencies: String?): Builder = apply {
                 this.dependencies = dependencies.filterNotNull().joinToString(separator = ",") { it }
             }
