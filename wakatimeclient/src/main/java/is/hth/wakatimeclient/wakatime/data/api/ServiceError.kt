@@ -17,6 +17,10 @@ data class ServiceError(
     val fieldErrors: List<FieldError> = emptyList()
 )
 
+/**
+ * Describes the problem which occurred due to a incorrect
+ * value in some payload field
+ */
 @Serializable
 data class FieldError(
     val name: String,
