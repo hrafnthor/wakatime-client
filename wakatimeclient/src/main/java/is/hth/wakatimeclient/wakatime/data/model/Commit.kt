@@ -21,7 +21,7 @@ data class Commit internal constructor(
     @SerialName(ID)
     val id: String = "",
     /**
-     *
+     * The id of the author of the commit
      */
     @SerialName(AUTHOR_ID)
     val authorId: String = "",
@@ -130,8 +130,7 @@ data class Commit internal constructor(
     }
 }
 
-internal object CommitTransformingSerializer :
-    JsonTransformingSerializer<Commit>(CommitSerializer2) {
+internal object CommitTransformingSerializer : JsonTransformingSerializer<Commit>(CommitSerializer) {
     private val authorMap: Map<String, String> = mapOf(
         Pair("author_avatar_url", Entity.AVATAR_URL),
         Pair("author_email", Entity.EMAIL),
@@ -182,7 +181,10 @@ internal object CommitTransformingSerializer :
     }
 }
 
-internal object CommitSerializer2 : KSerializer<Commit> {
+/**
+ * Performs custom object serialization of a [Commit] object
+ */
+internal object CommitSerializer : KSerializer<Commit> {
 
     override val descriptor: SerialDescriptor
         get() = buildClassSerialDescriptor("Commit") {
