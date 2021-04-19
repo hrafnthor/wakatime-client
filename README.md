@@ -22,9 +22,9 @@ WakatimeClient.Builder(
     redirectUri = Uri.parse("Your client's redirect uri")
 )....
 ```
-Then register an `Activity` in the `AndroidManifest` which will receive the results from the OAuth flow and process them. If your redirectUri was 'myapplication://authentication-results' then configure the receiver as follows
+Then register an `Activity` in the `AndroidManifest` which will receive the results from the OAuth flow and process them. If your redirectUri is 'myapplication://authentication-results' then configure the receiver as follows
 
-```
+```xml
  <activity android:name="net.openid.appauth.RedirectUriReceiverActivity">
     <intent-filter>
         <action android:name="android.intent.action.VIEW" />
