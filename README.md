@@ -69,9 +69,15 @@ builder.network {
     getOKHttpBuilder().apply {
         addInterceptor(interceptor)
         callTimeout(<Your value>, TimeUnit)
+        // Here you have full access to the OkHttpClient.Builder
     }
     
-    // If caching should be done by the client, it can be configured here
+    getRetrofitBuilder().apply {
+        // Here you have full access to the Retrofit.Builder
+    }
+    
+    // If network layer caching should be done by the client,
+    // it can be configured by using the built in caching mechanism
     enableCache(context.cacheDir, cacheLifetimeInSeconds = 30)
 }...
 ```
