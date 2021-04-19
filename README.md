@@ -87,9 +87,31 @@ The reason this is left to the implementer is that there are multiple ways of se
 
 ## Usage
 
-When the client is finally configured the way it should, it becomes trivial to fetch or send data to Wakatime. 
+### Authentication
 
-For instance, sending a heartbeat for writing this markdown would not be much more complex than doing
+With the client configured, authentication becomes as easy as creating an authentication intent
+
+```kotlin
+// Initiate the authentication flow
+val intent = client.createAuthenticationIntent(listOf(Scope.Email, Scope.ReadStats))
+startActivityForResults(intent)
+```
+
+And then either in the calling context's onActivityResults or using the latest ActivityResultsLauncher
+simply pass the received data on to the client
+
+```kotlin
+when(val authenticated = client.onAuthenticationResult(result)) {
+    is Results.Failure -> displayError(results.error)
+    is Results.Success -> {
+        // Start fetching data
+    }
+}
+
+```
+### Retrieving data
+
+With the authentication out of the way, sending a heartbeat for writing this markdown would not be much more complex than
 
 ```kotlin
 val results: Results<Confirmation> = client.sendHeartbeat(Heartbeat.send(
@@ -103,7 +125,7 @@ val results: Results<Confirmation> = client.sendHeartbeat(Heartbeat.send(
 })
 ```
 
-Or fetching summaries for a specific project branche's over a defined period
+Or fetching summaries for a specific project and its branch's over a defined period
 
 ```kotlin
 val results: Results<Summaries> = client.getSummaries(Summaries.request(start, end) {
@@ -117,12 +139,3 @@ val results: Results<Summaries> = client.getSummaries(Summaries.request(start, e
     }
 })
 ```
-Reacting to the results is also straight forward, as each call arrives wrapped in a receiver
-
-```kotlin
-when (val results = client.getCurrentUser()) {
-    is Results.Success.Value -> displayUser(results.value)
-    is Results.Failure -> displayError(results.error)
-}
-```
-
