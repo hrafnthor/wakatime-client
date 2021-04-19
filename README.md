@@ -92,12 +92,11 @@ The reason this is left to the implementer is that there are multiple ways of se
 With the client configured, authentication becomes as easy as creating an authentication intent
 
 ```kotlin
-// Initiate the authentication flow
 val intent = client.createAuthenticationIntent(listOf(Scope.Email, Scope.ReadStats))
 startActivityForResults(intent)
 ```
 
-And then either in the calling context's onActivityResults or using the latest ActivityResultsLauncher
+Then either in the calling context's onActivityResults or using the latest ActivityResultsLauncher
 simply pass the received data on to the client
 
 ```kotlin
