@@ -135,6 +135,10 @@ class MachineMeasurement(
     }
 }
 
+/**
+ * Modifies the incoming json stream to fit with the modified structure in the
+ * [MachineMeasurement] object
+ */
 internal object MMListSerializer : JsonTransformingSerializer<List<MachineMeasurement>>(
     ListSerializer(MachineMeasurement.serializer())
 ) {
@@ -142,8 +146,10 @@ internal object MMListSerializer : JsonTransformingSerializer<List<MachineMeasur
         return when (element) {
             is JsonArray -> buildJsonArray {
                 element.forEach { innerElement ->
-                    if (innerElement is JsonObject) {
-                        add(buildJsonObject {
+                    val child = if (innerElement is JsonObject && innerElement.size == 12) {
+                        // The inner element is of the correct type and contains as many
+                        // keys as would be expected for the transformation to take place
+                        buildJsonObject {
 
                             innerElement[MachineMeasurement.MACHINE]?.let { value ->
                                 put(MachineMeasurement.MACHINE, value)
@@ -154,8 +160,9 @@ internal object MMListSerializer : JsonTransformingSerializer<List<MachineMeasur
                                     .filterKeys { it != MachineMeasurement.MACHINE }
                                     .forEach(this::put)
                             })
-                        })
-                    }
+                        }
+                    } else super.transformDeserialize(element)
+                    add(child)
                 }
             }
             else -> super.transformDeserialize(element)
