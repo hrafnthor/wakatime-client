@@ -231,8 +231,7 @@ internal object CommitSerializer : KSerializer<Commit> {
             val totalSec = decodeFloatElement(descriptor, getIndex(Commit.TOTAL_SECONDS))
             val url = decodeNullableString(Commit.URL, this)
             val found = decodeBooleanElement(descriptor, getIndex(Commit.IS_AUTHOR_FOUND))
-            val author =
-                decodeSerializableElement(descriptor, getIndex(Commit.AUTHOR), Entity.serializer())
+            val author = decodeSerializableElement(descriptor, getIndex(Commit.AUTHOR), Entity.serializer())
             val committer = decodeSerializableElement(
                 descriptor,
                 getIndex(Commit.COMMITTER),
