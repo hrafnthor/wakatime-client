@@ -130,7 +130,14 @@ data class Commit internal constructor(
     }
 }
 
-internal object CommitTransformingSerializer : JsonTransformingSerializer<Commit>(CommitSerializer) {
+/**
+ * Performs a transformation on the incoming JSON payload to correlate author and
+ * committer values each in their own custom objects.
+ */
+internal object CommitTransformingSerializer :
+    JsonTransformingSerializer<Commit>(CommitSerializer) {
+
+    // Maps incoming JSON values to Entity values
     private val authorMap: Map<String, String> = mapOf(
         Pair("author_avatar_url", Entity.AVATAR_URL),
         Pair("author_email", Entity.EMAIL),
@@ -140,6 +147,7 @@ internal object CommitTransformingSerializer : JsonTransformingSerializer<Commit
         Pair("author_username", Entity.USERNAME)
     )
 
+    // Maps incoming JSON values to Entity values
     private val committerMap: Map<String, String> = mapOf(
         Pair("committer_avatar_url", Entity.AVATAR_URL),
         Pair("committer_email", Entity.EMAIL),
@@ -150,28 +158,33 @@ internal object CommitTransformingSerializer : JsonTransformingSerializer<Commit
     )
 
     @ExperimentalSerializationApi
+    private val otherFieldSet: Set<String> = descriptor.elementNames.toHashSet()
+
+    @ExperimentalSerializationApi
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return if (element is JsonObject) {
-            val author: MutableMap<String, JsonElement> = mutableMapOf()
-            val committer: MutableMap<String, JsonElement> = mutableMapOf()
-
             buildJsonObject {
-                descriptor.elementNames.forEach { name ->
-                    element[name]?.let { value ->
-                        if (value is JsonNull) {
-                            put(name, "")
-                        } else {
-                            put(name, value)
-                        }
-                    }
-                }
-
+                val author: MutableMap<String, JsonElement> = mutableMapOf()
+                val committer: MutableMap<String, JsonElement> = mutableMapOf()
                 element.forEach { item ->
-                    authorMap[item.key]?.let { key ->
-                        author[key] = item.value
-                    }
-                    committerMap[item.key]?.let { key ->
-                        committer[key] = item.value
+                    when {
+                        otherFieldSet.contains(item.key) -> {
+                            if (item.value is JsonNull) {
+                                put(item.key, "")
+                            } else {
+                                put(item.key, item.value)
+                            }
+                        }
+                        authorMap.containsKey(item.key) -> {
+                            authorMap[item.key]?.let { key ->
+                                author[key] = item.value
+                            }
+                        }
+                        committerMap.containsKey(item.key) -> {
+                            committerMap[item.key]?.let { key ->
+                                committer[key] = item.value
+                            }
+                        }
                     }
                 }
                 put("author", JsonObject(author))
@@ -182,7 +195,9 @@ internal object CommitTransformingSerializer : JsonTransformingSerializer<Commit
 }
 
 /**
- * Performs custom object serialization of a [Commit] object
+ * Performs custom object serialization of a [Commit] object.
+ * Due to receiving custom JSON from the [CommitTransformingSerializer], the ordering can be
+ * trusted not to change for the custom serialization that takes place in it.
  */
 internal object CommitSerializer : KSerializer<Commit> {
 
@@ -231,7 +246,8 @@ internal object CommitSerializer : KSerializer<Commit> {
             val totalSec = decodeFloatElement(descriptor, getIndex(Commit.TOTAL_SECONDS))
             val url = decodeNullableString(Commit.URL, this)
             val found = decodeBooleanElement(descriptor, getIndex(Commit.IS_AUTHOR_FOUND))
-            val author = decodeSerializableElement(descriptor, getIndex(Commit.AUTHOR), Entity.serializer())
+            val author =
+                decodeSerializableElement(descriptor, getIndex(Commit.AUTHOR), Entity.serializer())
             val committer = decodeSerializableElement(
                 descriptor,
                 getIndex(Commit.COMMITTER),
