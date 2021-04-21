@@ -143,13 +143,13 @@ internal object MMListSerializer : JsonTransformingSerializer<List<MachineMeasur
     ListSerializer(MachineMeasurement.serializer())
 ) {
     override fun transformDeserialize(element: JsonElement): JsonElement {
-        return when (element) {
-            is JsonArray -> buildJsonArray {
-                element.forEach { innerElement ->
+        if (element is JsonArray) {
+            return buildJsonArray {
+                element.map { innerElement ->
                     if (innerElement is JsonObject && innerElement.size == 8) {
                         // The inner element is of the correct type and contains as many
                         // keys as would be expected for the transformation to take place
-                        add(buildJsonObject {
+                        buildJsonObject {
 
                             innerElement[MachineMeasurement.MACHINE]?.let { value ->
                                 put(MachineMeasurement.MACHINE, value)
@@ -160,12 +160,12 @@ internal object MMListSerializer : JsonTransformingSerializer<List<MachineMeasur
                                     .filterKeys { it != MachineMeasurement.MACHINE }
                                     .forEach(this::put)
                             })
-                        })
-                    }
-                }
+                        }
+                    } else innerElement
+                }.forEach(this::add)
             }
-            else -> super.transformDeserialize(element)
         }
+        throw IllegalArgumentException("Incorrect JsonElement type received for MachineMeasurement deserialization!")
     }
 }
 
