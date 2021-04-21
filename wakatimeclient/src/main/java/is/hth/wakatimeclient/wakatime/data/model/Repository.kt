@@ -83,35 +83,36 @@ data class Repository(
 @Serializable
 data class Badge(
     /**
-     *
+     * The unique id of this badge
      */
     val id: String = "",
     /**
-     *
+     * The title shown inside of the badge
      */
     val title: String = "",
     /**
-     *
+     * The url to the badge as a pre rendered image asset, ready to be displayed
      */
-    val url: String = "",
+    @SerialName("url")
+    val preRenderedBadgeUrl: String = "",
     /**
-     *
+     * The hexadecimal color that the badge should show
      */
     val color: String = "",
     /**
-     *
+     * The link that should be navigated to when clicking the badge
      */
     val link: String = "",
     /**
-     *
+     * The hosting provider of the repository this badge is for
      */
     val provider: String = "",
     /**
-     *
+     * The full repository name that this badge is for
      */
     val repository: String = "",
     /**
-     *
+     * Creation date of the badge
      */
     @SerialName("created_at")
     val createdAt: String = "",
