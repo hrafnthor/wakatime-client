@@ -3,8 +3,19 @@ package `is`.hth.wakatimeclient.wakatime.data.model
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.MetaFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.ProjectFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.RequestDsl
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.*
+import kotlinx.serialization.encoding.CompositeDecoder
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encoding.decodeStructure
+import kotlinx.serialization.json.*
 
 @Serializable
 data class Day(
@@ -101,6 +112,57 @@ data class Machine(
     val createdAt: String = "",
 )
 
+/**
+ * A time measurement along with the associated [Machine] that the measurement was
+ * observed coming from
+ */
+@Serializable
+class MachineMeasurement(
+    /**
+     * The measurement done over the requested range
+     */
+    @SerialName(MEASUREMENT)
+    val measurement: Measurement,
+    /**
+     * The machine associated with the measurement
+     */
+    @SerialName(MACHINE)
+    val machine: Machine
+) {
+    internal companion object {
+        const val MEASUREMENT = "measurement"
+        const val MACHINE = "machine"
+    }
+}
+
+internal object MMListSerializer : JsonTransformingSerializer<List<MachineMeasurement>>(
+    ListSerializer(MachineMeasurement.serializer())
+) {
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        return when (element) {
+            is JsonArray -> buildJsonArray {
+                element.forEach { innerElement ->
+                    if (innerElement is JsonObject) {
+                        add(buildJsonObject {
+
+                            innerElement[MachineMeasurement.MACHINE]?.let { value ->
+                                put(MachineMeasurement.MACHINE, value)
+                            }
+
+                            put(MachineMeasurement.MEASUREMENT, buildJsonObject {
+                                innerElement
+                                    .filterKeys { it != MachineMeasurement.MACHINE }
+                                    .forEach(this::put)
+                            })
+                        })
+                    }
+                }
+            }
+            else -> super.transformDeserialize(element)
+        }
+    }
+}
+
 @Serializable
 data class Stats(
     val id: String = "",
@@ -152,6 +214,7 @@ data class Stats(
     val writesOnly: Boolean,
     @SerialName("best_day")
     val bestDay: Day,
+    @Serializable(MMListSerializer::class)
     val machines: List<MachineMeasurement>,
     val categories: List<Measurement>,
     val dependencies: List<Measurement>,
