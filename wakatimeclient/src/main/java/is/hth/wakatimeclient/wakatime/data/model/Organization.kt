@@ -308,17 +308,7 @@ data class Member(
      * The user backing up this member
      */
     val user: User
-) {
-    internal companion object {
-        const val ID = "id"
-        const val EMAIL = "email"
-        const val FULL_NAME = "full_name"
-        const val CAN_VIEW_DASHBOARD = "can_view_dashboard"
-        const val VIEW_ONLY = "is_view_only"
-        const val PHOTO = "photo"
-        const val USERNAME = "username"
-    }
-}
+)
 
 /**
  * Handles the custom deserialization of the [Member] payload, splitting it up into
@@ -326,15 +316,23 @@ data class Member(
  */
 internal object MemberSerializer : KSerializer<Member> {
 
+    private const val ID = "id"
+    private const val EMAIL = "email"
+    private const val FULL_NAME = "full_name"
+    private const val CAN_VIEW_DASHBOARD = "can_view_dashboard"
+    private const val VIEW_ONLY = "is_view_only"
+    private const val PHOTO = "photo"
+    private const val USERNAME = "username"
+
     override val descriptor: SerialDescriptor
         get() = buildClassSerialDescriptor("Member") {
-            element<Boolean>(elementName = Member.CAN_VIEW_DASHBOARD)
-            element<String>(elementName = Member.EMAIL, isOptional = true)
-            element<String>(elementName = Member.FULL_NAME, isOptional = true)
-            element<String>(elementName = Member.ID)
-            element<Boolean>(elementName = Member.VIEW_ONLY)
-            element<Boolean>(elementName = Member.PHOTO, isOptional = true)
-            element<String>(elementName = Member.USERNAME)
+            element<Boolean>(elementName = CAN_VIEW_DASHBOARD)
+            element<String>(elementName = EMAIL, isOptional = true)
+            element<String>(elementName = FULL_NAME, isOptional = true)
+            element<String>(elementName = ID)
+            element<Boolean>(elementName = VIEW_ONLY)
+            element<Boolean>(elementName = PHOTO, isOptional = true)
+            element<String>(elementName = USERNAME)
         }
 
     override fun serialize(encoder: Encoder, value: Member) {
@@ -344,13 +342,13 @@ internal object MemberSerializer : KSerializer<Member> {
     @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): Member {
         return decoder.decodeStructure(descriptor) {
-            val canView = decodeBooleanElement(descriptor, getIndex(Member.CAN_VIEW_DASHBOARD))
-            val email = decodeNullableString(Member.EMAIL, this)
-            val name = decodeNullableString(Member.FULL_NAME, this)
-            val id = decodeNullableString(Member.ID, this)
-            val isViewOnly = decodeBooleanElement(descriptor, getIndex(Member.VIEW_ONLY))
-            val photo = decodeNullableString(Member.PHOTO, this)
-            val username = decodeNullableString(Member.USERNAME, this)
+            val canView = decodeBooleanElement(descriptor, getIndex(CAN_VIEW_DASHBOARD))
+            val email = decodeNullableString(EMAIL, this)
+            val name = decodeNullableString(FULL_NAME, this)
+            val id = decodeNullableString(ID, this)
+            val isViewOnly = decodeBooleanElement(descriptor, getIndex(VIEW_ONLY))
+            val photo = decodeNullableString(PHOTO, this)
+            val username = decodeNullableString(USERNAME, this)
             Member(
                 canViewDashboard = canView,
                 isOnlyViewingDashboard = isViewOnly,
