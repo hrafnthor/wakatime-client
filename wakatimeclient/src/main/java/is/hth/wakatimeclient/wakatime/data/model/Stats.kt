@@ -8,50 +8,95 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Day(
+    /**
+     * Unique id of this entry
+     */
     val id: String = "",
+    /**
+     * The date for the day in ISO 8601 format
+     */
     val date: String = "",
-    val text: String = "",
+    /**
+     * The human readable total recorded time for this day
+     */
+    @SerialName("text")
+    val humanReadableTime: String = "",
+    /**
+     * The total recorded time for this day in seconds
+     */
     @SerialName("total_seconds")
     val secondsTotal: Double,
+    /**
+     * In ISO 8601 format
+     */
     @SerialName("created_at")
     val createdAt: String = "",
+    /**
+     * In ISO 8601 format. Can be empty.
+     */
     @SerialName("modified_at")
     val modifiedAt: String = ""
 )
 
 @Serializable
 data class Measurement(
+    /**
+     * The full hour portion of this measurement
+     */
     val hours: Int,
+    /**
+     * The minutes portion of this measurement
+     */
     val minutes: Int,
+    /**
+     * The percentage that this measurement represents of the whole observed time
+     * over the requested range
+     */
     val percent: Double,
+    /**
+     * The total amount of seconds in this measurement
+     */
     @SerialName("total_seconds")
     val secondsTotal: Double,
-    val digital: String = "",
+    /**
+     * The total amount of time in this measurement in 24 hour format
+     */
+    @SerialName("digital")
+    val total24Hour: String = "",
+    /**
+     * The descriptive name of this measurement, dependent on the context.
+     * Could be a category, a project name or a ide name depending on the context
+     */
     val name: String = "",
-    val text: String = "",
-)
-
-@Serializable
-data class MachineMeasurement(
-    val hours: Int,
-    val minutes: Int,
-    val percent: Double,
-    @SerialName("total_seconds")
-    val secondsTotal: Double,
-    val digital: String = "",
-    val name: String = "",
-    val text: String = "",
-    val machine: Machine
+    /**
+     * The total amount of time in this measurement in human readable 24 hour format
+     */
+    @SerialName("text")
+    val humanReadableTotal24Hour: String = "",
 )
 
 @Serializable
 data class Machine(
+    /**
+     * Unique id of this machine with Wakatime
+     */
     val id: String = "",
+    /**
+     * The ip address of this machine
+     */
     val ip: String = "",
+    /**
+     * The local name of the machine
+     */
     val name: String = "",
-    val value: String = "",
+    /**
+     * Last seen date in ISO 8601 format
+     */
     @SerialName("last_seen_at")
     val lastSeenAt: String = "",
+    /**
+     * First seen date in ISO 8601 format
+     */
     @SerialName("created_at")
     val createdAt: String = "",
 )
