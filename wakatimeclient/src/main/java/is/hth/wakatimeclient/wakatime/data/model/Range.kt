@@ -38,11 +38,6 @@ enum class HumanRange(val description: String) {
 @Serializable
 data class Range(
     /**
-     * The current time range as Date string in YEAR-MONTH-DAY
-     * format (only available when delta is a "day")
-     */
-    val date: String,
-    /**
      * Start of current time range as ISO 8601 UTC datetime
      */
     val start: String,
@@ -50,10 +45,6 @@ data class Range(
      * End of current time range as ISO 8601 UTC datetime>
      */
     val end: String,
-    /**
-     *  Current range in human-readable format relative to the current day
-     */
-    val text: String,
     /**
      * Timezone used in Olson Country/Region format
      */

@@ -47,7 +47,10 @@ enum class Delta {
     Day,
 
     @SerialName("week")
-    Week
+    Week,
+
+    @SerialName("all time")
+    AllTime
 }
 
 /**

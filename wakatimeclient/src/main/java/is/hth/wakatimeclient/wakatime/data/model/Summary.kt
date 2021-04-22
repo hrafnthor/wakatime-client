@@ -133,7 +133,9 @@ data class DailySummary(
      * Summary information by activity categories
      */
     val categories: List<Summary>,
-    // TODO: 13.11.2020 Figure out what the dependencies field revolves around
+    /**
+     * Summary information by dependencies
+     */
     val dependencies: List<Summary>,
     /**
      * Summary information by editors used
@@ -243,19 +245,27 @@ data class Summaries(
     /**
      * Utility class for network request making for [Summaries].
      *
-     * @param startDate Required. The requested start date for the request encoded as a Calendar
-     * @param endDate Required. The end date of the time range in 'yyyy-MM-dd' format.
-     * @param timezone Optional. The timezone for the given start and end dates. Defaults to the user's timezone.
-     * @param metaFilter Optional.
-     * @param projectFilter Optiona.
+     * @param startDate the start date of the range used in the request
+     * @param endDate the end date of the range used in the request
+     * @param timezone (optional) The timezone for the given start and end dates. Defaults to the user's timezone.
+     * @param meta (optional) meta related filtering options
+     * @param project (optional) project related filtering options
      */
     class Request(
         val startDate: Calendar,
         val endDate: Calendar,
         val timezone: String?,
-        val metaFilter: MetaFilter?,
-        val projectFilter: ProjectFilter?,
+        val meta: MetaFilter?,
+        val project: ProjectFilter?,
     ) {
+
+        /**
+         * @param startDate the start date of the range used in the request
+         * @param endDate the end date of the range used in the request
+         * @param timezone (optional) The timezone for the given start and end dates. Defaults to the user's timezone.
+         * @param meta (optional) meta related filtering options
+         * @param project (optional) project related filtering options
+         */
         @RequestDsl
         @Suppress("unused")
         class Builder(
@@ -269,8 +279,8 @@ data class Summaries(
                 startDate = startDate,
                 endDate = endDate,
                 timezone = timezone,
-                metaFilter = meta,
-                projectFilter = project
+                meta = meta,
+                project = project
             )
         }
     }
@@ -278,9 +288,12 @@ data class Summaries(
     /**
      * Utility class for network request making for [Summaries].
      *
-     * @param startDate Required. The requested start date for the request encoded as a Calendar
-     * @param endDate Required. The end date of the time range in 'yyyy-MM-dd' format.
-     * @param projectFilter Optional.
+     * @param organizationId the unique id of the organization that owns the dashboard
+     * @param dashboardId the unique id of the dashboard being requested
+     * @param userId the unique id of the user who's dashboard activity is being requested
+     * @param startDate the start date of the range used in the request
+     * @param endDate the end date of the range used in the request
+     * @param project (optional) project related filtering options
      */
     class DashboardRequest(
         val organizationId: String,
@@ -288,8 +301,16 @@ data class Summaries(
         val userId: String,
         val startDate: Calendar,
         val endDate: Calendar,
-        val projectFilter: ProjectFilter? = null
+        val project: ProjectFilter?,
     ) {
+        /**
+         * @param organizationId the unique id of the organization that owns the dashboard
+         * @param dashboardId the unique id of the dashboard being requested
+         * @param userId the unique id of the user who's dashboard activity is being requested
+         * @param startDate the start date of the range used in the request
+         * @param endDate the end date of the range used in the request
+         * @param project (optional) project related filtering options
+         */
         @RequestDsl
         @Suppress("unused")
         class Builder(

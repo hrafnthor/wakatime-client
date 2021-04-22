@@ -66,15 +66,26 @@ data class ExternalDuration internal constructor(
     companion object {
 
         /**
-         * Make a request for the authenticated user's [ExternalDuration]s for the given date
+         * Make an [ExternalDuration] request for the authenticated user
+         *
+         * @param date for which to query durations for
+         * @param construct for further configuration of the request's optional values
          */
         inline fun request(
             date: Calendar,
             construct: Request.Builder.() -> Unit = {}
-        ) = Request.Builder(date).also(construct).build()
+        ): Request = Request.Builder(date).also(construct).build()
 
         /**
-         * Make a [ExternalDuration] payload for delivering new information to Wakatime
+         * Make an [ExternalDuration] payload for delivering new information to Wakatime
+         *
+         * @param externalId a unique identifier for this duration on the external provider
+         * @param entity that this duration is logging time against, such as an absolute file path or domain
+         * @param type for the logged activity
+         * @param category for the logged activity
+         * @param startTime UNIX epoch timestamp; numbers after decimal point are fractions of a second
+         * @param endTime UNIX epoch timestamp; numbers after decimal point are fractions of a second
+         * @param construct for further configuration of the duration's optional values
          */
         inline fun send(
             externalId: String,
@@ -84,7 +95,7 @@ data class ExternalDuration internal constructor(
             startTime: Float,
             endTime: Float,
             construct: Builder.() -> Unit = {}
-        ) = Builder(
+        ): ExternalDuration = Builder(
             externalId = externalId,
             entity = entity,
             type = type,
@@ -94,6 +105,16 @@ data class ExternalDuration internal constructor(
         ).also(construct).build()
     }
 
+    /**
+     * @param externalId a unique identifier for this duration on the external provider
+     * @param entity that this duration is logging time against, such as an absolute file path or domain
+     * @param type for the logged activity
+     * @param category for the logged activity
+     * @param startTime UNIX epoch timestamp; numbers after decimal point are fractions of a second
+     * @param endTime UNIX epoch timestamp; numbers after decimal point are fractions of a second
+     * @param language (optional) the language this duration was logged against, if any
+     * @param project (optional) defines the project specific filtering for the duration, if any
+     */
     @RequestDsl
     @Suppress("unused")
     class Builder(
@@ -119,12 +140,25 @@ data class ExternalDuration internal constructor(
         )
     }
 
+    /**
+     * Utility class for creation requests for [ExternalDuration]s
+     *
+     * @param date for which to query durations for
+     * @param timezone (optional) for the given date. If none, defaults to the user's default timezone
+     * @param project (optional) defines the project specific filtering for the duration, if any
+     */
     @Suppress("unused")
     class Request(
         val date: Calendar,
         val timezone: String?,
         val project: ProjectFilter?
     ) {
+
+        /**
+         * @param date for which to query durations for
+         * @param timezone (optional) for the given date. If none, defaults to the user's default timezone
+         * @param project (optional) defines the project specific filtering for the duration, if any
+         */
         @RequestDsl
         class Builder(
             var date: Calendar,

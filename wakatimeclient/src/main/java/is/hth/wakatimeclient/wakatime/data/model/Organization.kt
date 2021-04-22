@@ -1,8 +1,11 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
@@ -307,45 +310,45 @@ data class Member(
     val user: User
 )
 
+/**
+ * Handles the custom deserialization of the [Member] payload, splitting it up into
+ * a [User] and other values.
+ */
 internal object MemberSerializer : KSerializer<Member> {
+
+    private const val ID = "id"
+    private const val EMAIL = "email"
+    private const val FULL_NAME = "full_name"
+    private const val CAN_VIEW_DASHBOARD = "can_view_dashboard"
+    private const val VIEW_ONLY = "is_view_only"
+    private const val PHOTO = "photo"
+    private const val USERNAME = "username"
 
     override val descriptor: SerialDescriptor
         get() = buildClassSerialDescriptor("Member") {
-            element<Boolean>(elementName = "can_view_dashboard")
-            element<String>(elementName = "email", isOptional = true)
-            element<String>(elementName = "full_name", isOptional = true)
-            element<String>(elementName = "id")
-            element<Boolean>(elementName = "is_view_only")
-            element<Boolean>(elementName = "photo", isOptional = true)
-            element<String>(elementName = "username")
+            element<Boolean>(elementName = CAN_VIEW_DASHBOARD)
+            element<String>(elementName = EMAIL, isOptional = true)
+            element<String>(elementName = FULL_NAME, isOptional = true)
+            element<String>(elementName = ID)
+            element<Boolean>(elementName = VIEW_ONLY)
+            element<Boolean>(elementName = PHOTO, isOptional = true)
+            element<String>(elementName = USERNAME)
         }
 
     override fun serialize(encoder: Encoder, value: Member) {
         throw NotImplementedError("The serialization method has not been implemented for 'Member'")
     }
 
+    @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): Member {
         return decoder.decodeStructure(descriptor) {
-            var canView = false
-            var email = ""
-            var name = ""
-            var id = ""
-            var isViewOnly = false
-            var photo = ""
-            var username = ""
-            while (true) {
-                when (val index = decodeElementIndex(descriptor)) {
-                    0 -> canView = decodeBooleanElement(descriptor, index)
-                    1 -> email = decodeStringElement(descriptor, index)
-                    2 -> name = decodeStringElement(descriptor, index)
-                    3 -> id = decodeStringElement(descriptor, index)
-                    4 -> isViewOnly = decodeBooleanElement(descriptor, index)
-                    5 -> photo = decodeStringElement(descriptor, index)
-                    6 -> username = decodeStringElement(descriptor, index)
-                    CompositeDecoder.DECODE_DONE -> break
-                    else -> error("Unexpected index: $index")
-                }
-            }
+            val canView = decodeBooleanElement(descriptor, getIndex(CAN_VIEW_DASHBOARD))
+            val email = decodeNullableString(EMAIL, this)
+            val name = decodeNullableString(FULL_NAME, this)
+            val id = decodeNullableString(ID, this)
+            val isViewOnly = decodeBooleanElement(descriptor, getIndex(VIEW_ONLY))
+            val photo = decodeNullableString(PHOTO, this)
+            val username = decodeNullableString(USERNAME, this)
             Member(
                 canViewDashboard = canView,
                 isOnlyViewingDashboard = isViewOnly,
@@ -359,4 +362,16 @@ internal object MemberSerializer : KSerializer<Member> {
             )
         }
     }
+
+    @ExperimentalSerializationApi
+    private fun decodeNullableString(key: String, decoder: CompositeDecoder): String {
+        return decoder.decodeNullableSerializableElement(
+            CommitSerializer.descriptor,
+            getIndex(key),
+            String.serializer().nullable
+        ) ?: ""
+    }
+
+    @ExperimentalSerializationApi
+    private fun getIndex(key: String): Int = CommitSerializer.descriptor.getElementIndex(key)
 }

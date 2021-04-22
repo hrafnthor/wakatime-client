@@ -64,15 +64,15 @@ data class PagedResponse<T>(
     @SerialName("prev_page_url")
     val previousPageUrl: String = "",
     /**
-     * The number of total available pages of data, if applicable. If not, then -1.
+     * The number of total available pages of data, if applicable. If not, then 1.
      */
     @SerialName("total_pages")
-    val totalPages: Int = -1,
+    val totalPages: Int = 1,
     /**
      * The total amount of items available over all pages
      */
     @SerialName("total")
-    val totalItems: Int = -1
+    val totalItems: Int = 0
 )
 
 /**
@@ -104,13 +104,13 @@ internal class PagedResponseSerializer<T : Any>(
                 decoder.json.decodeFromJsonElement(dataSerializer, it)
             }
 
-            val page: Int = getValue("page", -1, element) { it.int }
+            val page: Int = getValue("page", 1, element) { it.int }
             val nextPage: Int = getValue("next_page", -1, element) { it.int }
             val nextPageUrl: String = getValue("next_page_url", "", element) { it.content }
             val previousPage: Int = getValue("prev_page", -1, element) { it.int }
             val previousPageUrl: String = getValue("prev_page_url", "", element) { it.content }
-            val totalPages: Int = getValue("total_pages", -1, element) { it.int }
-            val totalItems: Int = getValue("total", -1, element) { it.int }
+            val totalPages: Int = getValue("total_pages", 1, element) { it.int }
+            val totalItems: Int = getValue("total", 0, element) { it.int }
 
             return PagedResponse(
                 data = data,

@@ -11,7 +11,7 @@ import timber.log.Timber
 /**
  * Handles Wakatime specific error response payloads
  */
-class WakatimeErrorProcessor : NetworkErrorProcessor() {
+internal class WakatimeErrorProcessor : NetworkErrorProcessor() {
 
     override fun onError(response: Response<*>): Error {
         val serviceError = convert(response.errorBody())

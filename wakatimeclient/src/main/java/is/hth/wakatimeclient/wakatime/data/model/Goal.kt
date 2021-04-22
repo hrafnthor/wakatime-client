@@ -1,15 +1,9 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.buildClassSerialDescriptor
-import kotlinx.serialization.descriptors.element
-import kotlinx.serialization.encoding.CompositeDecoder
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.decodeStructure
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.*
 
 @Serializable
 data class Goal internal constructor(
@@ -49,8 +43,14 @@ data class Goal internal constructor(
      */
     @SerialName("is_tweeting")
     val isTweeting: Boolean,
+    /**
+     *
+     */
     @SerialName("ignore_zero_days")
     val ignoreZeroDays: Boolean,
+    /**
+     *
+     */
     @SerialName("is_current_user_owner")
     val isCurrentUserOwner: Boolean,
     /**
@@ -67,7 +67,7 @@ data class Goal internal constructor(
     /**
      * human readable title for this goal
      */
-    val title: String,
+    val title: String = "",
     /**
      * type of goal
      */
@@ -116,11 +116,13 @@ data class Goal internal constructor(
      * Any subscriber which is not also the owner of the goal will also be present
      * in the list of invited users.
      */
+    @Serializable(SubscriberListTransformer::class)
     val subscribers: List<Subscriber> = emptyList(),
     /**
      * A list of users that have been invited to observer this goal's progress.
      */
     @SerialName("shared_with")
+    @Serializable(InvitedUserListTransformer::class)
     val invitedUsers: List<InvitedUser> = emptyList(),
     /**
      * A list of measurements taken at the correct time interval as per the
@@ -128,11 +130,16 @@ data class Goal internal constructor(
      */
     @SerialName("chart_data")
     val dataPoints: List<DataPoint> = emptyList(),
+    /**
+     * The creation date of the goal in ISO 8601 format
+     */
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String = "",
+    /**
+     * The latest modification date of the goal, if any, in ISO 8601 format
+     */
     @SerialName("modified_at")
-    val modifiedAt: String
-
+    val modifiedAt: String = ""
 )
 
 /**
@@ -166,10 +173,13 @@ data class DataPoint internal constructor(
     @SerialName("range_status")
     val rangeStatus: GoalStatus,
     /**
-     * An explanation for why this delta period passed or failed
+     * An explanation for why this delta period has the status it has
      */
     @SerialName("range_status_reason")
     val rangeStatusReason: String = "",
+    /**
+     * A shorter explanation for why this delta period has the status it has
+     */
     @SerialName("range_status_reason_short")
     val rangeStatusReasonShort: String = "",
     /**
@@ -181,146 +191,129 @@ data class DataPoint internal constructor(
 /**
  * A user who was invited to observe the progress of the goal.
  */
-@Serializable(with = InvitedUserSerializer::class)
+@Serializable
 data class InvitedUser internal constructor(
+    @SerialName(ID)
     val id: String,
     /**
      * The user detail of this subscriber
      */
+    @SerialName(USER)
     val user: User,
     /**
      * The status of the invitation
      */
+    @SerialName(STATUS)
     val status: InvitationStatus
-)
+) {
+    internal companion object {
+        const val ID = "id"
+        const val USER = "user"
+        const val STATUS = "status"
+    }
+}
 
 /**
- * This serializer manually decodes the structure of the invited user's list
- * creating a custom object out of it, [InvitedUser]
+ * Transforms the incoming JSON payload to simplify the resulting structure and reuse
+ * [User] objects for portion of the payload
  */
-internal object InvitedUserSerializer : KSerializer<InvitedUser> {
+internal object InvitedUserListTransformer : JsonTransformingSerializer<List<InvitedUser>>(
+    ListSerializer(InvitedUser.serializer())
+) {
 
-    override val descriptor: SerialDescriptor
-        get() = buildClassSerialDescriptor("InvitedUser") {
-            element<String>(elementName = "display_name", isOptional = true)
-            element<String>(elementName = "email", isOptional = true)
-            element<String>(elementName = "full_name", isOptional = true)
-            element<String>(elementName = "id")
-            element<String>(elementName = "photo", isOptional = true)
-            element<InvitationStatus>(elementName = "status")
-            element<String>(elementName = "user_id")
-            element<String>(elementName = "username")
-        }
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        if (element is JsonArray) {
+            return buildJsonArray {
+                element.map { innerElement ->
+                    if (innerElement is JsonObject && innerElement.size != 3) {
+                        // The inner element is of the correct type and does not seem to
+                        // be already processed payload
+                        buildJsonObject {
+                            innerElement[InvitedUser.ID]?.let { value ->
+                                put(InvitedUser.ID, value)
+                            }
 
-    override fun serialize(encoder: Encoder, value: InvitedUser) {
-        throw NotImplementedError("The serialization method has not been implemented for 'InvitedUser'")
-    }
+                            innerElement[InvitedUser.STATUS]?.let { value ->
+                                put(InvitedUser.STATUS, value)
+                            }
 
-    override fun deserialize(decoder: Decoder): InvitedUser {
-        return decoder.decodeStructure(descriptor) {
-            var displayName = ""
-            var email = ""
-            var name = ""
-            var id = ""
-            var photo = ""
-            var status = InvitationStatus.Accepted
-            var userId = ""
-            var username = ""
-            while (true) {
-                when (val index = decodeElementIndex(descriptor)) {
-                    0 -> displayName = decodeStringElement(descriptor, index)
-                    1 -> email = decodeStringElement(descriptor, index)
-                    2 -> name = decodeStringElement(descriptor, index)
-                    3 -> id = decodeStringElement(descriptor, index)
-                    4 -> photo = decodeStringElement(descriptor, index)
-                    5 -> status =
-                        decodeSerializableElement(descriptor, index, InvitationStatus.serializer())
-                    6 -> userId = decodeStringElement(descriptor, index)
-                    7 -> username = decodeStringElement(descriptor, index)
-                    CompositeDecoder.DECODE_DONE -> break
-                    else -> error("Unexpected index: $index")
-                }
+                            put(InvitedUser.USER, buildJsonObject {
+                                innerElement
+                                    .filterKeys { it != InvitedUser.ID && it != InvitedUser.STATUS }
+                                    .forEach {
+                                        put(it.key, it.value)
+                                    }
+                            })
+                        }
+                    } else innerElement
+                }.forEach(this::add)
             }
-            InvitedUser(
-                id = id,
-                user = User(
-                    id = userId,
-                    fullName = name,
-                    displayName = displayName,
-                    email = email,
-                    photoUrl = photo,
-                    username = username
-                ),
-                status = status
-            )
         }
+        throw IllegalArgumentException("Incorrect JsonElement type received for InvitedUser deserialization!")
     }
 }
 
 /**
  * A user who has an active email subscription for the goals progress
  */
-@Serializable(with = SubscribedUserSerializer::class)
+@Serializable
 data class Subscriber internal constructor(
     /**
      * The user detail of this subscriber
      */
+    @SerialName(USER)
     val user: User,
     /**
      *  How often this subscriber receives emails about this goal
      */
+    @SerialName(FREQUENCY)
     val frequency: Frequency
-)
+) {
+    internal companion object {
+        const val USER = "user"
+        const val FREQUENCY = "email_frequency"
+    }
+}
 
 /**
- * This serializer manually decodes the structure of the subscriber list creating a custom
- * object out of it, [Subscriber].
+ * Transforms the incoming JSON payload to simplify the resulting structure and reuse
+ * [User] objects for portion of the payload
  */
-internal object SubscribedUserSerializer : KSerializer<Subscriber> {
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("SubscribedUser") {
-        element<String>(elementName = "display_name", isOptional = true)
-        element<String>(elementName = "email", isOptional = true)
-        element<Frequency>(elementName = "email_frequency")
-        element<String>(elementName = "full_name", isOptional = true)
-        element<String>(elementName = "user_id")
-        element<String>(elementName = "username", isOptional = true)
-    }
+internal object SubscriberListTransformer : JsonTransformingSerializer<List<Subscriber>>(
+    ListSerializer(Subscriber.serializer())
+) {
 
-    override fun serialize(encoder: Encoder, value: Subscriber) {
-        throw NotImplementedError("Serialization method has not been implemented for 'Subscriber'")
-    }
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        if (element is JsonArray) {
+            return buildJsonArray {
+                element.map { innerElement ->
+                    if (innerElement is JsonObject && innerElement.size != 2) {
+                        // The inner element is of the correct type and doesn't seem to
+                        // be already processed
+                        buildJsonObject {
+                            innerElement[Subscriber.FREQUENCY]?.let { value ->
+                                put(Subscriber.FREQUENCY, value)
+                            }
 
-    override fun deserialize(decoder: Decoder): Subscriber {
-        return decoder.decodeStructure(descriptor) {
-            var displayName = ""
-            var email = ""
-            var frequency = Frequency.Daily
-            var fullName = ""
-            var id = ""
-            var username = ""
-            while (true) {
-                when (val index = decodeElementIndex(descriptor)) {
-                    0 -> displayName = decodeStringElement(descriptor, index)
-                    1 -> email = decodeStringElement(descriptor, index)
-                    2 -> frequency =
-                        decodeSerializableElement(descriptor, index, Frequency.serializer())
-                    3 -> fullName = decodeStringElement(descriptor, index)
-                    4 -> id = decodeStringElement(descriptor, index)
-                    5 -> username = decodeStringElement(descriptor, index)
-                    CompositeDecoder.DECODE_DONE -> break
-                    else -> error("Unexpected index: $index")
-                }
+                            put(Subscriber.USER, buildJsonObject {
+                                innerElement
+                                    .filterKeys { it != Subscriber.FREQUENCY }
+                                    .forEach {
+                                        if(it.key == "user_id"){
+                                            // One of the many instances where different field names
+                                            // are used in the response from API. Replace with the
+                                            // standard field name
+                                            put("id", it.value)
+                                        } else {
+                                            put(it.key, it.value)
+                                        }
+                                    }
+                            })
+                        }
+                    } else innerElement
+                }.forEach(this::add)
             }
-            Subscriber(
-                user = User(
-                    displayName = displayName,
-                    email = email,
-                    fullName = fullName,
-                    id = id,
-                    username = username
-                ),
-                frequency = frequency
-            )
         }
+        throw IllegalArgumentException("Incorrect JsonElement type received for Subscriber deserialization!")
     }
 }

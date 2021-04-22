@@ -3,7 +3,7 @@ package `is`.hth.wakatimeclient.wakatime.data.api
 import `is`.hth.wakatimeclient.core.data.net.NetworkClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 
-class WakatimeNetworkClient internal constructor(
+internal class WakatimeNetworkClient internal constructor(
     client: NetworkClient,
     private val errorProcessor: NetworkErrorProcessor
 ) {
