@@ -328,11 +328,11 @@ internal class WakatimeRemoteDataSourceImpl(
             api.getSummaries(
                 start = format(request.startDate.time),
                 end = format(request.endDate.time),
-                projectName = request.projectFilter?.projectName,
-                branches = request.projectFilter?.branches,
-                timeout = request.metaFilter?.timeout,
+                projectName = request.project?.projectName,
+                branches = request.project?.branches,
+                timeout = request.meta?.timeout,
                 timezone = request.timezone,
-                writesOnly = request.metaFilter?.writesOnly
+                writesOnly = request.meta?.writesOnly
             )
         })
     }
@@ -435,8 +435,8 @@ internal class WakatimeRemoteDataSourceImpl(
                 userId = request.userId,
                 start = format(request.startDate.time),
                 end = format(request.endDate.time),
-                branches = request.projectFilter?.branches,
-                projectName = request.projectFilter?.projectName
+                branches = request.project?.branches,
+                projectName = request.project?.projectName
             )
         }
     }
