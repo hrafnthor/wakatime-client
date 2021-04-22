@@ -47,7 +47,7 @@ internal interface WakatimeRemoteDataSource {
     /**
      * Fetches the private leaderboards that the currently authenticated user is member of.
      */
-    suspend fun getLeaderboards(): Results<PagedResponse<List<Leaderboard>>>
+    suspend fun getLeaderboards(): Results<PagedResponse<Leaderboard>>
 
     /**
      * Fetches leaders from the requested private leaderboard
@@ -133,7 +133,7 @@ internal interface WakatimeRemoteDataSource {
     /**
      * Fetches all of the user's [Goal]s
      */
-    suspend fun getGoals(): Results<PagedResponse<List<Goal>>>
+    suspend fun getGoals(): Results<PagedResponse<Goal>>
 
     /**
      * A user's external durations for the given day. External durations
@@ -188,7 +188,7 @@ internal interface WakatimeRemoteDataSource {
      *
      * Requires the [ReadOrganization] authentication scope
      */
-    suspend fun getOrganizations(): Results<PagedResponse<List<Organization>>>
+    suspend fun getOrganizations(): Results<PagedResponse<Organization>>
 
     /**
      * Lists all of the organization's dashboards
@@ -197,7 +197,7 @@ internal interface WakatimeRemoteDataSource {
      */
     suspend fun getDashboards(
         organizationId: String
-    ): Results<PagedResponse<List<Dashboard>>>
+    ): Results<PagedResponse<Dashboard>>
 
     /**
      * List an organization’s members.
@@ -205,7 +205,7 @@ internal interface WakatimeRemoteDataSource {
     suspend fun getDashboardMembers(
         organizationId: String,
         dashboardId: String
-    ): Results<PagedResponse<List<Member>>>
+    ): Results<PagedResponse<Member>>
 
     /**
      * An organization dashboard member’s coding activity for the
@@ -215,7 +215,7 @@ internal interface WakatimeRemoteDataSource {
         request: Summaries.DashboardRequest
     ): Results<Summaries>
 
-    suspend fun getExports(): Results<PagedResponse<List<Export>>>
+    suspend fun getExports(): Results<PagedResponse<Export>>
 }
 
 internal class WakatimeRemoteDataSourceImpl(
@@ -250,7 +250,7 @@ internal class WakatimeRemoteDataSourceImpl(
         })
     }
 
-    override suspend fun getLeaderboards(): Results<PagedResponse<List<Leaderboard>>> {
+    override suspend fun getLeaderboards(): Results<PagedResponse<Leaderboard>> {
         return makeCall {
             api.getPrivateLeaderboards()
         }
@@ -360,11 +360,11 @@ internal class WakatimeRemoteDataSourceImpl(
             networkCall = {
                 api.sendBeat(beat)
             }, transform = {
-                it.data
+                it.data.first()
             })
     }
 
-    override suspend fun getGoals(): Results<PagedResponse<List<Goal>>> {
+    override suspend fun getGoals(): Results<PagedResponse<Goal>> {
         return makeCall {
             api.getGoals()
         }
@@ -390,7 +390,7 @@ internal class WakatimeRemoteDataSourceImpl(
             networkCall = {
                 api.sendExternalDuration(payload)
             }, transform = {
-                it.data
+                it.data.first()
             })
     }
 
@@ -402,7 +402,7 @@ internal class WakatimeRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getOrganizations(): Results<PagedResponse<List<Organization>>> {
+    override suspend fun getOrganizations(): Results<PagedResponse<Organization>> {
         return makeCall {
             api.getOrganizations()
         }
@@ -410,7 +410,7 @@ internal class WakatimeRemoteDataSourceImpl(
 
     override suspend fun getDashboards(
         organizationId: String
-    ): Results<PagedResponse<List<Dashboard>>> {
+    ): Results<PagedResponse<Dashboard>> {
         return makeCall {
             api.getDashboards(organizationId)
         }
@@ -419,7 +419,7 @@ internal class WakatimeRemoteDataSourceImpl(
     override suspend fun getDashboardMembers(
         organizationId: String,
         dashboardId: String
-    ): Results<PagedResponse<List<Member>>> {
+    ): Results<PagedResponse<Member>> {
         return makeCall {
             api.getDashboardMembers(organizationId, dashboardId)
         }
@@ -441,7 +441,7 @@ internal class WakatimeRemoteDataSourceImpl(
         }
     }
 
-    override suspend fun getExports(): Results<PagedResponse<List<Export>>> {
+    override suspend fun getExports(): Results<PagedResponse<Export>> {
         return makeCall {
             api.getExports()
         }
