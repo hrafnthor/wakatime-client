@@ -141,6 +141,8 @@ data class ExternalDuration internal constructor(
     }
 
     /**
+     * Utility class for creation requests for [ExternalDuration]s
+     *
      * @param date for which to query durations for
      * @param timezone (optional) for the given date. If none, defaults to the user's default timezone
      * @param project (optional) defines the project specific filtering for the duration, if any

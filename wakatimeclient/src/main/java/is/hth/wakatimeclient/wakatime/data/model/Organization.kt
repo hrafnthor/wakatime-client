@@ -363,7 +363,6 @@ internal object MemberSerializer : KSerializer<Member> {
         }
     }
 
-
     @ExperimentalSerializationApi
     private fun decodeNullableString(key: String, decoder: CompositeDecoder): String {
         return decoder.decodeNullableSerializableElement(
