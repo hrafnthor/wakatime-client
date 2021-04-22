@@ -76,6 +76,38 @@ enum class Frequency {
 }
 
 /**
+ * Predefined chronological range constants
+ */
+@Suppress("unused")
+@Serializable
+enum class HumanRange(val description: String) {
+
+    /**
+     * The last week
+     */
+    @SerialName("last_7_days")
+    WEEK("last_7_days"),
+
+    /**
+     * The last 30 days from today
+     */
+    @SerialName("last_30_days")
+    MONTH("last_30_days"),
+
+    /**
+     * The last 6 months since today
+     */
+    @SerialName("last_6_months")
+    HALF_YEAR("last_6_months"),
+
+    /**
+     * The last year from today
+     */
+    @SerialName("last_year")
+    YEAR("last_year")
+}
+
+/**
  * Defines the statuses that an invitation to observe a goal can take
  */
 @Serializable
