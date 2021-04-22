@@ -1,5 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
+import `is`.hth.wakatimeclient.core.findValue
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -10,10 +11,7 @@ import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonTransformingSerializer
-import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.*
 
 @Serializable
 data class Organization(
@@ -300,13 +298,13 @@ data class Member(
      * Indicates whether the user can view the dashboard
      */
     @SerialName(CAN_VIEW_DASHBOARD)
-    val canViewDashboard: Boolean = false,
+    val canViewDashboard: Boolean = CAN_VIEW_DASHBOARD_DEFAULT,
     /**
      * Indicates whether the user is only viewing the dashboard, or participating
      * in supplying activity
      */
     @SerialName(IS_ONLY_VIEWING_DASHBOARD)
-    val isOnlyViewingDashboard: Boolean = false,
+    val isOnlyViewingDashboard: Boolean = IS_ONLY_VIEWING_DASHBOARD_DEFAULT,
     /**
      * The user backing up this member
      */
@@ -317,6 +315,9 @@ data class Member(
         const val CAN_VIEW_DASHBOARD = "can_view_dashboard"
         const val IS_ONLY_VIEWING_DASHBOARD = "is_view_only"
         const val USER = "user"
+
+        const val CAN_VIEW_DASHBOARD_DEFAULT = false
+        const val IS_ONLY_VIEWING_DASHBOARD_DEFAULT = false
     }
 }
 
@@ -332,12 +333,12 @@ internal object MemberTransformSerializer : JsonTransformingSerializer<Member>(M
                 // The inner element is of the correct type and does not seem to
                 // be already processed payload
                 buildJsonObject {
-                    element[Member.CAN_VIEW_DASHBOARD]?.let { value ->
-                        put(Member.CAN_VIEW_DASHBOARD, value)
+                    findValue(this, element, Member.CAN_VIEW_DASHBOARD) { key ->
+                        put(key, Member.CAN_VIEW_DASHBOARD_DEFAULT)
                     }
 
-                    element[Member.IS_ONLY_VIEWING_DASHBOARD]?.let { value ->
-                        put(Member.IS_ONLY_VIEWING_DASHBOARD, value)
+                    findValue(this, element, Member.IS_ONLY_VIEWING_DASHBOARD) { key ->
+                        put(key, Member.IS_ONLY_VIEWING_DASHBOARD_DEFAULT)
                     }
 
                     put(Member.USER, buildJsonObject {
