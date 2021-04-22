@@ -214,8 +214,8 @@ object Injector {
 
     private fun getOauthClient(context: Context): WakatimeClient {
         return WakatimeClient.Builder(
-            secret = BuildConfig.SECRET,
-            appId = BuildConfig.APPID,
+            clientSecret = BuildConfig.SECRET,
+            clientId = BuildConfig.APPID,
             redirectUri = Uri.parse(BuildConfig.REDIRECT_URI)
         ).build(context, EncryptedAuthStorage(getSharedPreferences(context)))
     }
