@@ -1,5 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
+import `is`.hth.wakatimeclient.core.findValue
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.MetaFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.ProjectFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.RequestDsl
@@ -45,21 +46,21 @@ data class Measurement(
     /**
      * The full hour portion of this measurement
      */
-    val hours: Int,
+    val hours: Int = 0,
     /**
      * The minutes portion of this measurement
      */
-    val minutes: Int,
+    val minutes: Int = 0,
     /**
      * The percentage that this measurement represents of the whole observed time
      * over the requested range
      */
-    val percent: Double,
+    val percent: Double = 0.0,
     /**
      * The total amount of seconds in this measurement
      */
     @SerialName("total_seconds")
-    val secondsTotal: Double,
+    val secondsTotal: Double = 0.0,
     /**
      * The total amount of time in this measurement in 24 hour format
      */
@@ -130,9 +131,10 @@ class MachineMeasurement(
  * Modifies the incoming json stream to fit with the modified structure in the
  * [MachineMeasurement] object
  */
-internal object MachineMeasurementListTransformer : JsonTransformingSerializer<List<MachineMeasurement>>(
-    ListSerializer(MachineMeasurement.serializer())
-) {
+internal object MachineMeasurementListTransformer :
+    JsonTransformingSerializer<List<MachineMeasurement>>(
+        ListSerializer(MachineMeasurement.serializer())
+    ) {
     override fun transformDeserialize(element: JsonElement): JsonElement {
         if (element is JsonArray) {
             return buildJsonArray {
@@ -142,9 +144,7 @@ internal object MachineMeasurementListTransformer : JsonTransformingSerializer<L
                         // keys as would be expected for the transformation to take place
                         buildJsonObject {
 
-                            innerElement[MachineMeasurement.MACHINE]?.let { value ->
-                                put(MachineMeasurement.MACHINE, value)
-                            }
+                            findValue(this, innerElement, MachineMeasurement.MACHINE) {}
 
                             put(MachineMeasurement.MEASUREMENT, buildJsonObject {
                                 innerElement
