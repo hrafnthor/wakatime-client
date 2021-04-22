@@ -28,5 +28,13 @@ data class TotalRecord(
      * The total recorded human readable time since the account was created
      */
     @SerialName("text")
-    val totalRecordedTimeReadable: String = ""
+    val totalRecordedTimeReadable: String = "",
+    /**
+     * The user configured timeout in seconds
+     */
+    val timeout: Int = 0,
+    /**
+     * The date range that this record applies over
+     */
+    val range: Range
 )
