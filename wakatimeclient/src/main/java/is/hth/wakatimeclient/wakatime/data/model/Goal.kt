@@ -1,16 +1,8 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.buildClassSerialDescriptor
-import kotlinx.serialization.descriptors.element
-import kotlinx.serialization.encoding.CompositeDecoder
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.json.*
 
 @Serializable
@@ -124,6 +116,7 @@ data class Goal internal constructor(
      * Any subscriber which is not also the owner of the goal will also be present
      * in the list of invited users.
      */
+    @Serializable(SubscriberListTransformer::class)
     val subscribers: List<Subscriber> = emptyList(),
     /**
      * A list of users that have been invited to observer this goal's progress.
@@ -180,10 +173,13 @@ data class DataPoint internal constructor(
     @SerialName("range_status")
     val rangeStatus: GoalStatus,
     /**
-     * An explanation for why this delta period passed or failed
+     * An explanation for why this delta period has the status it has
      */
     @SerialName("range_status_reason")
     val rangeStatusReason: String = "",
+    /**
+     * A shorter explanation for why this delta period has the status it has
+     */
     @SerialName("range_status_reason_short")
     val rangeStatusReasonShort: String = "",
     /**
@@ -229,9 +225,9 @@ internal object InvitedUserListTransformer : JsonTransformingSerializer<List<Inv
         if (element is JsonArray) {
             return buildJsonArray {
                 element.map { innerElement ->
-                    if (innerElement is JsonObject && innerElement.size == 8) {
-                        // The inner element is of the correct type and contains as many
-                        // keys as would be expected for the transformation to take place
+                    if (innerElement is JsonObject && innerElement.size != 3) {
+                        // The inner element is of the correct type and does not seem to
+                        // be already processed payload
                         buildJsonObject {
                             innerElement[InvitedUser.ID]?.let { value ->
                                 put(InvitedUser.ID, value)
@@ -260,67 +256,64 @@ internal object InvitedUserListTransformer : JsonTransformingSerializer<List<Inv
 /**
  * A user who has an active email subscription for the goals progress
  */
-@Serializable(with = SubscribedUserSerializer::class)
+@Serializable
 data class Subscriber internal constructor(
     /**
      * The user detail of this subscriber
      */
+    @SerialName(USER)
     val user: User,
     /**
      *  How often this subscriber receives emails about this goal
      */
+    @SerialName(FREQUENCY)
     val frequency: Frequency
-)
+) {
+    internal companion object {
+        const val USER = "user"
+        const val FREQUENCY = "email_frequency"
+    }
+}
 
 /**
- * This serializer manually decodes the structure of the subscriber list creating a custom
- * object out of it, [Subscriber].
+ * Transforms the incoming JSON payload to simplify the resulting structure and reuse
+ * [User] objects for portion of the payload
  */
-internal object SubscribedUserSerializer : KSerializer<Subscriber> {
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("SubscribedUser") {
-        element<String>(elementName = "display_name", isOptional = true)
-        element<String>(elementName = "email", isOptional = true)
-        element<Frequency>(elementName = "email_frequency")
-        element<String>(elementName = "full_name", isOptional = true)
-        element<String>(elementName = "user_id")
-        element<String>(elementName = "username", isOptional = true)
-    }
+internal object SubscriberListTransformer : JsonTransformingSerializer<List<Subscriber>>(
+    ListSerializer(Subscriber.serializer())
+) {
 
-    override fun serialize(encoder: Encoder, value: Subscriber) {
-        throw NotImplementedError("Serialization method has not been implemented for 'Subscriber'")
-    }
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        if (element is JsonArray) {
+            return buildJsonArray {
+                element.map { innerElement ->
+                    if (innerElement is JsonObject && innerElement.size != 2) {
+                        // The inner element is of the correct type and doesn't seem to
+                        // be already processed
+                        buildJsonObject {
+                            innerElement[Subscriber.FREQUENCY]?.let { value ->
+                                put(Subscriber.FREQUENCY, value)
+                            }
 
-    override fun deserialize(decoder: Decoder): Subscriber {
-        return decoder.decodeStructure(descriptor) {
-            var displayName = ""
-            var email = ""
-            var frequency = Frequency.Daily
-            var fullName = ""
-            var id = ""
-            var username = ""
-            while (true) {
-                when (val index = decodeElementIndex(descriptor)) {
-                    0 -> displayName = decodeStringElement(descriptor, index)
-                    1 -> email = decodeStringElement(descriptor, index)
-                    2 -> frequency =
-                        decodeSerializableElement(descriptor, index, Frequency.serializer())
-                    3 -> fullName = decodeStringElement(descriptor, index)
-                    4 -> id = decodeStringElement(descriptor, index)
-                    5 -> username = decodeStringElement(descriptor, index)
-                    CompositeDecoder.DECODE_DONE -> break
-                    else -> error("Unexpected index: $index")
-                }
+                            put(Subscriber.USER, buildJsonObject {
+                                innerElement
+                                    .filterKeys { it != Subscriber.FREQUENCY }
+                                    .forEach {
+                                        if(it.key == "user_id"){
+                                            // One of the many instances where different field names
+                                            // are used in the response from API. Replace with the
+                                            // standard field name
+                                            put("id", it.value)
+                                        } else {
+                                            put(it.key, it.value)
+                                        }
+                                    }
+                            })
+                        }
+                    } else innerElement
+                }.forEach(this::add)
             }
-            Subscriber(
-                user = User(
-                    displayName = displayName,
-                    email = email,
-                    fullName = fullName,
-                    id = id,
-                    username = username
-                ),
-                frequency = frequency
-            )
         }
+        throw IllegalArgumentException("Incorrect JsonElement type received for Subscriber deserialization!")
     }
 }
