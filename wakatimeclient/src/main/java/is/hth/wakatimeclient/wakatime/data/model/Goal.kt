@@ -49,8 +49,14 @@ data class Goal internal constructor(
      */
     @SerialName("is_tweeting")
     val isTweeting: Boolean,
+    /**
+     *
+     */
     @SerialName("ignore_zero_days")
     val ignoreZeroDays: Boolean,
+    /**
+     *
+     */
     @SerialName("is_current_user_owner")
     val isCurrentUserOwner: Boolean,
     /**
@@ -67,7 +73,7 @@ data class Goal internal constructor(
     /**
      * human readable title for this goal
      */
-    val title: String,
+    val title: String = "",
     /**
      * type of goal
      */
@@ -128,11 +134,16 @@ data class Goal internal constructor(
      */
     @SerialName("chart_data")
     val dataPoints: List<DataPoint> = emptyList(),
+    /**
+     * The creation date of the goal in ISO 8601 format
+     */
     @SerialName("created_at")
-    val createdAt: String,
+    val createdAt: String = "",
+    /**
+     * The latest modification date of the goal, if any, in ISO 8601 format
+     */
     @SerialName("modified_at")
-    val modifiedAt: String
-
+    val modifiedAt: String = ""
 )
 
 /**
