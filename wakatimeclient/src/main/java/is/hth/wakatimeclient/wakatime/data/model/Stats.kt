@@ -3,18 +3,9 @@ package `is`.hth.wakatimeclient.wakatime.data.model
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.MetaFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.ProjectFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.RequestDsl
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.builtins.nullable
-import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.descriptors.*
-import kotlinx.serialization.encoding.CompositeDecoder
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.json.*
 
 @Serializable
@@ -139,7 +130,7 @@ class MachineMeasurement(
  * Modifies the incoming json stream to fit with the modified structure in the
  * [MachineMeasurement] object
  */
-internal object MMListSerializer : JsonTransformingSerializer<List<MachineMeasurement>>(
+internal object MachineMeasurementListTransformer : JsonTransformingSerializer<List<MachineMeasurement>>(
     ListSerializer(MachineMeasurement.serializer())
 ) {
     override fun transformDeserialize(element: JsonElement): JsonElement {
@@ -158,7 +149,9 @@ internal object MMListSerializer : JsonTransformingSerializer<List<MachineMeasur
                             put(MachineMeasurement.MEASUREMENT, buildJsonObject {
                                 innerElement
                                     .filterKeys { it != MachineMeasurement.MACHINE }
-                                    .forEach(this::put)
+                                    .forEach {
+                                        put(it.key, it.value)
+                                    }
                             })
                         }
                     } else innerElement
@@ -220,7 +213,7 @@ data class Stats(
     val writesOnly: Boolean,
     @SerialName("best_day")
     val bestDay: Day,
-    @Serializable(MMListSerializer::class)
+    @Serializable(MachineMeasurementListTransformer::class)
     val machines: List<MachineMeasurement>,
     val categories: List<Measurement>,
     val dependencies: List<Measurement>,
