@@ -4,15 +4,16 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.builtins.nullable
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
-import kotlinx.serialization.encoding.CompositeDecoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonTransformingSerializer
+import kotlinx.serialization.json.buildJsonObject
 
 @Serializable
 data class Organization(
@@ -293,46 +294,78 @@ data class Dashboard(
     val viewers: List<User> = emptyList()
 )
 
-@Serializable(MemberSerializer::class)
+@Serializable(MemberTransformSerializer::class)
 data class Member(
     /**
      * Indicates whether the user can view the dashboard
      */
+    @SerialName(CAN_VIEW_DASHBOARD)
     val canViewDashboard: Boolean = false,
     /**
      * Indicates whether the user is only viewing the dashboard, or participating
      * in supplying activity
      */
+    @SerialName(IS_ONLY_VIEWING_DASHBOARD)
     val isOnlyViewingDashboard: Boolean = false,
     /**
      * The user backing up this member
      */
+    @SerialName(USER)
     val user: User
-)
+) {
+    internal companion object {
+        const val CAN_VIEW_DASHBOARD = "can_view_dashboard"
+        const val IS_ONLY_VIEWING_DASHBOARD = "is_view_only"
+        const val USER = "user"
+    }
+}
 
 /**
- * Handles the custom deserialization of the [Member] payload, splitting it up into
- * a [User] and other values.
+ * Transforms the incoming JSON payload to simplify the resulting structure and reuse
+ * [User] objects for portion of the payload
+ */
+internal object MemberTransformSerializer : JsonTransformingSerializer<Member>(MemberSerializer) {
+
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        if (element is JsonObject) {
+            return if (element.size != 3) {
+                // The inner element is of the correct type and does not seem to
+                // be already processed payload
+                buildJsonObject {
+                    element[Member.CAN_VIEW_DASHBOARD]?.let { value ->
+                        put(Member.CAN_VIEW_DASHBOARD, value)
+                    }
+
+                    element[Member.IS_ONLY_VIEWING_DASHBOARD]?.let { value ->
+                        put(Member.IS_ONLY_VIEWING_DASHBOARD, value)
+                    }
+
+                    put(Member.USER, buildJsonObject {
+                        element.filterKeys {
+                            it != Member.IS_ONLY_VIEWING_DASHBOARD && it != Member.CAN_VIEW_DASHBOARD
+                        }.forEach {
+                            put(it.key, it.value)
+                        }
+                    })
+                }
+
+            } else element
+        }
+        throw IllegalArgumentException("Incorrect JsonElement type received for Member deserialization!")
+    }
+}
+
+/**
+ * Handles the custom deserialization of the [Member] payload after having been pre processed
+ * in the [MemberTransformSerializer]. Ordering can thus be relied upon.
  */
 internal object MemberSerializer : KSerializer<Member> {
 
-    private const val ID = "id"
-    private const val EMAIL = "email"
-    private const val FULL_NAME = "full_name"
-    private const val CAN_VIEW_DASHBOARD = "can_view_dashboard"
-    private const val VIEW_ONLY = "is_view_only"
-    private const val PHOTO = "photo"
-    private const val USERNAME = "username"
-
     override val descriptor: SerialDescriptor
-        get() = buildClassSerialDescriptor("Member") {
-            element<Boolean>(elementName = CAN_VIEW_DASHBOARD)
-            element<String>(elementName = EMAIL, isOptional = true)
-            element<String>(elementName = FULL_NAME, isOptional = true)
-            element<String>(elementName = ID)
-            element<Boolean>(elementName = VIEW_ONLY)
-            element<Boolean>(elementName = PHOTO, isOptional = true)
-            element<String>(elementName = USERNAME)
+        get() = buildClassSerialDescriptor("member") {
+            element<Boolean>(elementName = Member.CAN_VIEW_DASHBOARD)
+            element<Boolean>(elementName = Member.IS_ONLY_VIEWING_DASHBOARD)
+            element<User>(elementName = Member.USER)
         }
 
     override fun serialize(encoder: Encoder, value: Member) {
@@ -342,36 +375,17 @@ internal object MemberSerializer : KSerializer<Member> {
     @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): Member {
         return decoder.decodeStructure(descriptor) {
-            val canView = decodeBooleanElement(descriptor, getIndex(CAN_VIEW_DASHBOARD))
-            val email = decodeNullableString(EMAIL, this)
-            val name = decodeNullableString(FULL_NAME, this)
-            val id = decodeNullableString(ID, this)
-            val isViewOnly = decodeBooleanElement(descriptor, getIndex(VIEW_ONLY))
-            val photo = decodeNullableString(PHOTO, this)
-            val username = decodeNullableString(USERNAME, this)
+            val canView = decodeBooleanElement(descriptor, getIndex(Member.CAN_VIEW_DASHBOARD))
+            val isViewOnly = decodeBooleanElement(descriptor, getIndex(Member.IS_ONLY_VIEWING_DASHBOARD))
+            val user = decodeSerializableElement(descriptor, getIndex(Member.USER), User.serializer())
             Member(
                 canViewDashboard = canView,
                 isOnlyViewingDashboard = isViewOnly,
-                user = User(
-                    id = id,
-                    fullName = name,
-                    email = email,
-                    photoUrl = photo,
-                    username = username
-                ),
+                user = user
             )
         }
     }
 
     @ExperimentalSerializationApi
-    private fun decodeNullableString(key: String, decoder: CompositeDecoder): String {
-        return decoder.decodeNullableSerializableElement(
-            CommitSerializer.descriptor,
-            getIndex(key),
-            String.serializer().nullable
-        ) ?: ""
-    }
-
-    @ExperimentalSerializationApi
-    private fun getIndex(key: String): Int = CommitSerializer.descriptor.getElementIndex(key)
+    private fun getIndex(key: String): Int = descriptor.getElementIndex(key)
 }
