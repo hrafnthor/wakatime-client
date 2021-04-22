@@ -2,6 +2,7 @@ package `is`.hth.wakatimeclient.core
 
 import `is`.hth.wakatimeclient.core.data.ErrorProcessor
 import `is`.hth.wakatimeclient.core.data.Results
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonObjectBuilder
 
@@ -23,10 +24,11 @@ inline fun <T : Any> safeOperation(
 /**
  * Convenience method for extracting a potential value from a JsonObject and
  * adding it to a new builder
+ *
  * @param builder that is being used to construct a new JsonObject
  * @param element from which fields are being parsed from
  * @param key for the element that is being looked for
- * @param default called when the element is not found and whatever default step should be
+ * @param default called when the element is not found, or the value is null, and whatever default step should be
  * performed. Is passed the previously supplied key
  */
 internal inline fun findValue(
@@ -35,9 +37,8 @@ internal inline fun findValue(
     key: String,
     default: (String) -> Unit
 ) {
-    element[key]?.let {
-        builder.put(key, it)
-    } ?: run {
-        default(key)
-    }
+    val innerElement = element[key]
+    if (innerElement != null && innerElement != JsonNull) {
+        builder.put(key, innerElement)
+    } else default(key)
 }
