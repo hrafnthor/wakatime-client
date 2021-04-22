@@ -229,7 +229,7 @@ internal object InvitedUserListTransformer : JsonTransformingSerializer<List<Inv
         if (element is JsonArray) {
             return buildJsonArray {
                 element.map { innerElement ->
-                    if (innerElement is JsonObject) {
+                    if (innerElement is JsonObject && innerElement.size == 8) {
                         // The inner element is of the correct type and contains as many
                         // keys as would be expected for the transformation to take place
                         buildJsonObject {
