@@ -12,14 +12,14 @@ data class Export(
     /**
      * Indicates the current state of the export process
      */
-    val status: ProcessingStatus,
+    val status: ExportStatus,
     /**
      * Indicates the percentage of coding stats that have been exported
      */
     @SerialName("percentage_complete")
     val percentage: Float = 0f,
     /**
-     * When the export has reached [ProcessingStatus.Completed] there will be a url for
+     * When the export has reached [ExportStatus.Completed] there will be a url for
      * downloading the activity.
      */
     @SerialName("download_url")

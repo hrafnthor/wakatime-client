@@ -197,7 +197,7 @@ enum class Category {
 
 @Serializable
 @Suppress("unused")
-enum class ProcessingStatus {
+enum class ExportStatus {
     @SerialName("Pending…")
     Pending,
 
@@ -209,4 +209,26 @@ enum class ProcessingStatus {
 
     @SerialName("Completed")
     Completed
+}
+
+@Serializable
+@Suppress("unused")
+enum class ProcessingStatus {
+    /**
+     * There is processing pending server side, which hasn't yet started
+     */
+    @SerialName("pending_update")
+    Pending,
+
+    /**
+     * There is processing happening server side
+     */
+    @SerialName("updating")
+    Processing,
+
+    /**
+     * All processing has finished
+     */
+    @SerialName("ok")
+    Done
 }
