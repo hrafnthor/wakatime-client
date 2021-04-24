@@ -6,6 +6,7 @@ import `is`.hth.wakatimeclient.wakatime.data.model.filters.ProjectFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.RequestDsl
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.*
 
@@ -165,63 +166,169 @@ internal object MachineMeasurementListTransformer :
 @Serializable
 data class Stats(
     val id: String = "",
+    /**
+     * The unique id of the owner of these stats
+     */
     @SerialName("user_id")
     val userId: String = "",
+    /**
+     * The public username for the owner of these stats
+     */
     val username: String = "",
+    /**
+     * The average coding activity per day as seconds for the given range of time
+     */
     @SerialName("daily_average")
-    val dailyAverage: Int,
+    val dailyAverage: Int = 0,
+    /**
+     * The average coding activity per day as seconds for the given range of time without any filtering
+     */
     @SerialName("daily_average_including_other_language")
-    val dailyAverageTotal: Int,
+    val dailyAverageTotal: Int = 0,
+    /**
+     * Total number of days in this range
+     */
     @SerialName("days_including_holidays")
-    val daysWithHolidays: Int,
+    val daysWithHolidays: Int = 0,
+    /**
+     * Number of days in this range excluding days with no coding time logged
+     */
     @SerialName("days_minus_holidays")
-    val daysWithoutHolidays: Int,
-    val holidays: Int,
+    val daysWithoutHolidays: Int = 0,
+    /**
+     * Number of days in this range with no coding time logged
+     */
+    val holidays: Int = 0,
+    /**
+     * If the stats are being computed, this field will indicate the progress
+     */
     @SerialName("percent_calculated")
-    val percentCalculated: Int,
-    val timeout: Int,
+    val percentCalculated: Int = 100,
+    /**
+     * Value of the user's timeout setting in minutes
+     */
+    val timeout: Int = 0,
+    /**
+     * Total coding activity as seconds for the given range of time
+     */
     @SerialName("total_seconds")
-    val totalSeconds: Double,
+    val totalSeconds: Double = 0.0,
+    /**
+     * Total coding activity as seconds for the given range of time without any filtering
+     */
     @SerialName("total_seconds_including_other_language")
-    val totalSecondsIncludingOtherLanguage: Double,
+    val totalSecondsIncludingOtherLanguage: Double = 0.0,
+    /**
+     * The daily average coding activity as a human readable string
+     */
     @SerialName("human_readable_daily_average")
     val humanReadableDailyAverage: String = "",
+    /**
+     * The total coding activity for the given range of time as a human readable string
+     */
     @SerialName("human_readable_total")
     val humanReadableTotal: String = "",
+    /**
+     * The time when these stats were created in ISO 8601 format
+     */
     @SerialName("created_at")
     val createdAt: String = "",
+    /**
+     * The time when these stats were modified in ISO 8601 format
+     */
     @SerialName("modified_at")
     val modifiedAt: String = "",
+    /**
+     *  The start of this time range as ISO 8601 UTC datetime
+     */
     val start: String = "",
+    /**
+     * The status of these stats in the cache
+     */
     val status: String = "",
+    /**
+     * The end of this time range as ISO 8601 UTC datetime
+     */
     val end: String = "",
-    val range: String = "",
+    /**
+     * The time range of these stats
+     */
+    val range: HumanRange,
+    /**
+     * The timezone used in Olson Country/Region format
+     */
     val timezone: String = "",
+    /**
+     * Indicates if these stats are being updated in the background
+     */
+    @Transient
     @SerialName("is_already_updating")
-    val isAlreadyUpdating: Boolean,
+    val isAlreadyUpdating: Boolean = false,
+    /**
+     * Indicates if this user's coding activity is publicly visible
+     */
     @SerialName("is_coding_activity_visible")
-    val isCodingActivityVisible: Boolean,
+    val isCodingActivityVisible: Boolean = false,
+    /**
+     * Indicates if these stats include the current day; normally false except when [range] is [HumanRange.All]
+     */
     @SerialName("is_including_today")
-    val isIncludingToday: Boolean,
+    val isIncludingToday: Boolean = false,
+    /**
+     * Indicates if this user's languages, editors, and operating system stats are publicly visible
+     */
     @SerialName("is_other_usage_visible")
-    val isOtherUsageVisible: Boolean,
+    val isOtherUsageVisible: Boolean = false,
+    /**
+     * Indicates if these stats got stuck while processing and will be recalculated in the background
+     */
     @SerialName("is_stuck")
-    val isStuck: Boolean,
+    val isStuck: Boolean = false,
+    /**
+     * Indicates if these stats are up to date; when false, stats are missing or from an old time range and will be refreshed soon
+     */
     @SerialName("is_up_to_date")
-    val isUpToDate: Boolean,
+    val isUpToDate: Boolean = false,
+    /**
+     * Status of the user's writes_only setting
+     */
     @SerialName("writes_only")
-    val writesOnly: Boolean,
+    val writesOnly: Boolean = false,
+    /**
+     * The singular day with the most activity within the requested range
+     */
     @SerialName("best_day")
     val bestDay: Day,
+    /**
+     * List of measurements based on the machines that were observed
+     */
     @Serializable(MachineMeasurementListTransformer::class)
-    val machines: List<MachineMeasurement>,
-    val categories: List<Measurement>,
-    val dependencies: List<Measurement>,
-    val editors: List<Measurement>,
-    val languages: List<Measurement>,
+    val machines: List<MachineMeasurement> = emptyList(),
+    /**
+     * List of measurements grouped by their categories
+     */
+    val categories: List<Measurement> = emptyList(),
+    /**
+     * List of measurements grouped by their dependencies
+     */
+    val dependencies: List<Measurement> = emptyList(),
+    /**
+     * List of measurements grouped by the editors observed being used
+     */
+    val editors: List<Measurement> = emptyList(),
+    /**
+     * List of measurements grouped by the languages they were observed using
+     */
+    val languages: List<Measurement> = emptyList(),
+    /**
+     * List of measurements grouped by the operating systems they were observed coming from
+     */
     @SerialName("operating_systems")
-    val operatingSystems: List<Measurement>,
-    val projects: List<Measurement>,
+    val operatingSystems: List<Measurement> = emptyList(),
+    /**
+     * List of measurements grouped by the projects they were observed for
+     */
+    val projects: List<Measurement> = emptyList(),
 ) {
 
     @Suppress("unused")

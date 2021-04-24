@@ -104,7 +104,13 @@ enum class HumanRange(val description: String) {
      * The last year from today
      */
     @SerialName("last_year")
-    YEAR("last_year")
+    YEAR("last_year"),
+
+    /**
+     * All time on record
+     */
+    @SerialName("all_time")
+    All("all_time")
 }
 
 /**
