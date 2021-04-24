@@ -83,7 +83,7 @@ enum class Frequency {
 enum class HumanRange(val description: String) {
 
     /**
-     * The last week
+     * The last 7 days from today
      */
     @SerialName("last_7_days")
     WEEK("last_7_days"),
