@@ -77,12 +77,6 @@ data class PagedResponse<T>(
      */
     @SerialName(TOTAL_ITEMS)
     val totalItems: Int = TOTAL_ITEMS_DEFAULT,
-    /**
-     * Contains a descriptive explanation in case that the values
-     * are currently being processed on the server.
-     */
-    @SerialName(MESSAGE)
-    val processingMessage: String = MESSAGE_DEFAULT
 ) {
     internal companion object {
         const val DATA = "data"
@@ -93,7 +87,6 @@ data class PagedResponse<T>(
         const val PREVIOUS_PAGE_URL = "prev_page_url"
         const val TOTAL_PAGES = "total_pages"
         const val TOTAL_ITEMS = "total"
-        const val MESSAGE = "message"
 
         const val PAGE_DEFAULT = 0
         const val NEXT_PAGE_DEFAULT = -1
@@ -102,7 +95,6 @@ data class PagedResponse<T>(
         const val PREVIOUS_PAGE_URL_DEFAULT = ""
         const val TOTAL_PAGES_DEFAULT = 0
         const val TOTAL_ITEMS_DEFAULT = 0
-        const val MESSAGE_DEFAULT = ""
 
         val set: Set<String> = setOf(
             DATA,
@@ -160,10 +152,6 @@ internal class PagedResponseTransformer<T : Any>(
                 findValue(this, element, PagedResponse.TOTAL_ITEMS) { key ->
                     put(key, PagedResponse.TOTAL_ITEMS_DEFAULT)
                 }
-
-                findValue(this, element, PagedResponse.MESSAGE) { key ->
-                    put(key, PagedResponse.MESSAGE_DEFAULT)
-                }
             }
         }
         throw IllegalArgumentException("Incorrect JsonElement type received for PagedResponse deserialization!")
@@ -190,7 +178,6 @@ internal class PagedResponseSerializer<T : Any>(
             element<String>(elementName = PagedResponse.PREVIOUS_PAGE_URL)
             element<Int>(elementName = PagedResponse.TOTAL_PAGES)
             element<Int>(elementName = PagedResponse.TOTAL_ITEMS)
-            element<String>(elementName = PagedResponse.MESSAGE)
         }
 
     override fun serialize(encoder: Encoder, value: PagedResponse<T>) {
@@ -234,10 +221,6 @@ internal class PagedResponseSerializer<T : Any>(
                 descriptor = descriptor,
                 index = descriptor.getElementIndex(PagedResponse.TOTAL_ITEMS)
             )
-            val message = decodeStringElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.MESSAGE)
-            )
 
             PagedResponse(
                 data = data,
@@ -248,7 +231,6 @@ internal class PagedResponseSerializer<T : Any>(
                 previousPageUrl = previousPageUrl,
                 totalPages = totalPages,
                 totalItems = totalItems,
-                processingMessage = message
             )
         }
     }
