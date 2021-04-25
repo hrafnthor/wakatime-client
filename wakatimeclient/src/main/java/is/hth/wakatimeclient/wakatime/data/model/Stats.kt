@@ -464,7 +464,8 @@ internal object StatsSerializer : KSerializer<Stats> {
                 descriptor = descriptor,
                 index = descriptor.getElementIndex(Stats.DATA),
                 serializer = StatsData.serializer(),
-                value = value.data)
+                value = value.data
+            )
             encodeSerializableElement(
                 descriptor = descriptor,
                 index = descriptor.getElementIndex(Stats.STATUS),
@@ -477,20 +478,17 @@ internal object StatsSerializer : KSerializer<Stats> {
     @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): Stats {
         return decoder.decodeStructure(descriptor) {
-            val data = decodeSerializableElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(Stats.DATA),
-                deserializer = StatsData.serializer()
-            )
-            val status = decodeSerializableElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(Stats.STATUS),
-                deserializer = Status.serializer()
-            )
-
             Stats(
-                data = data,
-                status = status
+                data = decodeSerializableElement(
+                    descriptor = descriptor,
+                    index = descriptor.getElementIndex(Stats.DATA),
+                    deserializer = StatsData.serializer()
+                ),
+                status = decodeSerializableElement(
+                    descriptor = descriptor,
+                    index = descriptor.getElementIndex(Stats.STATUS),
+                    deserializer = Status.serializer()
+                )
             )
         }
     }
