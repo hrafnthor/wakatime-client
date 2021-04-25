@@ -4,10 +4,15 @@ import `is`.hth.wakatimeclient.core.findValue
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.MetaFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.ProjectFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.RequestDsl
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
+import kotlinx.serialization.*
 import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.element
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encoding.decodeStructure
+import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.*
 
 @Serializable
@@ -29,7 +34,7 @@ data class Day(
      * The total recorded time for this day in seconds
      */
     @SerialName("total_seconds")
-    val secondsTotal: Double,
+    val secondsTotal: Double = 0.0,
     /**
      * In ISO 8601 format
      */
@@ -110,6 +115,7 @@ data class Machine(
  * observed coming from
  */
 @Serializable
+@Suppress("unused")
 class MachineMeasurement(
     /**
      * The measurement done over the requested range
@@ -130,7 +136,7 @@ class MachineMeasurement(
 
 /**
  * Modifies the incoming json stream to fit with the modified structure in the
- * [MachineMeasurement] object
+ * [MachineMeasurement] object, for reuse of [Measurement] and [Machine]
  */
 internal object MachineMeasurementListTransformer :
     JsonTransformingSerializer<List<MachineMeasurement>>(
@@ -164,7 +170,7 @@ internal object MachineMeasurementListTransformer :
 }
 
 @Serializable
-data class Stats(
+data class StatsData(
     val id: String = "",
     /**
      * The unique id of the owner of these stats
@@ -200,24 +206,19 @@ data class Stats(
      */
     val holidays: Int = 0,
     /**
-     * If the stats are being computed, this field will indicate the progress
-     */
-    @SerialName("percent_calculated")
-    val percentCalculated: Int = 100,
-    /**
      * Value of the user's timeout setting in minutes
      */
     val timeout: Int = 0,
     /**
-     * Total coding activity as seconds for the given range of time
+     * Total coding activity as seconds for the given range of time.
      */
     @SerialName("total_seconds")
     val totalSeconds: Double = 0.0,
     /**
-     * Total coding activity as seconds for the given range of time without any filtering
+     * Total coding activity as seconds for the given range of time without any language filtering
      */
     @SerialName("total_seconds_including_other_language")
-    val totalSecondsIncludingOtherLanguage: Double = 0.0,
+    val totalSecondsAllLanguages: Double = 0.0,
     /**
      * The daily average coding activity as a human readable string
      */
@@ -243,52 +244,32 @@ data class Stats(
      */
     val start: String = "",
     /**
-     * The status of these stats in the cache
-     */
-    val status: String = "",
-    /**
      * The end of this time range as ISO 8601 UTC datetime
      */
     val end: String = "",
     /**
      * The time range of these stats
      */
-    val range: HumanRange,
+    val range: HumanRange = HumanRange.WEEK,
     /**
      * The timezone used in Olson Country/Region format
      */
     val timezone: String = "",
     /**
-     * Indicates if these stats are being updated in the background
-     */
-    @Transient
-    @SerialName("is_already_updating")
-    val isAlreadyUpdating: Boolean = false,
-    /**
      * Indicates if this user's coding activity is publicly visible
      */
     @SerialName("is_coding_activity_visible")
-    val isCodingActivityVisible: Boolean = false,
+    val codingActivityPubliclyVisible: Boolean = false,
     /**
      * Indicates if these stats include the current day; normally false except when [range] is [HumanRange.All]
      */
     @SerialName("is_including_today")
-    val isIncludingToday: Boolean = false,
+    val includesToday: Boolean = false,
     /**
      * Indicates if this user's languages, editors, and operating system stats are publicly visible
      */
     @SerialName("is_other_usage_visible")
-    val isOtherUsageVisible: Boolean = false,
-    /**
-     * Indicates if these stats got stuck while processing and will be recalculated in the background
-     */
-    @SerialName("is_stuck")
-    val isStuck: Boolean = false,
-    /**
-     * Indicates if these stats are up to date; when false, stats are missing or from an old time range and will be refreshed soon
-     */
-    @SerialName("is_up_to_date")
-    val isUpToDate: Boolean = false,
+    val otherActivityPubliclyVisible: Boolean = false,
     /**
      * Status of the user's writes_only setting
      */
@@ -298,7 +279,7 @@ data class Stats(
      * The singular day with the most activity within the requested range
      */
     @SerialName("best_day")
-    val bestDay: Day,
+    val bestDay: Day = Day(),
     /**
      * List of measurements based on the machines that were observed
      */
@@ -329,13 +310,72 @@ data class Stats(
      * List of measurements grouped by the projects they were observed for
      */
     val projects: List<Measurement> = emptyList(),
-) {
+)
 
-    @Suppress("unused")
+
+@Serializable
+data class Status(
+    /**
+     * Indicates if these stats got stuck while processing and will be recalculated in the background
+     */
+    @SerialName(IS_STUCK)
+    val isStuck: Boolean = false,
+    /**
+     * Indicates if these stats are being updated in the background
+     */
+    @SerialName(IS_ALREADY_UPDATING)
+    val isAlreadyUpdating: Boolean = false,
+    /**
+     * The status of these stats in the cache
+     */
+    @SerialName(STATUS)
+    val status: ProcessingStatus = ProcessingStatus.Done,
+    /**
+     * If the stats are being computed, this field will indicate the progress
+     */
+    @SerialName(PERCENTAGE_CALCULATED)
+    val percentCalculated: Int = 100,
+    /**
+     * Indicates if these stats are up to date; when false, stats are missing or from an old
+     * time range and will be refreshed soon
+     */
+    @SerialName(IS_UP_TO_DATE)
+    val isUpToDate: Boolean = true,
+) {
+    internal companion object {
+        internal const val IS_STUCK = "is_stuck"
+        internal const val IS_ALREADY_UPDATING = "is_already_updating"
+        internal const val STATUS = "status"
+        internal const val PERCENTAGE_CALCULATED = "percent_calculated"
+        internal const val IS_UP_TO_DATE = "is_up_to_date"
+    }
+
+    init {
+        require(percentCalculated in 0..100)
+    }
+}
+
+@Serializable(StatsTransformer::class)
+data class Stats(
+    /**
+     * The data as requested. Depending on if the data was not available and required
+     * processing, it might contain default values. Verify the stats [Status] before
+     * using them.
+     */
+    @SerialName(DATA)
+    val data: StatsData = StatsData(),
+    /**
+     * Defines the status of the data, and if any background processing is taking place.
+     */
+    @SerialName(STATUS)
+    val status: Status = Status()
+) {
     companion object {
+        internal const val DATA = "data"
+        internal const val STATUS = "status"
 
         /**
-         * Make a request for the authenticated user's [Stats] over the defined range
+         * Make a request for the authenticated user's [StatsData] over the defined range
          */
         inline fun request(
             range: HumanRange,
@@ -359,6 +399,98 @@ data class Stats(
                 range = range,
                 project = project,
                 meta = meta,
+            )
+        }
+    }
+}
+
+/**
+ * Performs Json transformation on the incoming payload to extract values not relevant
+ * to the [StatsData] into another object [Status]
+ */
+internal object StatsTransformer : JsonTransformingSerializer<Stats>(StatsSerializer) {
+
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        return if (element is JsonObject && element.size != 2) {
+            // Payload is of the correct type and does not seem to
+            // already have the modified structure
+            buildJsonObject {
+
+                put(Stats.DATA, buildJsonObject {
+                    element.filterKeys {
+                        it != Status.IS_STUCK
+                            && it != Status.IS_ALREADY_UPDATING
+                            && it != Status.STATUS
+                            && it != Status.PERCENTAGE_CALCULATED
+                            && it != Status.IS_UP_TO_DATE
+                    }.forEach { entry ->
+                        put(entry.key, entry.value)
+                    }
+                })
+
+                put(Stats.STATUS, buildJsonObject {
+                    findValue(this, element, Status.IS_STUCK) {
+                        put(it, false)
+                    }
+                    findValue(this, element, Status.IS_ALREADY_UPDATING) {
+                        put(it, false)
+                    }
+                    findValue(this, element, Status.STATUS) {
+                        put(it, ProcessingStatus.Done.name)
+                    }
+                    findValue(this, element, Status.PERCENTAGE_CALCULATED) {
+                        put(it, 100)
+                    }
+                    findValue(this, element, Status.IS_UP_TO_DATE) {
+                        put(it, true)
+                    }
+                })
+            }
+        } else super.transformDeserialize(element)
+    }
+}
+
+internal object StatsSerializer : KSerializer<Stats> {
+    override val descriptor: SerialDescriptor
+        get() = buildClassSerialDescriptor("stats") {
+            element<StatsData>(Stats.DATA)
+            element<Status>(Stats.STATUS)
+        }
+
+    @ExperimentalSerializationApi
+    override fun serialize(encoder: Encoder, value: Stats) {
+        encoder.encodeStructure(descriptor) {
+            encodeSerializableElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(Stats.DATA),
+                serializer = StatsData.serializer(),
+                value = value.data)
+            encodeSerializableElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(Stats.STATUS),
+                serializer = Status.serializer(),
+                value = value.status
+            )
+        }
+    }
+
+    @ExperimentalSerializationApi
+    override fun deserialize(decoder: Decoder): Stats {
+        return decoder.decodeStructure(descriptor) {
+            val data = decodeSerializableElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(Stats.DATA),
+                deserializer = StatsData.serializer()
+            )
+            val status = decodeSerializableElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(Stats.STATUS),
+                deserializer = Status.serializer()
+            )
+
+            Stats(
+                data = data,
+                status = status
             )
         }
     }
