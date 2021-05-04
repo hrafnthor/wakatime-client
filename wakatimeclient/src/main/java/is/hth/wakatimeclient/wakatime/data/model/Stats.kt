@@ -251,6 +251,11 @@ data class StatsData(
      */
     val end: String = "",
     /**
+     * The project name for which these stats were queried for.
+     * If no filtering was made, then empty.
+     */
+    val project: String = "",
+    /**
      * The time range of these stats
      */
     val range: HumanRange = HumanRange.WEEK,
