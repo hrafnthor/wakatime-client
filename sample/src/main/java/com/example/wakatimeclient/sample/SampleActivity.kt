@@ -6,6 +6,8 @@ import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.AuthStorage
 import `is`.hth.wakatimeclient.core.data.auth.Scope
 import `is`.hth.wakatimeclient.wakatime.data.model.CurrentUser
+import `is`.hth.wakatimeclient.wakatime.data.model.HumanRange
+import `is`.hth.wakatimeclient.wakatime.data.model.Stats
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -28,6 +30,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import net.openid.appauth.browser.BrowserSelector
+import okhttp3.logging.HttpLoggingInterceptor
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
 interface SampleActivityDataSource {
@@ -95,6 +99,7 @@ class SampleActivity : AppCompatActivity(),
     override fun onRefresh() {
         binding.refreshLayout.isRefreshing = false
         loadCurrentUser()
+        model.test()
     }
 
     //
@@ -188,6 +193,17 @@ class SampleViewModel(
             }
         }
     }
+
+    fun test(){
+        launch(coroutineContext) {
+            when(val result = client.getStats(Stats.request(HumanRange.WEEK))) {
+                is Results.Failure -> _error.postValue(result.error)
+                is Results.Success -> {
+
+                }
+            }
+        }
+    }
 }
 
 class SampleViewModelFactory(
@@ -217,7 +233,18 @@ object Injector {
             clientSecret = BuildConfig.SECRET,
             clientId = BuildConfig.APPID,
             redirectUri = Uri.parse(BuildConfig.REDIRECT_URI)
-        ).build(context, EncryptedAuthStorage(getSharedPreferences(context)))
+        ).network {
+            val interceptor = HttpLoggingInterceptor().apply {
+                setLevel(HttpLoggingInterceptor.Level.BODY)
+            }
+
+            getOKHttpBuilder().apply {
+                addInterceptor(interceptor)
+                callTimeout(15, TimeUnit.SECONDS)
+            }
+
+            enableCache(context.cacheDir, 30)
+        }.build(context, EncryptedAuthStorage(getSharedPreferences(context)))
     }
 
     private fun getSharedPreferences(context: Context): SharedPreferences {

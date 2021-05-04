@@ -23,12 +23,12 @@ android {
     buildTypes {
         getByName("debug") {
             // The defined OAuth redirect scheme as defined inside Wakatime's app dashboard
-            val redirectScheme = "<Your redirect scheme>"
-            val redirectHost = "<Your redirect host>"
+            val redirectScheme = "vakta"
+            val redirectHost = "grant-callback"
             manifestPlaceholders["appAuthRedirectScheme"] = redirectScheme
             manifestPlaceholders["appAuthRedirectHost"] = redirectHost
-            setBuildConfigField("APPID", "<Your Wakatime generated app id")
-            setBuildConfigField("SECRET", "<Your Wakatime generated secret>")
+            setBuildConfigField("APPID", "tz1FryYdlYYlM3ZQmmUi0oyG")
+            setBuildConfigField("SECRET", "sec_ao7z9uEqgvcvD3l1UG0sT9lnkspGRX8iCac2D4GaE7OoEY0iLwOOMI3azI9REK64m3xSGArErGUajwv2")
             setBuildConfigField("REDIRECT_URI", "$redirectScheme://$redirectHost")
         }
     }
@@ -38,6 +38,12 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
+
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
     }
 }
 

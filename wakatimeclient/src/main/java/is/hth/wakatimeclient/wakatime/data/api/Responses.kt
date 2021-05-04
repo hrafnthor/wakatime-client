@@ -9,6 +9,7 @@ import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
+import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.*
 
 
@@ -180,8 +181,51 @@ internal class PagedResponseSerializer<T : Any>(
             element<Int>(elementName = PagedResponse.TOTAL_ITEMS)
         }
 
+    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: PagedResponse<T>) {
-        throw NotImplementedError("Serialization of PagedResponse had not been implemented yet!")
+        encoder.encodeStructure(descriptor) {
+            encodeSerializableElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(PagedResponse.DATA),
+                serializer = listSerializer,
+                value = value.data
+            )
+            encodeIntElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(PagedResponse.PAGE),
+                value = value.page
+            )
+            encodeIntElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(PagedResponse.NEXT_PAGE),
+                value = value.nextPage
+            )
+            encodeStringElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(PagedResponse.NEXT_PAGE_URL),
+                value = value.nextPageUrl
+            )
+            encodeIntElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(PagedResponse.PREVIOUS_PAGE),
+                value = value.previousPage
+            )
+            encodeStringElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(PagedResponse.PREVIOUS_PAGE_URL),
+                value = value.previousPageUrl
+            )
+            encodeIntElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(PagedResponse.TOTAL_PAGES),
+                value = value.totalPages
+            )
+            encodeIntElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(PagedResponse.TOTAL_ITEMS),
+                value = value.totalItems
+            )
+        }
     }
 
     @ExperimentalSerializationApi
