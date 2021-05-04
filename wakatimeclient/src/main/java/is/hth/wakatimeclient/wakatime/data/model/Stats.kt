@@ -320,7 +320,6 @@ data class StatsData(
     val projects: List<Measurement> = emptyList(),
 )
 
-
 @Serializable
 data class Status(
     /**
@@ -423,7 +422,6 @@ internal object StatsTransformer : JsonTransformingSerializer<Stats>(StatsSerial
             // Payload is of the correct type and does not seem to
             // already have the modified structure
             buildJsonObject {
-
                 put(Stats.DATA, buildJsonObject {
                     element.filterKeys {
                         it != Status.IS_STUCK
