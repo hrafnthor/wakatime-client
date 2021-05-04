@@ -110,6 +110,10 @@ data class PagedResponse<T>(
     }
 }
 
+/**
+ * Performs Json transformation on the payload to standardize the way that it
+ * is delivered for consumption.
+ */
 internal class PagedResponseTransformer<T : Any>(
     dataSerializer: KSerializer<T>
 ) : JsonTransformingSerializer<PagedResponse<T>>(PagedResponseSerializer(dataSerializer)) {
