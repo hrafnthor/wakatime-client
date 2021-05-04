@@ -105,10 +105,9 @@ internal class NetworkClientImpl private constructor(
 
         @ExperimentalSerializationApi
         internal fun build(): NetworkClient {
-            val factory: Converter.Factory = Json {
-                ignoreUnknownKeys = true
-                coerceInputValues = true
-            }.asConverterFactory(MediaType.get( Mime.ApplicationJson.name))
+            val factory: Converter.Factory = WakatimeJsonFactory
+                .makeJson()
+                .asConverterFactory(MediaType.get(Mime.ApplicationJson.name))
 
             val client: OkHttpClient = clientBuilder
                 .authenticator(authenticator)
@@ -135,5 +134,18 @@ internal class NetworkClientImpl private constructor(
                 retrofit
             )
         }
+    }
+}
+
+internal object WakatimeJsonFactory {
+
+    private const val ignoreUnknownKeys: Boolean = true
+    private const val coerceInputValues: Boolean = true
+    private const val encodeDefaults: Boolean = true
+
+    fun makeJson(): Json = Json {
+        ignoreUnknownKeys = WakatimeJsonFactory.ignoreUnknownKeys
+        coerceInputValues = WakatimeJsonFactory.coerceInputValues
+        encodeDefaults = WakatimeJsonFactory.encodeDefaults
     }
 }
