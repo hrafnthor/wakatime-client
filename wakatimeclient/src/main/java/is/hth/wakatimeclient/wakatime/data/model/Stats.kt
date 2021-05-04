@@ -116,17 +116,17 @@ data class Machine(
  */
 @Serializable
 @Suppress("unused")
-class MachineMeasurement(
+data class MachineMeasurement(
     /**
      * The measurement done over the requested range
      */
     @SerialName(MEASUREMENT)
-    val measurement: Measurement,
+    val measurement: Measurement = Measurement(),
     /**
      * The machine associated with the measurement
      */
     @SerialName(MACHINE)
-    val machine: Machine
+    val machine: Machine = Machine()
 ) {
     internal companion object {
         const val MEASUREMENT = "measurement"
