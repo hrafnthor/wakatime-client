@@ -143,8 +143,8 @@ internal object MachineMeasurementListTransformer :
         ListSerializer(MachineMeasurement.serializer())
     ) {
     override fun transformDeserialize(element: JsonElement): JsonElement {
-        if (element is JsonArray) {
-            return buildJsonArray {
+        return when (element) {
+            is JsonArray -> buildJsonArray {
                 element.map { innerElement ->
                     if (innerElement is JsonObject && innerElement.size == 8) {
                         // The inner element is of the correct type and contains as many
@@ -164,8 +164,11 @@ internal object MachineMeasurementListTransformer :
                     } else innerElement
                 }.forEach(this::add)
             }
+            is JsonNull -> JsonArray(emptyList())
+            else -> throw IllegalArgumentException(
+                "Incorrect JsonElement type received for MachineMeasurement deserialization!"
+            )
         }
-        throw IllegalArgumentException("Incorrect JsonElement type received for MachineMeasurement deserialization!")
     }
 }
 
