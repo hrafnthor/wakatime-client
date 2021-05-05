@@ -237,37 +237,37 @@ internal class PagedResponseSerializer<T : Any>(
         require(decoder is JsonDecoder)
         return decoder.decodeStructure(descriptor) {
             val data = decodeSerializableElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.DATA),
-                deserializer = listSerializer
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.DATA),
+                listSerializer
             )
             val page = decodeIntElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.PAGE)
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.PAGE)
             )
             val nextPage = decodeIntElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.NEXT_PAGE)
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.NEXT_PAGE)
             )
             val nextPageUrl = decodeStringElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.NEXT_PAGE_URL)
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.NEXT_PAGE_URL)
             )
             val previousPage = decodeIntElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.PREVIOUS_PAGE)
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.PREVIOUS_PAGE)
             )
             val previousPageUrl = decodeStringElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.PREVIOUS_PAGE_URL)
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.PREVIOUS_PAGE_URL)
             )
             val totalPages = decodeIntElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.TOTAL_PAGES)
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.TOTAL_PAGES)
             )
             val totalItems = decodeIntElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.TOTAL_ITEMS)
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.TOTAL_ITEMS)
             )
 
             PagedResponse(
