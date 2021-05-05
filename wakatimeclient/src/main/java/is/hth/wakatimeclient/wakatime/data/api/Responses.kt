@@ -175,59 +175,59 @@ internal class PagedResponseSerializer<T : Any>(
 
     override val descriptor: SerialDescriptor
         get() = buildClassSerialDescriptor("response") {
-            element(elementName = PagedResponse.DATA, descriptor = listSerializer.descriptor)
-            element<Int>(elementName = PagedResponse.PAGE)
-            element<Int>(elementName = PagedResponse.NEXT_PAGE)
-            element<String>(elementName = PagedResponse.NEXT_PAGE_URL)
-            element<Int>(elementName = PagedResponse.PREVIOUS_PAGE)
-            element<String>(elementName = PagedResponse.PREVIOUS_PAGE_URL)
-            element<Int>(elementName = PagedResponse.TOTAL_PAGES)
-            element<Int>(elementName = PagedResponse.TOTAL_ITEMS)
+            element(PagedResponse.DATA, listSerializer.descriptor)
+            element<Int>(PagedResponse.PAGE)
+            element<Int>(PagedResponse.NEXT_PAGE)
+            element<String>(PagedResponse.NEXT_PAGE_URL)
+            element<Int>(PagedResponse.PREVIOUS_PAGE)
+            element<String>(PagedResponse.PREVIOUS_PAGE_URL)
+            element<Int>(PagedResponse.TOTAL_PAGES)
+            element<Int>(PagedResponse.TOTAL_ITEMS)
         }
 
     @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: PagedResponse<T>) {
         encoder.encodeStructure(descriptor) {
             encodeSerializableElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.DATA),
-                serializer = listSerializer,
-                value = value.data
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.DATA),
+                listSerializer,
+                value.data
             )
             encodeIntElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.PAGE),
-                value = value.page
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.PAGE),
+                value.page
             )
             encodeIntElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.NEXT_PAGE),
-                value = value.nextPage
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.NEXT_PAGE),
+                value.nextPage
             )
             encodeStringElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.NEXT_PAGE_URL),
-                value = value.nextPageUrl
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.NEXT_PAGE_URL),
+                value.nextPageUrl
             )
             encodeIntElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.PREVIOUS_PAGE),
-                value = value.previousPage
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.PREVIOUS_PAGE),
+                value.previousPage
             )
             encodeStringElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.PREVIOUS_PAGE_URL),
-                value = value.previousPageUrl
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.PREVIOUS_PAGE_URL),
+                value.previousPageUrl
             )
             encodeIntElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.TOTAL_PAGES),
-                value = value.totalPages
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.TOTAL_PAGES),
+                value.totalPages
             )
             encodeIntElement(
-                descriptor = descriptor,
-                index = descriptor.getElementIndex(PagedResponse.TOTAL_ITEMS),
-                value = value.totalItems
+                descriptor,
+                descriptor.getElementIndex(PagedResponse.TOTAL_ITEMS),
+                value.totalItems
             )
         }
     }
