@@ -76,6 +76,44 @@ enum class Frequency {
 }
 
 /**
+ * Predefined chronological range constants
+ */
+@Suppress("unused")
+@Serializable
+enum class HumanRange(val description: String) {
+
+    /**
+     * The last 7 days from today
+     */
+    @SerialName("last_7_days")
+    WEEK("last_7_days"),
+
+    /**
+     * The last 30 days from today
+     */
+    @SerialName("last_30_days")
+    MONTH("last_30_days"),
+
+    /**
+     * The last 6 months since today
+     */
+    @SerialName("last_6_months")
+    HALF_YEAR("last_6_months"),
+
+    /**
+     * The last year from today
+     */
+    @SerialName("last_year")
+    YEAR("last_year"),
+
+    /**
+     * All time on record
+     */
+    @SerialName("all_time")
+    All("all_time")
+}
+
+/**
  * Defines the statuses that an invitation to observe a goal can take
  */
 @Serializable
@@ -165,7 +203,7 @@ enum class Category {
 
 @Serializable
 @Suppress("unused")
-enum class ProcessingStatus {
+enum class ExportStatus {
     @SerialName("Pending…")
     Pending,
 
@@ -177,4 +215,26 @@ enum class ProcessingStatus {
 
     @SerialName("Completed")
     Completed
+}
+
+@Serializable
+@Suppress("unused")
+enum class ProcessingStatus {
+    /**
+     * There is processing pending server side, which hasn't yet started
+     */
+    @SerialName("pending_update")
+    Pending,
+
+    /**
+     * There is processing happening server side
+     */
+    @SerialName("updating")
+    Processing,
+
+    /**
+     * All processing has finished
+     */
+    @SerialName("ok")
+    Done
 }

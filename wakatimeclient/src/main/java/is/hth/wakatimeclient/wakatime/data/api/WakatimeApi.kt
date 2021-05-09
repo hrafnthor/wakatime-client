@@ -47,7 +47,7 @@ interface WakatimeApi {
      * Requires the [ReadPrivateLeaderboards] authentication scope
      */
     @GET("users/current/leaderboards")
-    suspend fun getPrivateLeaderboards(): Response<PagedResponse<List<Leaderboard>>>
+    suspend fun getPrivateLeaderboards(): Response<PagedResponse<Leaderboard>>
 
     /**
      * Retrieves the leaders for the specified leaderboard that the currently
@@ -165,7 +165,7 @@ interface WakatimeApi {
      * Requires the [ReadLoggedTime] authentication scope
      */
     @GET("users/current/goals")
-    suspend fun getGoals(): Response<PagedResponse<List<Goal>>>
+    suspend fun getGoals(): Response<PagedResponse<Goal>>
 
     /**
      * A user's external durations for the given day. External durations
@@ -241,7 +241,7 @@ interface WakatimeApi {
      * Requires the [ReadOrganization] authentication scope
      */
     @GET("users/current/orgs")
-    suspend fun getOrganizations(): Response<PagedResponse<List<Organization>>>
+    suspend fun getOrganizations(): Response<PagedResponse<Organization>>
 
     /**
      * Fetches all of the organizations [Dashboard]s
@@ -251,7 +251,7 @@ interface WakatimeApi {
     @GET("users/current/orgs/{organizationId}/dashboards")
     suspend fun getDashboards(
         @Path("organizationId") organizationId: String
-    ): Response<PagedResponse<List<Dashboard>>>
+    ): Response<PagedResponse<Dashboard>>
 
     /**
      * Lists a dashboard's members
@@ -262,7 +262,7 @@ interface WakatimeApi {
     suspend fun getDashboardMembers(
         @Path("organizationId") organizationId: String,
         @Path("dashboardId") dashboardId: String
-    ): Response<PagedResponse<List<Member>>>
+    ): Response<PagedResponse<Member>>
 
     /**
      * An organization dashboard member’s coding activity for the given time
@@ -322,7 +322,7 @@ interface WakatimeApi {
      * Requires the [ReadLoggedTime] authentication scope.
      */
     @GET("users/current/data_dumps")
-    suspend fun getExports(): Response<PagedResponse<List<Export>>>
+    suspend fun getExports(): Response<PagedResponse<Export>>
 }
 
 interface OauthApi {

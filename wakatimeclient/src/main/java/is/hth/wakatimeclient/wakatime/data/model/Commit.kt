@@ -7,10 +7,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.descriptors.elementNames
-import kotlinx.serialization.encoding.CompositeDecoder
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
-import kotlinx.serialization.encoding.decodeStructure
+import kotlinx.serialization.encoding.*
 import kotlinx.serialization.json.*
 
 @Serializable(with = CommitTransformingSerializer::class)
@@ -71,6 +68,17 @@ data class Commit internal constructor(
     @SerialName(COMMITTER_DATE)
     val commitDate: String = "",
     /**
+     * The time of the commit in human readable format
+     */
+    @SerialName(HUMAN_READABLE_DATE)
+    val humanReadableDate: String = "",
+    /**
+     * The length of time that has passed since the commit
+     * in human readable format.
+     */
+    @SerialName(HUMAN_READABLE_NATURAL_DATE)
+    val humanReadableTimeSinceCommit: String = "",
+    /**
      * Time coded in editor for this commit
      */
     @SerialName(HUMAN_READABLE_TOTAL)
@@ -120,6 +128,8 @@ data class Commit internal constructor(
         const val CREATED_AT = "created_at"
         const val AUTHOR_DATE = "author_date"
         const val COMMITTER_DATE = "committer_date"
+        const val HUMAN_READABLE_DATE = "human_readable_date"
+        const val HUMAN_READABLE_NATURAL_DATE = "human_readable_natural_date"
         const val HUMAN_READABLE_TOTAL = "human_readable_total"
         const val HUMAN_READABLE_TOTAL_SECONDS = "human_readable_total_with_seconds"
         const val TOTAL_SECONDS = "total_seconds"
@@ -162,7 +172,9 @@ internal object CommitTransformingSerializer :
 
     @ExperimentalSerializationApi
     override fun transformDeserialize(element: JsonElement): JsonElement {
-        return if (element is JsonObject) {
+        return if (element is JsonObject && element.size >= 30) {
+            // Json element is of correct type and sufficient length to indicate
+            // it has not already been transformed
             buildJsonObject {
                 val author: MutableMap<String, JsonElement> = mutableMapOf()
                 val committer: MutableMap<String, JsonElement> = mutableMapOf()
@@ -187,8 +199,8 @@ internal object CommitTransformingSerializer :
                         }
                     }
                 }
-                put("author", JsonObject(author))
-                put("committer", JsonObject(committer))
+                put(Commit.AUTHOR, JsonObject(author))
+                put(Commit.COMMITTER, JsonObject(committer))
             }
         } else super.transformDeserialize(element)
     }
@@ -214,6 +226,8 @@ internal object CommitSerializer : KSerializer<Commit> {
             element<String>(elementName = Commit.CREATED_AT)
             element<String>(elementName = Commit.AUTHOR_DATE)
             element<String>(elementName = Commit.COMMITTER_DATE)
+            element<String>(elementName = Commit.HUMAN_READABLE_DATE)
+            element<String>(elementName = Commit.HUMAN_READABLE_NATURAL_DATE)
             element<String>(elementName = Commit.HUMAN_READABLE_TOTAL)
             element<String>(elementName = Commit.HUMAN_READABLE_TOTAL_SECONDS)
             element<Float>(elementName = Commit.TOTAL_SECONDS)
@@ -223,8 +237,92 @@ internal object CommitSerializer : KSerializer<Commit> {
             element<Entity>(elementName = Commit.COMMITTER)
         }
 
+    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: Commit) {
-        throw NotImplementedError("Commit serialization not implemented yet!")
+        encoder.encodeStructure(descriptor) {
+            encodeStringElement(descriptor, descriptor.getElementIndex(Commit.ID), value.id)
+            encodeStringElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.AUTHOR_ID),
+                value.authorId
+            )
+            encodeStringElement(descriptor, descriptor.getElementIndex(Commit.REF), value.ref)
+            encodeStringElement(descriptor, descriptor.getElementIndex(Commit.HASH), value.hash)
+            encodeStringElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.TRUNCATED_HASH),
+                value.truncatedHash
+            )
+            encodeStringElement(descriptor, descriptor.getElementIndex(Commit.BRANCH), value.branch)
+            encodeStringElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.MESSAGE),
+                value.message
+            )
+            encodeStringElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.HTML_URL),
+                value.htmlUrl
+            )
+            encodeStringElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.CREATED_AT),
+                value.createdAt
+            )
+            encodeStringElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.AUTHOR_DATE),
+                value.authoringDate
+            )
+            encodeStringElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.COMMITTER_DATE),
+                value.commitDate
+            )
+            encodeStringElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.HUMAN_READABLE_DATE),
+                value.humanReadableDate
+            )
+            encodeStringElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.HUMAN_READABLE_NATURAL_DATE),
+                value.humanReadableTimeSinceCommit
+            )
+            encodeStringElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.HUMAN_READABLE_TOTAL),
+                value.humanReadableTotal
+            )
+            encodeStringElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.HUMAN_READABLE_TOTAL_SECONDS),
+                value.humanReadableTotalWithSeconds
+            )
+            encodeFloatElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.TOTAL_SECONDS),
+                value.totalSeconds
+            )
+            encodeStringElement(descriptor, descriptor.getElementIndex(Commit.URL), value.url)
+            encodeBooleanElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.IS_AUTHOR_FOUND),
+                value.isAuthorFound
+            )
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.AUTHOR),
+                Entity.serializer(),
+                value.author
+            )
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(Commit.COMMITTER),
+                Entity.serializer(),
+                value.committer
+            )
+        }
     }
 
     @ExperimentalSerializationApi
@@ -241,6 +339,8 @@ internal object CommitSerializer : KSerializer<Commit> {
             val createdAt = decodeNullableString(Commit.CREATED_AT, this)
             val authorDate = decodeNullableString(Commit.AUTHOR_DATE, this)
             val commitDate = decodeNullableString(Commit.COMMITTER_DATE, this)
+            val humanDate = decodeNullableString(Commit.HUMAN_READABLE_DATE, this)
+            val humanTimeSince = decodeNullableString(Commit.HUMAN_READABLE_NATURAL_DATE, this)
             val humanTotal = decodeNullableString(Commit.HUMAN_READABLE_TOTAL, this)
             val humanTotalSec = decodeNullableString(Commit.HUMAN_READABLE_TOTAL_SECONDS, this)
             val totalSec = decodeFloatElement(descriptor, getIndex(Commit.TOTAL_SECONDS))
@@ -266,6 +366,8 @@ internal object CommitSerializer : KSerializer<Commit> {
                 createdAt = createdAt,
                 authoringDate = authorDate,
                 commitDate = commitDate,
+                humanReadableDate = humanDate,
+                humanReadableTimeSinceCommit = humanTimeSince,
                 humanReadableTotal = humanTotal,
                 humanReadableTotalWithSeconds = humanTotalSec,
                 totalSeconds = totalSec,

@@ -3,6 +3,7 @@ plugins {
     id("kotlin-android")
     id("kotlin-kapt")
     id("kotlinx-serialization")
+    id("de.mannodermaus.android-junit5")
 }
 
 android {
@@ -14,6 +15,7 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
     }
     buildTypes {
         getByName("debug") {
@@ -60,19 +62,21 @@ dependencies {
 
     //#region Kotest
     testImplementation("io.kotest:kotest-runner-junit5")
+    testImplementation("io.kotest:kotest-assertions-core")
     //#endregion
 
-    //#region JUnit
+    //#region Test
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 
-    androidTestImplementation("de.mannodermaus.junit5:android-test-core")
-    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner")
     //#endregion
 
     //#region Android Test
     androidTestImplementation("androidx.test:runner")
     androidTestImplementation("androidx.test.ext:junit")
-    androidTestImplementation("androidx.test.espresso:espresso-core")
+    androidTestImplementation("org.junit.jupiter:junit-jupiter-api")
+
+    androidTestImplementation("de.mannodermaus.junit5:android-test-core")
+    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner")
     //#endregion
 }

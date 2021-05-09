@@ -71,11 +71,6 @@ dependencies {
         api("androidx.lifecycle:lifecycle-viewmodel-ktx$androidx_lifecycle_version")
         //#endregion
 
-        //#region Espresso
-        val espresso_version: String by project
-        api("androidx.test.espresso:espresso-core:$espresso_version")
-        //#endregion
-
         //#region Kotest
         val kotest_version: String by project
         api("io.kotest:kotest-assertions-core:$kotest_version")
