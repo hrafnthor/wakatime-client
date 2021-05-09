@@ -15,13 +15,13 @@ data class Range(
     /**
      * Start of time range as ISO 8601 UTC datetime
      */
-    @SerialName(START_DATE)
-    val startDate: String = "",
+    @SerialName(START)
+    val start: String = "",
     /**
      * End of time range as ISO 8601 UTC datetime
      */
-    @SerialName(END_DATE)
-    val endDate: String = "",
+    @SerialName(END)
+    val end: String = "",
     /**
      * Timezone used in Olson Country/Region format, if available
      */
@@ -64,8 +64,8 @@ internal object RangeJsonTransformer : JsonTransformingSerializer<Range>(RangeSe
                     }
                     ?: JsonPrimitive("")
 
-                put(Range.START_DATE, startDate)
-                put(Range.END_DATE, endDate)
+                put(Range.START, startDate)
+                put(Range.END, endDate)
                 put(Range.TIMEZONE, element[Range.TIMEZONE] ?: JsonPrimitive(""))
             }
         } else throw IllegalArgumentException(
@@ -77,8 +77,8 @@ internal object RangeJsonTransformer : JsonTransformingSerializer<Range>(RangeSe
 internal object RangeSerializer : KSerializer<Range> {
     override val descriptor: SerialDescriptor
         get() = buildClassSerialDescriptor("range") {
-            element<String>(Range.START_DATE)
-            element<String>(Range.END_DATE)
+            element<String>(Range.START)
+            element<String>(Range.END)
             element<String>(Range.TIMEZONE)
         }
 
@@ -87,11 +87,11 @@ internal object RangeSerializer : KSerializer<Range> {
         return decoder.decodeStructure(descriptor) {
             val startDate = decodeStringElement(
                 descriptor,
-                descriptor.getElementIndex(Range.START_DATE)
+                descriptor.getElementIndex(Range.START)
             )
             val endDate = decodeStringElement(
                 descriptor,
-                descriptor.getElementIndex(Range.END_DATE)
+                descriptor.getElementIndex(Range.END)
             )
             val timezone = decodeStringElement(
                 descriptor,
@@ -99,8 +99,8 @@ internal object RangeSerializer : KSerializer<Range> {
             )
 
             Range(
-                startDate = startDate,
-                endDate = endDate,
+                start = startDate,
+                end = endDate,
                 timezone = timezone
             )
         }
@@ -111,13 +111,13 @@ internal object RangeSerializer : KSerializer<Range> {
         encoder.encodeStructure(descriptor) {
             encodeStringElement(
                 descriptor,
-                descriptor.getElementIndex(Range.START_DATE),
-                value.startDate
+                descriptor.getElementIndex(Range.START),
+                value.start
             )
             encodeStringElement(
                 descriptor,
-                descriptor.getElementIndex(Range.END_DATE),
-                value.endDate
+                descriptor.getElementIndex(Range.END),
+                value.end
             )
             encodeStringElement(
                 descriptor,
