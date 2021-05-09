@@ -1,11 +1,19 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
+import `is`.hth.wakatimeclient.core.findValue
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.MetaFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.ProjectFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.RequestDsl
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
+import kotlinx.serialization.*
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encoding.decodeStructure
+import kotlinx.serialization.encoding.encodeStructure
+import kotlinx.serialization.json.*
 import java.util.*
 
 @Serializable
@@ -177,39 +185,41 @@ data class DailySummary(
     val range: Range
 )
 
-@Serializable
 @Suppress("unused")
+@Serializable(SummariesJsonTransformer::class)
 data class Summaries(
     /**
      * The available branches for the request project, if any. Will always be
      * empty if no project filtering is made.
      */
     @Transient
-    @SerialName("available_branches")
+    @SerialName(AVAILABLE_BRANCHES)
     val availableBranches: List<String> = emptyList(),
     /**
      * The currently selected branches for the requested project, if any. Will
      * always be empty if no project filtering is made.
      */
     @Transient
-    @SerialName("branches")
+    @SerialName(SELECTED_BRANCHES)
     val selectedBranches: List<String> = emptyList(),
     /**
      * The summaries for the request made, segmented by days
      */
-    @SerialName("data")
+    @SerialName(SUMMARIES)
     val summaries: List<DailySummary>,
     /**
-     * The start of the summary period returned
+     * The range over which the summaries go
      */
-    val start: String,
-    /**
-     * The end of the summary period returned
-     */
-    val end: String
+    @SerialName(RANGE)
+    val range: Range
 ) {
-
     companion object {
+        internal const val AVAILABLE_BRANCHES = "available_branches"
+        internal const val SELECTED_BRANCHES = "branches"
+        internal const val END = "end"
+        internal const val START = "start"
+        internal const val SUMMARIES = "data"
+        internal const val RANGE = "range"
 
         /**
          * Make a request for [Summaries] for the currently authenticated user
@@ -328,6 +338,117 @@ data class Summaries(
                 startDate,
                 endDate,
                 project
+            )
+        }
+    }
+}
+
+/**
+ * Modifies the incoming payload by moving date range values into a [Range]
+ * object for more comfortable consumption
+ */
+internal object SummariesJsonTransformer : JsonTransformingSerializer<Summaries>(
+    SummariesSerializer
+) {
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        return when {
+            element is JsonObject && element.containsKey(Summaries.RANGE).not() -> buildJsonObject {
+                findValue(this, element, Summaries.AVAILABLE_BRANCHES) { key ->
+                    put(key, JsonArray(emptyList()))
+                }
+                findValue(this, element, Summaries.SELECTED_BRANCHES) { key ->
+                    put(key, JsonArray(emptyList()))
+                }
+                findValue(this, element, Summaries.SUMMARIES) { key ->
+                    put(key, JsonArray(emptyList()))
+                }
+                val start = element[Summaries.START] ?: JsonPrimitive("")
+                val end = element[Summaries.END] ?: JsonPrimitive("")
+                put(Summaries.RANGE, buildJsonObject {
+                    put(Range.START, start)
+                    put(Range.END, end)
+                })
+            }
+            element is JsonObject -> element
+            else -> throw IllegalArgumentException(
+                "Incorrect JsonElement received for Summaries deserialization!"
+            )
+        }
+    }
+}
+
+internal object SummariesSerializer : KSerializer<Summaries> {
+
+    private val rangeSerializer = Range.serializer()
+    private val listStringSerializer = ListSerializer(String.serializer())
+    private val listDailySummarySerializer = ListSerializer(DailySummary.serializer())
+
+    override val descriptor: SerialDescriptor
+        get() = buildClassSerialDescriptor("summaries") {
+            element(Summaries.AVAILABLE_BRANCHES, listStringSerializer.descriptor)
+            element(Summaries.SELECTED_BRANCHES, listStringSerializer.descriptor)
+            element(Summaries.SUMMARIES, listDailySummarySerializer.descriptor)
+            element(Summaries.RANGE, rangeSerializer.descriptor)
+        }
+
+    @ExperimentalSerializationApi
+    override fun deserialize(decoder: Decoder): Summaries {
+        return decoder.decodeStructure(descriptor) {
+            val available = decodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(Summaries.AVAILABLE_BRANCHES),
+                listStringSerializer
+            )
+            val selected = decodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(Summaries.SELECTED_BRANCHES),
+                listStringSerializer
+            )
+            val summaries = decodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(Summaries.SUMMARIES),
+                listDailySummarySerializer
+            )
+            val range = decodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(Summaries.RANGE),
+                rangeSerializer
+            )
+            Summaries(
+                availableBranches = available,
+                selectedBranches = selected,
+                summaries = summaries,
+                range = range
+            )
+        }
+    }
+
+    @ExperimentalSerializationApi
+    override fun serialize(encoder: Encoder, value: Summaries) {
+        encoder.encodeStructure(descriptor) {
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(Summaries.AVAILABLE_BRANCHES),
+                listStringSerializer,
+                value.availableBranches
+            )
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(Summaries.SELECTED_BRANCHES),
+                listStringSerializer,
+                value.selectedBranches
+            )
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(Summaries.SUMMARIES),
+                listDailySummarySerializer,
+                value.summaries
+            )
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(Summaries.RANGE),
+                rangeSerializer,
+                value.range
             )
         }
     }

@@ -35,8 +35,7 @@ data class Leaders(
     /**
      * The period over which these results cover
      */
-    @SerialName("range")
-    val period: Period,
+    val range: Range,
     /**
      * The current user's rank if access has been given to that data.
      */
@@ -155,36 +154,4 @@ data class LanguageTotal(
      */
     @SerialName("total_seconds")
     val totalSeconds: Float
-)
-
-@Serializable
-data class Period(
-    /**
-     * Start of this range as ISO 8601 UTC datetime>
-     */
-    @SerialName("start_date")
-    val startDate: String = "",
-    /**
-     * Start of range in human-readable format relative to the current day
-     */
-    @SerialName("start_text")
-    val startText: String = "",
-    /**
-     * End of range as ISO 8601 UTC datetime
-     */
-    @SerialName("end_date")
-    val endDate: String = "",
-    /**
-     * End of range in human-readable format relative to the current day
-     */
-    @SerialName("end_text")
-    val endText: String = "",
-    /**
-     * Time range of this leaderboard
-     */
-    val name: String = "",
-    /**
-     * Time range in human-readable format relative to the current day
-     */
-    val text: String = ""
 )
