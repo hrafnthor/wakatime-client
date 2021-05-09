@@ -99,6 +99,10 @@ internal interface WakatimeRemoteDataSource {
         request: Stats.Request
     ): Results<Stats>
 
+    suspend fun getGlobalStats(
+        request: GlobalStats.Request
+    ): Results<GlobalStats>
+
     /**
      * Fetches the [Summaries] for the current user filtered by the supplied request
      * @param request defined the filtering to apply

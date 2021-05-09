@@ -103,6 +103,13 @@ interface WakatimeApi {
     ): Response<WrappedResponse<Stats>>
 
     /**
+     *
+     */
+    suspend fun getGlobalStats(
+        @Query("range") range: String
+    ) : Response<GlobalStats>
+
+    /**
      * Retrieves the current user's coding activity for the given time range as a
      * list of summaries segmented by
      *
