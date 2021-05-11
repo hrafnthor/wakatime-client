@@ -14,20 +14,25 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.*
-import java.util.*
 
 @Serializable
 data class Amount(
     /**
      * The number of seconds for this amount type
      */
+    @SerialName(SECONDS)
     val seconds: Float = 0.0f,
     /**
      * The seconds field formatted as human readable text
      */
-    @SerialName("text")
+    @SerialName(SECONDS_HUMAN_READABLE)
     val secondsHumanReadable: String = ""
-)
+) {
+    internal companion object {
+        const val SECONDS = "seconds"
+        const val SECONDS_HUMAN_READABLE = "text"
+    }
+}
 
 @Serializable(AggregationJsonTransformer::class)
 data class Aggregation(
@@ -86,6 +91,11 @@ internal object AggregationJsonTransformer : JsonTransformingSerializer<Aggregat
     AggregationSerializer
 ) {
 
+    private val defaultAmount: JsonObject = buildJsonObject {
+        put(Amount.SECONDS, 0.0f)
+        put(Amount.SECONDS_HUMAN_READABLE, "")
+    }
+
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return when {
             element is JsonObject && !element.containsKey(Aggregation.HUMAN_READABLE_COUNT) -> {
@@ -106,19 +116,19 @@ internal object AggregationJsonTransformer : JsonTransformingSerializer<Aggregat
                     }
 
                     findValue(this, element, Aggregation.AVERAGE) {
-                        put(it, JsonArray(emptyList()))
+                        put(it, defaultAmount)
                     }
 
                     findValue(this, element, Aggregation.MAX) {
-                        put(it, JsonArray(emptyList()))
+                        put(it, defaultAmount)
                     }
 
                     findValue(this, element, Aggregation.MEDIAN) {
-                        put(it, JsonArray(emptyList()))
+                        put(it, defaultAmount)
                     }
 
                     findValue(this, element, Aggregation.SUM) {
-                        put(it, JsonArray(emptyList()))
+                        put(it, defaultAmount)
                     }
                 }
             }
@@ -238,30 +248,58 @@ internal object AggregationSerializer : KSerializer<Aggregation> {
     }
 }
 
+@Suppress("unused")
 @Serializable(GlobalStatsJsonTransformer::class)
 data class GlobalStats(
+    /**
+     * Contains total value aggregation for all users
+     */
+    @SerialName(TOTAL)
+    val total: Aggregation,
+    /**
+     * Contains global aggregated average stats for all users
+     */
+    @SerialName(AVERAGES)
+    val dailyAverages: Aggregation,
+    /**
+     * Contains global stats aggregation by categories. See [Category] for options
+     */
     @SerialName(CATEGORIES)
     val categories: List<Aggregation>,
-    @SerialName(AVERAGES)
-    val dailyAverages: List<Aggregation>,
+    /**
+     * Contains global stats aggregation by editors
+     */
     @SerialName(EDITORS)
     val editors: List<Aggregation>,
+    /**
+     * Contains global stats aggregation by languages
+     */
     @SerialName(LANGUAGES)
     val languages: List<Aggregation>,
+    /**
+     * Contains global stats aggregation by operating systems
+     */
     @SerialName(OSYSTEMS)
     val operatingSystems: List<Aggregation>,
-    @SerialName(TOTAL)
-    val total: List<Aggregation>,
+    /**
+     * The range for these stats
+     */
     @SerialName(RANGE)
     val range: Range,
+    /**
+     * The default timeout preference for public stats
+     */
     @SerialName(TIMEOUT)
     val timeout: Int,
+    /**
+     * The default 'writes only' preference for public stats
+     */
     @SerialName(WRITES_ONLY)
     val writesOnly: Boolean
 ) {
     companion object {
         internal const val CATEGORIES = "categories"
-        internal const val AVERAGES = "daily_averages"
+        internal const val AVERAGES = "daily_average"
         internal const val EDITORS = "editors"
         internal const val LANGUAGES = "languages"
         internal const val OSYSTEMS = "operating_systems"
@@ -300,20 +338,14 @@ internal object GlobalStatsJsonTransformer : JsonTransformingSerializer<GlobalSt
         return when {
             element is JsonObject && element.size == 4 -> buildJsonObject {
                 element["data"]?.let { data ->
-                    put(GlobalStats.CATEGORIES, getAggregation(data, GlobalStats.CATEGORIES))
+                    put(GlobalStats.TOTAL, getAggregation(data, GlobalStats.TOTAL))
                     put(GlobalStats.AVERAGES, getAggregation(data, GlobalStats.AVERAGES))
+                    put(GlobalStats.CATEGORIES, getAggregation(data, GlobalStats.CATEGORIES))
                     put(GlobalStats.EDITORS, getAggregation(data, GlobalStats.EDITORS))
                     put(GlobalStats.LANGUAGES, getAggregation(data, GlobalStats.LANGUAGES))
                     put(GlobalStats.OSYSTEMS, getAggregation(data, GlobalStats.OSYSTEMS))
-                    put(GlobalStats.TOTAL, getAggregation(data, GlobalStats.TOTAL))
-                } ?: run {
-                    put(GlobalStats.CATEGORIES, empty)
-                    put(GlobalStats.AVERAGES, empty)
-                    put(GlobalStats.EDITORS, empty)
-                    put(GlobalStats.LANGUAGES, empty)
-                    put(GlobalStats.OSYSTEMS, empty)
-                    put(GlobalStats.TOTAL, empty)
                 }
+
                 findValue(this, element, GlobalStats.RANGE) {}
                 findValue(this, element, GlobalStats.TIMEOUT) {
                     put(it, 15)
@@ -338,17 +370,18 @@ internal object GlobalStatsJsonTransformer : JsonTransformingSerializer<GlobalSt
 
 internal object GlobalStatsSerializer : KSerializer<GlobalStats> {
 
-    private val aggregationListSerializer = ListSerializer(Aggregation.serializer())
+    private val aggregationSerializer = Aggregation.serializer()
+    private val aggregationListSerializer = ListSerializer(aggregationSerializer)
     private val rangeSerializer = Range.serializer()
 
     override val descriptor: SerialDescriptor
         get() = buildClassSerialDescriptor("global_stats") {
+            element(GlobalStats.TOTAL, aggregationSerializer.descriptor)
+            element(GlobalStats.AVERAGES, aggregationSerializer.descriptor)
             element(GlobalStats.CATEGORIES, aggregationListSerializer.descriptor)
-            element(GlobalStats.AVERAGES, aggregationListSerializer.descriptor)
             element(GlobalStats.EDITORS, aggregationListSerializer.descriptor)
             element(GlobalStats.LANGUAGES, aggregationListSerializer.descriptor)
             element(GlobalStats.OSYSTEMS, aggregationListSerializer.descriptor)
-            element(GlobalStats.TOTAL, aggregationListSerializer.descriptor)
             element(GlobalStats.RANGE, rangeSerializer.descriptor)
             element<Int>(GlobalStats.TIMEOUT)
             element<Boolean>(GlobalStats.WRITES_ONLY)
@@ -357,14 +390,19 @@ internal object GlobalStatsSerializer : KSerializer<GlobalStats> {
     @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): GlobalStats {
         return decoder.decodeStructure(descriptor) {
-            val categories = decodeSerializableElement(
+            val total = decodeSerializableElement(
                 descriptor,
-                descriptor.getElementIndex(GlobalStats.CATEGORIES),
-                aggregationListSerializer
+                descriptor.getElementIndex(GlobalStats.TOTAL),
+                aggregationSerializer
             )
             val averages = decodeSerializableElement(
                 descriptor,
                 descriptor.getElementIndex(GlobalStats.AVERAGES),
+                aggregationSerializer
+            )
+            val categories = decodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(GlobalStats.CATEGORIES),
                 aggregationListSerializer
             )
             val editors = decodeSerializableElement(
@@ -380,11 +418,6 @@ internal object GlobalStatsSerializer : KSerializer<GlobalStats> {
             val os = decodeSerializableElement(
                 descriptor,
                 descriptor.getElementIndex(GlobalStats.OSYSTEMS),
-                aggregationListSerializer
-            )
-            val total = decodeSerializableElement(
-                descriptor,
-                descriptor.getElementIndex(GlobalStats.TOTAL),
                 aggregationListSerializer
             )
             val range = decodeSerializableElement(
@@ -414,7 +447,61 @@ internal object GlobalStatsSerializer : KSerializer<GlobalStats> {
         }
     }
 
+    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: GlobalStats) {
-        TODO("Not yet implemented")
+        encoder.encodeStructure(descriptor) {
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(GlobalStats.TOTAL),
+                AggregationSerializer,
+                value.total
+            )
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(GlobalStats.AVERAGES),
+                AggregationSerializer,
+                value.dailyAverages
+            )
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(GlobalStats.CATEGORIES),
+                aggregationListSerializer,
+                value.categories
+            )
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(GlobalStats.EDITORS),
+                aggregationListSerializer,
+                value.editors
+            )
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(GlobalStats.LANGUAGES),
+                aggregationListSerializer,
+                value.languages
+            )
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(GlobalStats.OSYSTEMS),
+                aggregationListSerializer,
+                value.operatingSystems
+            )
+            encodeSerializableElement(
+                descriptor,
+                descriptor.getElementIndex(GlobalStats.RANGE),
+                rangeSerializer,
+                value.range
+            )
+            encodeIntElement(
+                descriptor,
+                descriptor.getElementIndex(GlobalStats.TIMEOUT),
+                value.timeout
+            )
+            encodeBooleanElement(
+                descriptor,
+                descriptor.getElementIndex(GlobalStats.WRITES_ONLY),
+                value.writesOnly
+            )
+        }
     }
 }
