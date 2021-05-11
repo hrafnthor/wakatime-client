@@ -16,6 +16,7 @@ internal class DefaultAuthenticator(
             val header = when (session.authenticationMethod()) {
                 Method.OAuth -> "Bearer ${session.accessToken()}"
                 Method.ApiKey -> "Basic ${session.apiKey()}"
+                Method.None -> ""
             }
             response.request()
                 .newBuilder()

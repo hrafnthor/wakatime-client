@@ -85,10 +85,9 @@ internal class AuthStorageWrapper(private val storage: AuthStorage) {
      */
     fun getMethod(): Method {
         val method = storage.getMethod() ?: ""
-        if (method.isEmpty()) {
-            throw IllegalStateException("No authentication method set!")
-        }
-        return Method.convert(method)
+        return if (method.isEmpty()) {
+            Method.None
+        } else Method.convert(method)
     }
 
     /**
