@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * A user agent, plugin, used by the user
  */
 @Serializable
-data class Agent(
+public data class Agent internal constructor(
     /**
      * Unique id of this user agent
      */
