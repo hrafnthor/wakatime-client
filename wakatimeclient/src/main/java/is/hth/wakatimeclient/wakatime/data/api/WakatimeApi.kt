@@ -11,7 +11,7 @@ import java.time.LocalDate
  * Wakatime API interface as defined here https://wakatime.com/developer
  */
 @Suppress("unused")
-interface WakatimeApi {
+public interface WakatimeApi {
 
     private companion object {
         private const val API = "api/v1"
@@ -23,7 +23,7 @@ interface WakatimeApi {
      * Requires the [Email] authentication scope
      */
     @GET("$API/users/current")
-    suspend fun getCurrentUser(): Response<WrappedResponse<NetworkUser>>
+    public suspend fun getCurrentUser(): Response<WrappedResponse<NetworkUser>>
 
     /**
      * Retrieves the total recorded time for the current user.
@@ -31,7 +31,7 @@ interface WakatimeApi {
      * Requires the [ReadStats] authentication scope
      */
     @GET("$API/users/current/all_time_since_today")
-    suspend fun getTotalRecord(): Response<WrappedResponse<TotalRecord>>
+    public suspend fun getTotalRecord(): Response<WrappedResponse<TotalRecord>>
 
     /**
      * Retrieves the public leaderboards leaders.
@@ -39,7 +39,7 @@ interface WakatimeApi {
      * The results are paginated so iterate by requesting a [page]
      */
     @GET("$API/leaders")
-    suspend fun getPublicLeaders(
+    public suspend fun getPublicLeaders(
         @Query("language") language: String?,
         @Query("page") page: Int?,
     ): Response<Leaders>
@@ -51,7 +51,7 @@ interface WakatimeApi {
      * Requires the [ReadPrivateLeaderboards] authentication scope
      */
     @GET("$API/users/current/leaderboards")
-    suspend fun getPrivateLeaderboards(): Response<PagedResponse<Leaderboard>>
+    public suspend fun getPrivateLeaderboards(): Response<PagedResponse<Leaderboard>>
 
     /**
      * Retrieves the leaders for the specified leaderboard that the currently
@@ -61,7 +61,7 @@ interface WakatimeApi {
      * Requires the [ReadPrivateLeaderboards] authentication scope
      */
     @GET("$API/users/current/leaderboards/{leaderboardId}")
-    suspend fun getPrivateLeaders(
+    public suspend fun getPrivateLeaders(
         @Path("leaderboardId") leaderboardId: String,
         @Query("language") language: String?,
         @Query("page") page: Int?,
@@ -74,7 +74,7 @@ interface WakatimeApi {
      * Requires the [ReadLoggedTime] authentication scope
      */
     @GET("$API/users/{userId}/projects")
-    suspend fun getProjects(
+    public suspend fun getProjects(
         @Path("userId") userId: String
     ): Response<List<Project>>
 
@@ -85,7 +85,7 @@ interface WakatimeApi {
      * Requires the [ReadLoggedTime] authentication scope
      */
     @GET("$API/users/current/projects")
-    suspend fun getCurrentUsersProjects(): Response<WrappedResponse<List<Project>>>
+    public suspend fun getCurrentUsersProjects(): Response<WrappedResponse<List<Project>>>
 
     /**
      * Retrieves the stats for the current user over the supplied range, optionally filtered
@@ -99,7 +99,7 @@ interface WakatimeApi {
      * @param range The range to filter the stats by
      */
     @GET("$API/users/current/stats/{range}")
-    suspend fun getStats(
+    public suspend fun getStats(
         @Path("range") range: String,
         @Query("timeout") timeout: Int? = null,
         @Query("writes_only") writesOnly: Boolean? = null,
@@ -118,7 +118,7 @@ interface WakatimeApi {
      *  @param range the range to filter the stats by. Either 'last_7_days' or a year
      */
     @GET("$API/stats/{range}")
-    suspend fun getGlobalStats(
+    public suspend fun getGlobalStats(
         @Path("range") range: String
     ): Response<GlobalStats>
 
@@ -137,7 +137,7 @@ interface WakatimeApi {
      * @param timezone [String] optional: The timezone for the given start and end dates. Defaults to the user's timezone
      */
     @GET("$API/users/current/summaries")
-    suspend fun getSummaries(
+    public suspend fun getSummaries(
         @Query("start") start: String,
         @Query("end") end: String,
         @Query("project") projectName: String?,
@@ -153,7 +153,7 @@ interface WakatimeApi {
      * Requires the [ReadLoggedTime] authentication scope
      */
     @GET("$API/users/current/user_agents")
-    suspend fun getAgents(): Response<WrappedResponse<List<Agent>>>
+    public suspend fun getAgents(): Response<WrappedResponse<List<Agent>>>
 
     /**
      * Retrieves all of the user's [Heartbeat]s for the given date.
@@ -164,7 +164,7 @@ interface WakatimeApi {
      * from 12:00 until 23:59 in the user's timezone for this day
      */
     @GET("$API/users/current/heartbeats")
-    suspend fun getHeartbeats(
+    public suspend fun getHeartbeats(
         @Query("date") date: String
     ): Response<ChronologicalResponse<Heartbeat>>
 
@@ -175,7 +175,7 @@ interface WakatimeApi {
      *  Requires the [WriteLoggedTime] authentication scope
      */
     @POST("$API/users/current/heartbeats")
-    suspend fun sendBeat(
+    public suspend fun sendBeat(
         @Body beat: Heartbeat.Beat
     ): Response<PagedResponse<Confirmation>>
 
@@ -185,7 +185,7 @@ interface WakatimeApi {
      * Requires the [ReadLoggedTime] authentication scope
      */
     @GET("$API/users/current/goals")
-    suspend fun getGoals(): Response<PagedResponse<Goal>>
+    public suspend fun getGoals(): Response<PagedResponse<Goal>>
 
     /**
      * A user's external durations for the given day. External durations
@@ -203,7 +203,7 @@ interface WakatimeApi {
      * Requires the [ReadLoggedTime] authentication scope
      */
     @GET("$API/users/current/external_durations")
-    suspend fun getExternalDurations(
+    public suspend fun getExternalDurations(
         @Query("date") day: String,
         @Query("project") project: String?,
         @Query("branches") branches: String?,
@@ -224,7 +224,7 @@ interface WakatimeApi {
      * Requires the [WriteLoggedTime] authentication scope
      */
     @POST("$API/users/current/external_durations")
-    suspend fun sendExternalDuration(
+    public suspend fun sendExternalDuration(
         @Body payload: ExternalDuration
     ): Response<PagedResponse<ExternalDuration>>
 
@@ -251,7 +251,7 @@ interface WakatimeApi {
      * Requires the [WriteLoggedTime] authentication scope
      */
     @POST("$API/users/current/external_durations.bulk")
-    suspend fun sendExternalDurations(
+    public suspend fun sendExternalDurations(
         @Body payloads: List<ExternalDuration>
     ): Response<ResponseBody>
 
@@ -261,7 +261,7 @@ interface WakatimeApi {
      * Requires the [ReadOrganization] authentication scope
      */
     @GET("$API/users/current/orgs")
-    suspend fun getOrganizations(): Response<PagedResponse<Organization>>
+    public suspend fun getOrganizations(): Response<PagedResponse<Organization>>
 
     /**
      * Fetches all of the organizations [Dashboard]s
@@ -269,7 +269,7 @@ interface WakatimeApi {
      * Requires the [ReadOrganization] authentication scope
      */
     @GET("$API/users/current/orgs/{organizationId}/dashboards")
-    suspend fun getDashboards(
+    public suspend fun getDashboards(
         @Path("organizationId") organizationId: String
     ): Response<PagedResponse<Dashboard>>
 
@@ -279,7 +279,7 @@ interface WakatimeApi {
      * Requires the [ReadOrganization] authentication scope
      */
     @GET("$API/users/current/orgs/{organizationId}/dashboards/{dashboardId}/members")
-    suspend fun getDashboardMembers(
+    public suspend fun getDashboardMembers(
         @Path("organizationId") organizationId: String,
         @Path("dashboardId") dashboardId: String
     ): Response<PagedResponse<Member>>
@@ -291,7 +291,7 @@ interface WakatimeApi {
      * Requires the [ReadOrganization] authentication scope
      */
     @GET("$API/users/current/orgs/{organizationId}/dashboards/{dashboardId}/members/{userId}/summaries")
-    suspend fun getMemberSummaries(
+    public suspend fun getMemberSummaries(
         @Path("organizationId") organizationId: String,
         @Path("dashboardId") dashboardId: String,
         @Path("userId") userId: String,
@@ -312,7 +312,7 @@ interface WakatimeApi {
      * @param page optional: Page number of commits.
      */
     @GET("$API/users/current/projects/{projectName}/commits")
-    suspend fun getProjectCommits(
+    public suspend fun getProjectCommits(
         @Path("projectName") projectName: String,
         @Query("author") author: String?,
         @Query("branch") branch: String?,
@@ -328,7 +328,7 @@ interface WakatimeApi {
      * @param branch optional: Filter the commit to a branch; defaults to the repo’s default branch name.
      */
     @GET("$API/users/current/projects/{projectName}/commits/{hash}")
-    suspend fun getProjectCommit(
+    public suspend fun getProjectCommit(
         @Path("projectName") projectName: String,
         @Path("hash") hash: String,
         @Query("branch") branch: String?
@@ -342,10 +342,10 @@ interface WakatimeApi {
      * Requires the [ReadLoggedTime] authentication scope.
      */
     @GET("$API/users/current/data_dumps")
-    suspend fun getExports(): Response<PagedResponse<Export>>
+    public suspend fun getExports(): Response<PagedResponse<Export>>
 }
 
-interface OauthApi {
+public interface OauthApi {
 
     /**
      * Revokes the [token] belonging to the client with matching [id] and [secret].
@@ -354,7 +354,7 @@ interface OauthApi {
      */
     @FormUrlEncoded
     @POST("oauth/revoke")
-    suspend fun revoke(
+    public suspend fun revoke(
         @Field("client_id") id: String,
         @Field("client_secret") secret: String,
         @Field("token") token: String
