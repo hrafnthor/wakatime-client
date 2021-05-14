@@ -3,6 +3,7 @@ package `is`.hth.wakatimeclient
 import `is`.hth.wakatimeclient.core.data.auth.*
 import `is`.hth.wakatimeclient.core.data.auth.AuthClientImpl
 import `is`.hth.wakatimeclient.core.data.auth.DefaultAuthenticator
+import `is`.hth.wakatimeclient.core.data.net.CacheControl
 import `is`.hth.wakatimeclient.core.data.net.NetworkClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkClientImpl
 import `is`.hth.wakatimeclient.wakatime.SessionManager
@@ -18,13 +19,16 @@ import timber.log.Timber
 
 @Suppress("unused")
 public class WakatimeClient private constructor(
-    private val auth: AuthClientImpl,
-    private val net: WakatimeNetworkClient,
+    private val authentication: AuthClientImpl,
+    private val network: WakatimeNetworkClient,
     private val session: SessionManager,
     private val remote: WakatimeRemoteDataSource
 ) : WakatimeRemoteDataSource by remote,
     SessionManager by session,
-    AuthClient by auth {
+    CacheControl by network,
+    AuthClient by authentication {
+
+
 
     public class Builder private constructor(
         clientSecret: String = "",
@@ -113,8 +117,8 @@ public class WakatimeClient private constructor(
             )
 
             return WakatimeClient(
-                auth = authClient,
-                net = network,
+                authentication = authClient,
+                network = network,
                 remote = remoteSource,
                 session = manager
             )
