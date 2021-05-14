@@ -8,7 +8,7 @@ import kotlinx.serialization.Transient
 import java.util.*
 
 @Serializable
-data class ExternalDuration internal constructor(
+public data class ExternalDuration internal constructor(
     /**
      * A unique id of this external duration
      */
@@ -63,7 +63,7 @@ data class ExternalDuration internal constructor(
 ) {
 
     @Suppress("unused")
-    companion object {
+    public companion object {
 
         /**
          * Make an [ExternalDuration] request for the authenticated user
@@ -71,7 +71,7 @@ data class ExternalDuration internal constructor(
          * @param date for which to query durations for
          * @param construct for further configuration of the request's optional values
          */
-        inline fun request(
+        public inline fun request(
             date: Calendar,
             construct: Request.Builder.() -> Unit = {}
         ): Request = Request.Builder(date).also(construct).build()
@@ -87,7 +87,7 @@ data class ExternalDuration internal constructor(
          * @param endTime UNIX epoch timestamp; numbers after decimal point are fractions of a second
          * @param construct for further configuration of the duration's optional values
          */
-        inline fun send(
+        public inline fun send(
             externalId: String,
             entity: String,
             type: Type,
@@ -117,17 +117,17 @@ data class ExternalDuration internal constructor(
      */
     @RequestDsl
     @Suppress("unused")
-    class Builder(
-        var externalId: String,
-        var entity: String,
-        var type: Type,
-        var category: Category,
-        var startTime: Float,
-        var endTime: Float,
-        var language: String? = null,
-        var project: ProjectFilter? = null,
+    public class Builder(
+        public var externalId: String,
+        public var entity: String,
+        public var type: Type,
+        public var category: Category,
+        public var startTime: Float,
+        public var endTime: Float,
+        public var language: String? = null,
+        public var project: ProjectFilter? = null,
     ) {
-        fun build() = ExternalDuration(
+        public fun build(): ExternalDuration = ExternalDuration(
             externalId = externalId,
             entity = entity,
             type = type,
@@ -148,10 +148,10 @@ data class ExternalDuration internal constructor(
      * @param project (optional) defines the project specific filtering for the duration, if any
      */
     @Suppress("unused")
-    class Request(
-        val date: Calendar,
-        val timezone: String?,
-        val project: ProjectFilter?
+    public class Request(
+        public val date: Calendar,
+        public val timezone: String?,
+        public val project: ProjectFilter?
     ) {
 
         /**
@@ -160,12 +160,12 @@ data class ExternalDuration internal constructor(
          * @param project (optional) defines the project specific filtering for the duration, if any
          */
         @RequestDsl
-        class Builder(
-            var date: Calendar,
-            var timezone: String? = null,
-            var project: ProjectFilter? = null,
+        public class Builder(
+            public var date: Calendar,
+            public var timezone: String? = null,
+            public var project: ProjectFilter? = null,
         ) {
-            fun build() = Request(
+            public fun build(): Request = Request(
                 date = date,
                 timezone = timezone,
                 project = project
@@ -174,8 +174,11 @@ data class ExternalDuration internal constructor(
     }
 }
 
+/**
+ * Project filtering dsl for [ExternalDuration] building
+ */
 @Suppress("unused")
-inline fun ExternalDuration.Builder.project(
+public inline fun ExternalDuration.Builder.project(
     filter: ProjectFilter.Builder.() -> Unit
 ) {
     val builder = ProjectFilter.Builder()
@@ -183,8 +186,11 @@ inline fun ExternalDuration.Builder.project(
     project = builder.build()
 }
 
+/**
+ * Project filtering dsl for [ExternalDuration.Request] building
+ */
 @Suppress("unused")
-inline fun ExternalDuration.Request.Builder.project(
+public inline fun ExternalDuration.Request.Builder.project(
     filter: ProjectFilter.Builder.() -> Unit
 ) {
     val builder = ProjectFilter.Builder()
