@@ -1,8 +1,19 @@
 package `is`.hth.wakatimeclient.core.data
 
+/**
+ * Contains information regarding a error.
+ *
+ * See sub classes for detailed breakdown.
+ */
 @Suppress("unused")
 public sealed class Error(
+    /**
+     * The error type's unique numerical code
+     */
     public val code: Int,
+    /**
+     * A human readable message describing the cause of the error
+     */
     public val message: String
 ) {
 
@@ -15,20 +26,25 @@ public sealed class Error(
      * A authentication layer error occurred. This category of errors only happen during
      * initial authentication, token refresh and remote token revoke operations.
      */
-    public sealed class Auth(code: Int, message: String) : Error(code, message) {
+    public sealed class Authentication(code: Int, message: String) : Error(code, message) {
 
         /**
          * An unknown error occurred during the authentication processes
          */
-        public class Unknown(code: Int, message: String) : Auth(code, message)
+        public class Unknown(code: Int, message: String) : Authentication(code, message)
 
         /**
-         * An error occurred during initial authentication flow
+         * An error occurred during initial authorization flow
          */
-        public class Authentication(
+        public class Authorization(
+            /**
+             * A unique error code given by AppAuth describing the cause of the error.
+             *
+             * See [net.openid.appauth.AuthorizationException] for all available codes.
+             */
             public val appauthCode: Int,
             message: String
-        ) : Auth(CODE, message) {
+        ) : Authentication(CODE, message) {
             public companion object {
                 public const val CODE: Int = 100
             }
@@ -37,7 +53,7 @@ public sealed class Error(
         /**
          * User is not authenticated and so the operation was not possible
          */
-        public class Unauthorized(message: String) : Auth(CODE, message) {
+        public class Unauthorized(message: String) : Authentication(CODE, message) {
             public companion object {
                 public const val CODE: Int = 101
             }
@@ -49,7 +65,7 @@ public sealed class Error(
         public class TokenRefresh(
             public val appauthCode: Int,
             message: String
-        ) : Auth(CODE, message) {
+        ) : Authentication(CODE, message) {
             public companion object {
                 public const val CODE: Int = 102
             }
@@ -61,7 +77,7 @@ public sealed class Error(
         public class TokenFetch(
             public val appauthCode: Int,
             message: String
-        ) : Auth(CODE, message) {
+        ) : Authentication(CODE, message) {
             public companion object {
                 public const val CODE: Int = 103
             }

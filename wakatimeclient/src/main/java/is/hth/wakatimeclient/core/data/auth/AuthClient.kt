@@ -116,14 +116,14 @@ internal class AuthClientImpl internal constructor(
                 response == null && exception != null -> {
                     val code = exception.code
                     val message = exception.message ?: "No exception message given!"
-                    continuation.resume(Results.Failure(Error.Auth.Authentication(code, message)))
+                    continuation.resume(Results.Failure(Error.Authentication.Authorization(code, message)))
                 }
                 response != null -> fetchAuthorizationToken(config, response) {
                     continuation.resume(it)
                 }
                 else -> {
                     val message = "Authentication flow resulted in neither actionable response nor exception!"
-                    continuation.resume(Results.Failure(Error.Auth.Unknown(-1, message)))
+                    continuation.resume(Results.Failure(Error.Authentication.Unknown(-1, message)))
                 }
             }
         }
@@ -151,11 +151,11 @@ internal class AuthClientImpl internal constructor(
                 }
                 exception != null -> {
                     val message = exception.message ?: "No exception message given!"
-                    Results.Failure(Error.Auth.TokenFetch(exception.code, message))
+                    Results.Failure(Error.Authentication.TokenFetch(exception.code, message))
                 }
                 else -> {
                     val message = "Token fetch operation resulted in neither success nor failure!"
-                    Results.Failure(Error.Auth.Unknown(-1, message))
+                    Results.Failure(Error.Authentication.Unknown(-1, message))
                 }
             }
             receiver(results)
@@ -204,7 +204,7 @@ internal class AuthClientImpl internal constructor(
                                 Results.Success.Empty
                             } else {
                                 val message: String = exception.message ?: "Token refresh operation failed"
-                                val error = Error.Auth.TokenRefresh(exception.code, message)
+                                val error = Error.Authentication.TokenRefresh(exception.code, message)
                                 Results.Failure(error)
                             }
                             continuation.resumeWith(Result.success(results))
@@ -215,7 +215,7 @@ internal class AuthClientImpl internal constructor(
                     }
                     else -> {
                         val msg = "No authentication found! Halting token refresh operation"
-                        val result = Results.Failure(Error.Auth.Unauthorized(msg))
+                        val result = Results.Failure(Error.Authentication.Unauthorized(msg))
                         continuation.resumeWith(Result.success(result))
                     }
                 }
