@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * A heartbeat representing some activity for a user
  */
 @Serializable
-data class Heartbeat internal constructor(
+public data class Heartbeat internal constructor(
     /**
      * The current line row number of cursor, if applicable. If no value is received from the service,
      * then this value will be -1. If this value should not be sent to the service then
@@ -107,7 +107,7 @@ data class Heartbeat internal constructor(
      * A network model for sending heartbeats to the server
      */
     @Serializable
-    data class Beat internal constructor(
+    public data class Beat internal constructor(
         /**
          * The entity that the beat is logging time against, such as an absolute file path or domain
          */
@@ -177,33 +177,33 @@ data class Heartbeat internal constructor(
          * @param language (optional) the language name being used
          * @param lines (optional) the total number of lines in the entity (when the type is [Type.File]])
          * @param lineno (optional) the current cursor column position, if applicable.
-         * @param cursorpos (optinal) the current line row number of cursor, if applicable.
+         * @param cursorpos (optional) the current line row number of cursor, if applicable.
          * @param isWrite (optional)
          */
         @Suppress("unused")
-        class Builder(
-            var entity: String,
-            var time: Float,
-            var type: Type,
-            var category: Category,
-            var project: String? = null,
-            var branch: String? = null,
-            var language: String? = null,
-            var lines: Int? = null,
-            var lineno: Int? = null,
-            var cursorpos: Int? = null,
-            var isWrite: Boolean? = null,
+        public class Builder(
+            public var entity: String,
+            public var time: Float,
+            public var type: Type,
+            public var category: Category,
+            public var project: String? = null,
+            public var branch: String? = null,
+            public var language: String? = null,
+            public var lines: Int? = null,
+            public var lineno: Int? = null,
+            public var cursorpos: Int? = null,
+            public var isWrite: Boolean? = null,
             private var dependencies: String? = null,
         ) {
 
             /**
              * A list of dependencies detected from the entity file, if applicable.
              */
-            fun dependencies(vararg dependencies: String?): Builder = apply {
+            public fun dependencies(vararg dependencies: String?): Builder = apply {
                 this.dependencies = dependencies.filterNotNull().joinToString(separator = ",") { it }
             }
 
-            fun build(): Beat = Beat(
+            public fun build(): Beat = Beat(
                 entity = entity,
                 time = time,
                 project = project,
@@ -221,7 +221,7 @@ data class Heartbeat internal constructor(
     }
 
     @Suppress("unused")
-    companion object {
+    public companion object {
 
         /**
          * Creates a new [Beat] for sending a heartbeat to the server
@@ -231,7 +231,7 @@ data class Heartbeat internal constructor(
          * @param type The type for this beat
          * @param category The category for this beat
          */
-        inline fun send(
+        public inline fun send(
             entity: String,
             time: Float,
             type: Type,
@@ -245,7 +245,7 @@ data class Heartbeat internal constructor(
  * Confirmation of [Heartbeat] creation server side
  */
 @Serializable
-data class Confirmation(
+public data class Confirmation(
     /**
      * The unique id of the newly created heartbeat
      */

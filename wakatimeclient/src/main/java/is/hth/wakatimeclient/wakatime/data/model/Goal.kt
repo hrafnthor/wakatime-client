@@ -6,7 +6,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.*
 
 @Serializable
-data class Goal internal constructor(
+public data class Goal internal constructor(
     /**
      * Unique id of the goal
      */
@@ -146,7 +146,7 @@ data class Goal internal constructor(
  * A data point measurement over a range matching the configured delta of the goal.
  */
 @Serializable
-data class DataPoint internal constructor(
+public data class DataPoint internal constructor(
     /**
      * number of seconds coded during this delta period
      */
@@ -192,7 +192,7 @@ data class DataPoint internal constructor(
  * A user who was invited to observe the progress of the goal.
  */
 @Serializable
-data class InvitedUser internal constructor(
+public data class InvitedUser internal constructor(
     @SerialName(ID)
     val id: String,
     /**
@@ -257,7 +257,7 @@ internal object InvitedUserListTransformer : JsonTransformingSerializer<List<Inv
  * A user who has an active email subscription for the goals progress
  */
 @Serializable
-data class Subscriber internal constructor(
+public data class Subscriber internal constructor(
     /**
      * The user detail of this subscriber
      */
