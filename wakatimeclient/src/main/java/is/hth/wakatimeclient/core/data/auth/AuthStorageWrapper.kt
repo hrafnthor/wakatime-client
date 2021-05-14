@@ -83,11 +83,8 @@ internal class AuthStorageWrapper(private val storage: AuthStorage) {
     /**
      * The authentication method being used
      */
-    fun getMethod(): Method {
-        val method = storage.getMethod() ?: ""
-        return if (method.isEmpty()) {
-            Method.None
-        } else Method.convert(method)
+    fun getMethod(): Method? {
+        return storage.getMethod()?.let { Method.convert(it) }
     }
 
     /**
@@ -95,7 +92,7 @@ internal class AuthStorageWrapper(private val storage: AuthStorage) {
      */
     fun setMethod(method: Method) {
         clear()
-        storage.setMethod(method.key)
+        storage.setMethod(method.value)
     }
 
     /**

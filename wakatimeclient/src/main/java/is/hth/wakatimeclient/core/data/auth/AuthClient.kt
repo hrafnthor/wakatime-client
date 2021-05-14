@@ -42,7 +42,7 @@ public interface AuthClient {
         /**
          * Indicates if the client is configured to use OAuth.
          */
-        public fun authenticationMethod(): Method
+        public fun authenticationMethod(): Method?
 
         /**
          * The list of scopes that the user has authorized the client to have access to, if any.
@@ -92,7 +92,7 @@ internal class AuthClientImpl internal constructor(
             config.authorizationEndpoint,
             config.tokenEndpoint
         )
-        val joined = scopes.joinToString { it.description }
+        val joined = scopes.joinToString { it.value }
         val request = AuthorizationRequest.Builder(
             serviceConfig,
             config.clientId,
@@ -173,9 +173,9 @@ internal class AuthClientImpl internal constructor(
 
         override fun isAuthorized(): Boolean {
             return when (authenticationMethod()) {
+                null -> false
                 Method.ApiKey -> apiKey().isNotEmpty()
                 Method.OAuth -> storage.getState().isAuthorized
-                Method.None -> false
             }
         }
 
@@ -222,7 +222,7 @@ internal class AuthClientImpl internal constructor(
             } else continuation.resumeWith(Result.success(Results.Success.Empty))
         }
 
-        override fun authenticationMethod(): Method = storage.getMethod()
+        override fun authenticationMethod(): Method? = storage.getMethod()
     }
 
     internal class Builder(
