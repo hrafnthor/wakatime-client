@@ -12,7 +12,7 @@ import kotlinx.serialization.json.JsonObjectBuilder
  * @param processor In case of an exception being thrown, processes it to standard form
  * @param operation A long running operation that might throw an exception
  */
-inline fun <T : Any> safeOperation(
+internal inline fun <T : Any> safeOperation(
     processor: ErrorProcessor,
     operation: () -> Results<T>
 ): Results<T> = try {
