@@ -14,7 +14,7 @@ import kotlinx.serialization.json.*
 
 
 @Serializable
-data class ChronologicalResponse<T>(
+public data class ChronologicalResponse<T>(
     /**
      * The payload received from the service
      */
@@ -37,7 +37,7 @@ data class ChronologicalResponse<T>(
  * A web service response JSON wrapper
  */
 @Serializable(with = PagedResponseTransformer::class)
-data class PagedResponse<T>(
+public data class PagedResponse<T>(
     /**
      * The payload received from the service
      */
@@ -285,7 +285,7 @@ internal class PagedResponseSerializer<T : Any>(
 }
 
 @Serializable
-data class WrappedResponse<T>(
+public data class WrappedResponse<T>(
     /**
      * The payload received from the service
      */
