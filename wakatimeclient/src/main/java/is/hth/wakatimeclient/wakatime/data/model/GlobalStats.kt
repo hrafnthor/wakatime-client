@@ -279,7 +279,7 @@ data class GlobalStats(
     /**
      * Contains global stats aggregation by operating systems
      */
-    @SerialName(OSYSTEMS)
+    @SerialName(OPERATING_SYSTEMS)
     val operatingSystems: List<Aggregation>,
     /**
      * The range for these stats
@@ -302,7 +302,7 @@ data class GlobalStats(
         internal const val AVERAGES = "daily_average"
         internal const val EDITORS = "editors"
         internal const val LANGUAGES = "languages"
-        internal const val OSYSTEMS = "operating_systems"
+        internal const val OPERATING_SYSTEMS = "operating_systems"
         internal const val TOTAL = "total"
         internal const val RANGE = "range"
         internal const val TIMEOUT = "timeout"
@@ -343,7 +343,7 @@ internal object GlobalStatsJsonTransformer : JsonTransformingSerializer<GlobalSt
                     put(GlobalStats.CATEGORIES, getAggregation(data, GlobalStats.CATEGORIES))
                     put(GlobalStats.EDITORS, getAggregation(data, GlobalStats.EDITORS))
                     put(GlobalStats.LANGUAGES, getAggregation(data, GlobalStats.LANGUAGES))
-                    put(GlobalStats.OSYSTEMS, getAggregation(data, GlobalStats.OSYSTEMS))
+                    put(GlobalStats.OPERATING_SYSTEMS, getAggregation(data, GlobalStats.OPERATING_SYSTEMS))
                 }
 
                 findValue(this, element, GlobalStats.RANGE) {}
@@ -381,7 +381,7 @@ internal object GlobalStatsSerializer : KSerializer<GlobalStats> {
             element(GlobalStats.CATEGORIES, aggregationListSerializer.descriptor)
             element(GlobalStats.EDITORS, aggregationListSerializer.descriptor)
             element(GlobalStats.LANGUAGES, aggregationListSerializer.descriptor)
-            element(GlobalStats.OSYSTEMS, aggregationListSerializer.descriptor)
+            element(GlobalStats.OPERATING_SYSTEMS, aggregationListSerializer.descriptor)
             element(GlobalStats.RANGE, rangeSerializer.descriptor)
             element<Int>(GlobalStats.TIMEOUT)
             element<Boolean>(GlobalStats.WRITES_ONLY)
@@ -417,7 +417,7 @@ internal object GlobalStatsSerializer : KSerializer<GlobalStats> {
             )
             val os = decodeSerializableElement(
                 descriptor,
-                descriptor.getElementIndex(GlobalStats.OSYSTEMS),
+                descriptor.getElementIndex(GlobalStats.OPERATING_SYSTEMS),
                 aggregationListSerializer
             )
             val range = decodeSerializableElement(
@@ -482,7 +482,7 @@ internal object GlobalStatsSerializer : KSerializer<GlobalStats> {
             )
             encodeSerializableElement(
                 descriptor,
-                descriptor.getElementIndex(GlobalStats.OSYSTEMS),
+                descriptor.getElementIndex(GlobalStats.OPERATING_SYSTEMS),
                 aggregationListSerializer,
                 value.operatingSystems
             )
