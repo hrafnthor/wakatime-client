@@ -100,6 +100,21 @@ internal interface WakatimeRemoteDataSource {
     ): Results<Stats>
 
     /**
+     * Aggregate stats of all WakaTime users over the given time range. range can be one of
+     * last_7_days or any year in the past since 2013 for ex: 2020.
+     *
+     * Aggregate stats are only available with the same preferences as public profiles
+     * (Default 15m timeout preference).
+     *
+     * Yearly aggregate stats are calculated each year on Jan 1st.
+     *
+     *  @param request contains the range by which to fetch the stats for
+     */
+    suspend fun getGlobalStats(
+        request: GlobalStats.Request
+    ): Results<GlobalStats>
+
+    /**
      * Fetches the [Summaries] for the current user filtered by the supplied request
      * @param request defined the filtering to apply
      */
@@ -319,6 +334,12 @@ internal class WakatimeRemoteDataSourceImpl(
         }, transform = {
             it.data
         })
+    }
+
+    override suspend fun getGlobalStats(
+        request: GlobalStats.Request
+    ): Results<GlobalStats> {
+        return makeCall { api.getGlobalStats(request.range) }
     }
 
     override suspend fun getSummaries(

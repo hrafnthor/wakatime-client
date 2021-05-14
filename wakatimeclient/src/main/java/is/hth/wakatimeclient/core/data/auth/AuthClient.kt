@@ -175,6 +175,7 @@ internal class AuthClientImpl internal constructor(
             return when (authenticationMethod()) {
                 Method.ApiKey -> apiKey().isNotEmpty()
                 Method.OAuth -> storage.getState().isAuthorized
+                Method.None -> false
             }
         }
 

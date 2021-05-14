@@ -3,6 +3,12 @@ package `is`.hth.wakatimeclient.core.data.auth
 enum class Method(val key: String) {
 
     /**
+     * No authentication method is being used, i.e no authentication data
+     * was locally found
+     */
+    None(""),
+
+    /**
      * OAuth 2.0 based authentication method
      */
     OAuth("oauth"),

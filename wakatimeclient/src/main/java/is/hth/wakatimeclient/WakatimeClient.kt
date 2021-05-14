@@ -73,7 +73,7 @@ class WakatimeClient private constructor(
             host = Uri.parse("https://wakatime.com"),
             method = method
         )
-        private val netBuilder = NetworkClientImpl.Builder("https://wakatime.com/api/v1/")
+        private val netBuilder = NetworkClientImpl.Builder("https://wakatime.com/")
         private val authBuilder = AuthClientImpl.Builder(apiKey, config)
 
         /**
