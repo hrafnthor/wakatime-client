@@ -92,7 +92,7 @@ internal class AuthClientImpl internal constructor(
             config.authorizationEndpoint,
             config.tokenEndpoint
         )
-        val joined = scopes.joinToString { it.value }
+        val joined = scopes.joinToString { it.toString() }
         val request = AuthorizationRequest.Builder(
             serviceConfig,
             config.clientId,

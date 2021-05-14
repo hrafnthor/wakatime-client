@@ -14,7 +14,7 @@ import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.json.*
 
 @Serializable
-data class Organization(
+public data class Organization internal constructor(
     /**
      * The unique id of the organization
      */
@@ -150,7 +150,7 @@ data class Organization(
 )
 
 @Serializable
-data class Dashboard(
+public data class Dashboard internal constructor(
     /**
      * unique id of this dashboard
      */
@@ -293,7 +293,7 @@ data class Dashboard(
 )
 
 @Serializable(MemberTransformSerializer::class)
-data class Member(
+public data class Member internal constructor(
     /**
      * Indicates whether the user can view the dashboard
      */
@@ -377,8 +377,10 @@ internal object MemberSerializer : KSerializer<Member> {
     override fun deserialize(decoder: Decoder): Member {
         return decoder.decodeStructure(descriptor) {
             val canView = decodeBooleanElement(descriptor, getIndex(Member.CAN_VIEW_DASHBOARD))
-            val isViewOnly = decodeBooleanElement(descriptor, getIndex(Member.IS_ONLY_VIEWING_DASHBOARD))
-            val user = decodeSerializableElement(descriptor, getIndex(Member.USER), User.serializer())
+            val isViewOnly =
+                decodeBooleanElement(descriptor, getIndex(Member.IS_ONLY_VIEWING_DASHBOARD))
+            val user =
+                decodeSerializableElement(descriptor, getIndex(Member.USER), User.serializer())
             Member(
                 canViewDashboard = canView,
                 isOnlyViewingDashboard = isViewOnly,

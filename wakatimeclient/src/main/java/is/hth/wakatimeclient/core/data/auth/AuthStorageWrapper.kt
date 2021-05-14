@@ -92,7 +92,7 @@ internal class AuthStorageWrapper(private val storage: AuthStorage) {
      */
     fun setMethod(method: Method) {
         clear()
-        storage.setMethod(method.value)
+        storage.setMethod(method.toString())
     }
 
     /**

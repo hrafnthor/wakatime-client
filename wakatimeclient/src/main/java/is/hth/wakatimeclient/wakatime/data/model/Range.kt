@@ -11,7 +11,7 @@ import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.*
 
 @Serializable(RangeJsonTransformer::class)
-data class Range(
+public data class Range internal constructor(
     /**
      * Start of time range as ISO 8601 UTC datetime
      */

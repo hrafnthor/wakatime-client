@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * The total recorded time for the user since account creation
  */
 @Serializable
-data class TotalRecord(
+public data class TotalRecord internal constructor(
     /**
      * Indicates if this record is up to date or is being updated server side
      */

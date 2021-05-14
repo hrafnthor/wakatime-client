@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Repository(
+public data class Repository internal constructor(
     /**
      * The unique id of the repository
      */
@@ -81,7 +81,7 @@ data class Repository(
 )
 
 @Serializable
-data class Badge(
+public data class Badge internal constructor(
     /**
      * The unique id of this badge
      */
@@ -123,7 +123,7 @@ data class Badge(
 )
 
 @Serializable
-data class Snippet(
+public data class Snippet internal constructor(
     /**
      *
      */
