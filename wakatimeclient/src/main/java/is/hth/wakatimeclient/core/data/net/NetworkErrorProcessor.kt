@@ -14,7 +14,7 @@ import java.net.UnknownHostException
 /**
  * Produces network related [Error]s based on the given inputs
  */
-open class NetworkErrorProcessor : ErrorProcessor {
+internal open class NetworkErrorProcessor : ErrorProcessor {
 
     override fun onError(code: Int, message: String): Error {
         return when (code) {
@@ -46,5 +46,6 @@ open class NetworkErrorProcessor : ErrorProcessor {
     /**
      * Converts the supplied failed [Response] into a [Error]
      */
-    open fun onError(response: Response<*>): Error = onError(response.code(), response.message() ?: "")
+    open fun onError(response: Response<*>): Error =
+        onError(response.code(), response.message() ?: "")
 }
