@@ -10,72 +10,72 @@ import net.openid.appauth.browser.BrowserMatcher
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-interface AuthClient {
+public interface AuthClient {
 
     /**
      * Creates a new [Intent] for starting a new OAuth flow against Wakatime.
      * The [scopes] determine what access level the resulting authentication will have.
      */
-    fun createAuthenticationIntent(scopes: List<Scope>): Intent
+    public fun createAuthenticationIntent(scopes: List<Scope>): Intent
 
     /**
      * Processes the received [Intent] results from the OAuth flow started
      * with calling [createAuthenticationIntent]
      */
-    suspend fun onAuthenticationResult(result: Intent): Results<Boolean>
+    public suspend fun onAuthenticationResult(result: Intent): Results<Boolean>
 
     /**
-     *
+     * The current user session
      */
-    fun session(): Session
+    public fun session(): Session
 
     /**
      * Exposes utility functionality for the ongoing session
      */
-    interface Session {
+    public interface Session {
 
         /**
          * Indicates if the client is currently authorized
          */
-        fun isAuthorized(): Boolean
+        public fun isAuthorized(): Boolean
 
         /**
          * Indicates if the client is configured to use OAuth.
          */
-        fun authenticationMethod(): Method
+        public fun authenticationMethod(): Method
 
         /**
          * The list of scopes that the user has authorized the client to have access to, if any.
          */
-        fun authorizedScopes(): Set<Scope>
+        public fun authorizedScopes(): Set<Scope>
 
         /**
          * The session's access token if any exists
          */
-        fun accessToken(): String
+        public fun accessToken(): String
 
         /**
          * The session's refresh token if any exists
          */
-        fun refreshToken(): String
+        public fun refreshToken(): String
 
         /**
          * The API key being used if any exists
          */
-        fun apiKey(): String
+        public fun apiKey(): String
 
         /**
          * Updates the access token if needed for the current session
          */
-        suspend fun update(force: Boolean): Results<Unit>
+        public suspend fun update(force: Boolean): Results<Unit>
     }
 
-    interface Builder {
+    public interface Builder {
 
         /**
          * For setting custom filtering requirements on which browsers are allowed
          */
-        fun setBrowserMatcher(matcher: BrowserMatcher): Builder
+        public fun setBrowserMatcher(matcher: BrowserMatcher): Builder
     }
 }
 
