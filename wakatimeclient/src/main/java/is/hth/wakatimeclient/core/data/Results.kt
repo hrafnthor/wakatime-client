@@ -3,26 +3,36 @@ package `is`.hth.wakatimeclient.core.data
 /**
  * A discriminating wrapper that encapsulates operational results
  */
-sealed class Results<out T> {
+public sealed class Results<out T> {
 
     /**
      * The operation was deemed successful
      */
-    sealed class Success<T> : Results<T>() {
+    public sealed class Success<T> : Results<T>() {
 
         /**
          * No resulting values were produced
          */
-        object Empty : Success<Nothing>()
+        public object Empty : Success<Nothing>()
 
         /**
          * Resulting values were produced
          */
-        class Value<T>(val value: T) : Success<T>()
+        public class Value<T>(
+            /**
+             * The value resulting from the operation
+             */
+            public val value: T
+        ) : Success<T>()
     }
 
     /**
      * A complete failure happened due to the indicated [Error]
      */
-    class Failure(val error: Error) : Results<Nothing>()
+    public class Failure(
+        /**
+         * A description of what failed
+         */
+        public val error: Error
+    ) : Results<Nothing>()
 }
