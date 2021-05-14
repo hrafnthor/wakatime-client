@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Suppress("unused")
-enum class Visibility {
+public enum class Visibility {
     @SerialName("visible")
     Visible,
 
@@ -21,7 +21,7 @@ enum class Visibility {
  */
 @Serializable
 @Suppress("unused")
-enum class GoalStatus {
+public enum class GoalStatus {
 
     @SerialName("success")
     Success,
@@ -42,7 +42,7 @@ enum class GoalStatus {
  */
 @Serializable
 @Suppress("unused")
-enum class Delta {
+public enum class Delta {
     @SerialName("day")
     Day,
 
@@ -58,7 +58,7 @@ enum class Delta {
  */
 @Serializable
 @Suppress("unused")
-enum class Frequency {
+public enum class Frequency {
     @SerialName("Daily")
     Daily,
 
@@ -80,7 +80,7 @@ enum class Frequency {
  */
 @Suppress("unused")
 @Serializable
-enum class HumanRange(val description: String) {
+public enum class HumanRange(private val value: String) {
 
     /**
      * The last 7 days from today
@@ -110,7 +110,9 @@ enum class HumanRange(val description: String) {
      * All time on record
      */
     @SerialName("all_time")
-    All("all_time")
+    All("all_time");
+
+    override fun toString(): String = value
 }
 
 /**
@@ -118,7 +120,7 @@ enum class HumanRange(val description: String) {
  */
 @Serializable
 @Suppress("unused")
-enum class InvitationStatus {
+public enum class InvitationStatus {
 
     /**
      * The user has accepted to observe the goal
@@ -144,7 +146,7 @@ enum class InvitationStatus {
  */
 @Suppress("unused")
 @Serializable
-enum class Type {
+public enum class Type {
     @SerialName("file")
     File,
 
@@ -160,7 +162,7 @@ enum class Type {
  */
 @Suppress("unused")
 @Serializable
-enum class Category {
+public enum class Category {
     @SerialName("coding")
     Coding,
 
@@ -203,7 +205,7 @@ enum class Category {
 
 @Serializable
 @Suppress("unused")
-enum class ExportStatus {
+public enum class ExportStatus {
     @SerialName("Pending…")
     Pending,
 
@@ -219,7 +221,7 @@ enum class ExportStatus {
 
 @Serializable
 @Suppress("unused")
-enum class ProcessingStatus {
+public enum class ProcessingStatus {
     /**
      * There is processing pending server side, which hasn't yet started
      */
