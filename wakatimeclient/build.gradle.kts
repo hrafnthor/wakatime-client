@@ -39,12 +39,13 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
+        freeCompilerArgs = freeCompilerArgs + "-Xexplicit-api=strict"
     }
-
     packagingOptions {
         exclude("META-INF/LICENSE*")
     }
 }
+
 
 dependencies {
     //#region Local
