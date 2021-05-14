@@ -28,8 +28,6 @@ public class WakatimeClient private constructor(
     CacheControl by network,
     AuthClient by authentication {
 
-
-
     public class Builder private constructor(
         clientSecret: String = "",
         clientId: String = "",
