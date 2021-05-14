@@ -6,7 +6,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 
-class ConstantTests : DescribeSpec({
+private class ConstantTests : DescribeSpec({
 
     val json = Json {
         ignoreUnknownKeys = true
