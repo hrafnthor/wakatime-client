@@ -7,7 +7,7 @@ public enum class Method(
     /**
      * The method's unique descriptive value
      */
-    public val value: String
+    private val value: String
 ) {
 
     /**
@@ -19,6 +19,8 @@ public enum class Method(
      * API key based authentication
      */
     ApiKey("api_key");
+
+    override fun toString(): String = value
 
     public companion object {
         private val map = values().associateBy(Method::value)

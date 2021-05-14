@@ -8,7 +8,7 @@ public enum class Scope(
     /**
      * The scope's unique descriptive value
      */
-    public val value: String
+    private val value: String
 ) {
 
     /**
@@ -46,6 +46,8 @@ public enum class Scope(
      * current user had Admin or Owner role.
      */
     WritePrivateLeaderboards("write_private_leaderboards");
+
+    override fun toString(): String = value
 
     public companion object {
         private val map = values().associateBy(Scope::value)
