@@ -1,3 +1,5 @@
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
+
 buildscript {
     repositories {
         google()
@@ -31,4 +33,24 @@ tasks {
     withType<Test> {
         useJUnitPlatform()
     }
+
+    // Set dependency update task configuration to filter unstable updates.
+    // see https://github.com/ben-manes/gradle-versions-plugin for details
+    named<DependencyUpdatesTask>("dependencyUpdates") {
+        checkConstraints = true
+        checkForGradleUpdate = true
+        rejectVersionIf {
+            // reject all unstable dependency versions
+            isUnstable(candidate.version)
+        }
+    }
+}
+
+fun isUnstable(version: String): Boolean {
+    val hasUnstableKeywords = listOf("beta", "alpha", "rc").any {
+        version.toLowerCase().contains(it)
+    }
+    // Capture formats where {number} is repeated with {dot} in between
+    val regex = "^(?:[0-9]+\\.)+[0-9]+$".toRegex()
+    return hasUnstableKeywords || regex.matches(version).not()
 }
