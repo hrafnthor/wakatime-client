@@ -14,34 +14,34 @@ private class ConstantTests : DescribeSpec({
     }
 
     describe("serialization") {
-        describe("visibility") {
+        it("of Visibility") {
             json.encodeToJsonElement(Visibility.Visible)
         }
-        describe("goal status") {
+        it("of GoalStatus") {
             json.encodeToJsonElement(GoalStatus.Pending)
         }
-        describe("delta") {
+        it("of Delta") {
             json.encodeToJsonElement(Delta.Day)
         }
-        describe("frequency") {
+        it("of Frequency") {
             json.encodeToJsonElement(Frequency.Daily)
         }
-        describe("human range") {
+        it("of HumanRange") {
             json.encodeToJsonElement(HumanRange.WEEK)
         }
-        describe("invitation status") {
+        it("of InvitationStatus") {
             json.encodeToJsonElement(InvitationStatus.Accepted)
         }
-        describe("type") {
+        it("of Type") {
             json.encodeToJsonElement(Type.App)
         }
-        describe("category") {
+        it("of Category") {
             json.encodeToJsonElement(Category.TestsRunning)
         }
-        describe("export status") {
+        it("of ExportStatus") {
             json.encodeToJsonElement(ExportStatus.Pending)
         }
-        describe("processing status") {
+        it("of ProcessingStatus") {
             json.encodeToJsonElement(ProcessingStatus.Done)
         }
     }
@@ -49,7 +49,7 @@ private class ConstantTests : DescribeSpec({
     // Contains deserialization test for each type of constant used
     describe("deserialization") {
 
-        describe("visibility") {
+        describe("of Visibility") {
             it("visible") {
                 decodeAndMatch(json, "visible", Visibility.Visible)
             }
@@ -58,7 +58,7 @@ private class ConstantTests : DescribeSpec({
             }
         }
 
-        describe("goal status") {
+        describe("of GoalStatus") {
             it("success") {
                 decodeAndMatch(json, "success", GoalStatus.Success)
             }
@@ -73,7 +73,7 @@ private class ConstantTests : DescribeSpec({
             }
         }
 
-        describe("delta") {
+        describe("of Delta") {
             it("day") {
                 decodeAndMatch(json, "day", Delta.Day)
             }
@@ -85,7 +85,7 @@ private class ConstantTests : DescribeSpec({
             }
         }
 
-        describe("frequency") {
+        describe("of Frequency") {
             it("daily") {
                 decodeAndMatch(json, "Daily", Frequency.Daily)
             }
@@ -100,7 +100,7 @@ private class ConstantTests : DescribeSpec({
             }
         }
 
-        describe("human range") {
+        describe("of HumanRange") {
             it("week") {
                 decodeAndMatch(json, "last_7_days", HumanRange.WEEK)
             }
@@ -118,7 +118,7 @@ private class ConstantTests : DescribeSpec({
             }
         }
 
-        describe("invitation status") {
+        describe("of InvitationStatus") {
             it("accepted") {
                 decodeAndMatch(json, "Accepted", InvitationStatus.Accepted)
             }
@@ -130,7 +130,7 @@ private class ConstantTests : DescribeSpec({
             }
         }
 
-        describe("type") {
+        describe("of Type") {
             it("file") {
                 decodeAndMatch(json, "file", Type.File)
             }
@@ -142,7 +142,7 @@ private class ConstantTests : DescribeSpec({
             }
         }
 
-        describe("category") {
+        describe("of Category") {
             it("coding") {
                 decodeAndMatch(json, "coding", Category.Coding)
             }
@@ -184,7 +184,7 @@ private class ConstantTests : DescribeSpec({
             }
         }
 
-        describe("export status") {
+        describe("of ExportStatus") {
             it("pending") {
                 decodeAndMatch(json, "Pending…", ExportStatus.Pending)
             }
@@ -199,7 +199,7 @@ private class ConstantTests : DescribeSpec({
             }
         }
 
-        describe("processing status") {
+        describe("of ProcessingStatus") {
             it("pending") {
                 decodeAndMatch(json, "pending_update", ProcessingStatus.Pending)
             }
