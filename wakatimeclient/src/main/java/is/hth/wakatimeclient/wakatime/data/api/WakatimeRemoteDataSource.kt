@@ -326,7 +326,7 @@ internal class WakatimeRemoteDataSourceImpl(
     ): Results<Stats> {
         return makeCall(networkCall = {
             api.getStats(
-                range = request.range.description,
+                range = request.range.toString(),
                 timeout = request.meta?.timeout,
                 writesOnly = request.meta?.writesOnly,
                 projectId = request.project?.projectName

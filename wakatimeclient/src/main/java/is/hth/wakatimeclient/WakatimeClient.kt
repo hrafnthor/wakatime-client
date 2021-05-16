@@ -3,6 +3,7 @@ package `is`.hth.wakatimeclient
 import `is`.hth.wakatimeclient.core.data.auth.*
 import `is`.hth.wakatimeclient.core.data.auth.AuthClientImpl
 import `is`.hth.wakatimeclient.core.data.auth.DefaultAuthenticator
+import `is`.hth.wakatimeclient.core.data.net.CacheControl
 import `is`.hth.wakatimeclient.core.data.net.NetworkClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkClientImpl
 import `is`.hth.wakatimeclient.wakatime.SessionManager
@@ -17,16 +18,17 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import timber.log.Timber
 
 @Suppress("unused")
-class WakatimeClient private constructor(
-    private val auth: AuthClientImpl,
-    private val net: WakatimeNetworkClient,
+public class WakatimeClient private constructor(
+    private val authentication: AuthClientImpl,
+    private val network: WakatimeNetworkClient,
     private val session: SessionManager,
     private val remote: WakatimeRemoteDataSource
 ) : WakatimeRemoteDataSource by remote,
     SessionManager by session,
-    AuthClient by auth {
+    CacheControl by network,
+    AuthClient by authentication {
 
-    class Builder private constructor(
+    public class Builder private constructor(
         clientSecret: String = "",
         clientId: String = "",
         apiKey: String = "",
@@ -46,7 +48,7 @@ class WakatimeClient private constructor(
          * The client will be configured to use basic authentication with
          * the supplied base64 encoded api key.
          */
-        constructor(base64EncodedApiKey: String) : this(
+        public constructor(base64EncodedApiKey: String) : this(
             apiKey = base64EncodedApiKey,
             method = Method.ApiKey
         )
@@ -55,7 +57,7 @@ class WakatimeClient private constructor(
          * The client will be configured to use OAuth 2.0 with the supplied
          * values.
          */
-        constructor(
+        public constructor(
             clientId: String,
             clientSecret: String,
             redirectUri: Uri
@@ -79,18 +81,18 @@ class WakatimeClient private constructor(
         /**
          * Configure the [AuthClient] that will be used for authentication against Wakatime's API
          */
-        fun authentication(action: (AuthClient.Builder.() -> Unit)): Builder = apply { action(authBuilder) }
+        public fun authentication(action: (AuthClient.Builder.() -> Unit)): Builder = apply { action(authBuilder) }
 
         /**
          * Configure the [NetworkClient] that will be used for interacting against Wakatime's API
          */
-        fun network(action: (NetworkClient.Builder.() -> Unit)): Builder = apply { action(netBuilder) }
+        public fun network(action: (NetworkClient.Builder.() -> Unit)): Builder = apply { action(netBuilder) }
 
         /**
          * Constructs a [WakatimeClient] based on the current configuration
          */
         @ExperimentalSerializationApi
-        fun build(context: Context, storage: AuthStorage): WakatimeClient {
+        public fun build(context: Context, storage: AuthStorage): WakatimeClient {
             val authClient: AuthClientImpl = authBuilder.build(context, storage)
             val netClient: NetworkClient = netBuilder
                 .setAuthenticatorIfNeeded(DefaultAuthenticator(authClient.session()))
@@ -113,8 +115,8 @@ class WakatimeClient private constructor(
             )
 
             return WakatimeClient(
-                auth = authClient,
-                net = network,
+                authentication = authClient,
+                network = network,
                 remote = remoteSource,
                 session = manager
             )

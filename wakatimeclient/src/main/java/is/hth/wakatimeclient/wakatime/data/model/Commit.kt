@@ -11,7 +11,7 @@ import kotlinx.serialization.encoding.*
 import kotlinx.serialization.json.*
 
 @Serializable(with = CommitTransformingSerializer::class)
-data class Commit internal constructor(
+public data class Commit internal constructor(
     /**
      * Unique id of the commit
      */
@@ -393,7 +393,7 @@ internal object CommitSerializer : KSerializer<Commit> {
 }
 
 @Serializable
-data class Entity internal constructor(
+public data class Entity internal constructor(
     /**
      * The entity's name
      */
@@ -436,7 +436,7 @@ data class Entity internal constructor(
 }
 
 @Serializable
-data class ProjectCommits internal constructor(
+public data class ProjectCommits internal constructor(
     /**
      * current author or null if showing commits from all authors
      */
@@ -450,17 +450,17 @@ data class ProjectCommits internal constructor(
      */
     val status: String = "",
     /**
-     *
+     * The project that the commits are from
      */
     val project: Project,
     /**
-     *
+     * The commits for this project over the period
      */
     val commits: List<Commit>
 )
 
 @Serializable
-data class ProjectCommit internal constructor(
+public data class ProjectCommit internal constructor(
     /**
      * The branch name containing the commits
      */
@@ -470,11 +470,11 @@ data class ProjectCommit internal constructor(
      */
     val status: String = "",
     /**
-     *
+     * The project this commit is from
      */
     val project: Project,
     /**
-     *
+     * The commit it self
      */
     val commit: Commit
 )

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Export(
+public data class Export internal constructor(
     /**
      * The unique id of this data export
      */

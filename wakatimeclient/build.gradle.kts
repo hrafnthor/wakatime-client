@@ -7,15 +7,19 @@ plugins {
 }
 
 android {
-    compileSdkVersion(30)
+    compileSdk = 30
     buildToolsVersion = "30.0.3"
     defaultConfig {
-        minSdkVersion(16)
-        targetSdkVersion(30)
-        versionCode = 1
-        versionName = "1.0"
+        minSdk = 16
+        targetSdk = 30
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunnerArgument("runnerBuilder", "de.mannodermaus.junit5.AndroidJUnit5Builder")
+        testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
+
+        // Default values given for the benefit of AppAuth to shut
+        // up the manifest merger during tests
+        manifestPlaceholders["appAuthRedirectScheme"] = ""
+        manifestPlaceholders["appAuthRedirectHost"] = ""
+
     }
     buildTypes {
         getByName("debug") {
@@ -33,12 +37,13 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
+        freeCompilerArgs = freeCompilerArgs + "-Xexplicit-api=strict"
     }
-
     packagingOptions {
         exclude("META-INF/LICENSE*")
     }
 }
+
 
 dependencies {
     //#region Local

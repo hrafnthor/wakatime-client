@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Leaders(
+public data class Leaders internal constructor(
     /**
      *  current page number
      */
@@ -50,56 +50,46 @@ data class Leaders(
     /**
      * A request object for [Leaders] defining querying values
      */
-    @Suppress("unused")
-    class Request private constructor(
-        val leaderboardId: String,
-        val language: String?,
-        val page: Int?
+    public class Request(
+        public val leaderboardId: String,
+        public val language: String?,
+        public val page: Int?
     ) {
 
-        class Builder internal constructor(
-            private val leaderboardId: String,
-            private var language: String? = null,
-            private var page: Int? = null,
+        public class Builder(
+            public val leaderboardId: String,
+            public var language: String? = null,
+            public var page: Int? = null,
         ) {
-
-            fun setLanguage(language: String?): Builder = apply {
-                this.language = language
-            }
-
-            fun setPage(page: Int?): Builder = apply {
-                this.page = page
-            }
 
             /**
              * Constructs a new [Request] from set values
              */
-            fun build(): Request = Request(leaderboardId, language, page)
+            public fun build(): Request = Request(leaderboardId, language, page)
         }
     }
 
-    @Suppress("unused")
-    companion object {
+    public companion object {
 
         /**
          * Returns a [Request.Builder] configured for public leaderboard querying
          */
-        fun publicLeaderboardRequest(): Request.Builder {
-            return Request.Builder("")
-        }
+        public inline fun publicLeaderboardRequest(
+            construct: Request.Builder.() -> Unit
+        ): Request = Request.Builder("").also(construct).build()
 
         /**
          * Returns a [Request.Builder] configured for a private leaderboard querying
          * @param leaderboardId The unique id of the leaderboard that should be queried
          */
-        fun privateLeaderboardRequest(leaderboardId: String): Request.Builder {
+        public fun privateLeaderboardRequest(leaderboardId: String): Request.Builder {
             return Request.Builder(leaderboardId)
         }
     }
 }
 
 @Serializable
-data class Rank(
+public data class Rank(
     /**
      * Rank of this leader
      */
@@ -116,7 +106,7 @@ data class Rank(
 )
 
 @Serializable
-data class RunningTotal(
+public data class RunningTotal(
     /**
      * total coding activity for this user as seconds
      */
@@ -144,7 +134,7 @@ data class RunningTotal(
 )
 
 @Serializable
-data class LanguageTotal(
+public data class LanguageTotal(
     /**
      * The language name
      */

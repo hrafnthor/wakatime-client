@@ -4,43 +4,43 @@ import net.openid.appauth.AuthState
 import org.json.JSONException
 import timber.log.Timber
 
-interface AuthStorage {
+public interface AuthStorage {
 
     /**
      * Retrieves the currently stored authentication state, or null if none is found
      */
-    fun getState(): String?
+    public fun getState(): String?
 
     /**
      * Stores the supplied authentication state as the current state
      */
-    fun setState(state: String)
+    public fun setState(state: String)
 
     /**
      * Stores the authentication method type being used
      */
-    fun setMethod(method: String)
+    public fun setMethod(method: String)
 
     /**
      * Retrieves the stored authentication method being used, or null if none is found
      */
-    fun getMethod(): String?
+    public fun getMethod(): String?
 
     /**
      * Stores the api key being used
      */
-    fun setKey(key: String)
+    public fun setKey(key: String)
 
     /**
      * Retrieves the stored API key if configured to use one, or null if none is
      * found or not configured to use one
      */
-    fun getKey(): String?
+    public fun getKey(): String?
 
     /**
      * Clears all stored authentication information
      */
-    fun clear()
+    public fun clear()
 }
 
 /**
@@ -83,11 +83,8 @@ internal class AuthStorageWrapper(private val storage: AuthStorage) {
     /**
      * The authentication method being used
      */
-    fun getMethod(): Method {
-        val method = storage.getMethod() ?: ""
-        return if (method.isEmpty()) {
-            Method.None
-        } else Method.convert(method)
+    fun getMethod(): Method? {
+        return storage.getMethod()?.let { Method.convert(it) }
     }
 
     /**
@@ -95,7 +92,7 @@ internal class AuthStorageWrapper(private val storage: AuthStorage) {
      */
     fun setMethod(method: Method) {
         clear()
-        storage.setMethod(method.key)
+        storage.setMethod(method.toString())
     }
 
     /**

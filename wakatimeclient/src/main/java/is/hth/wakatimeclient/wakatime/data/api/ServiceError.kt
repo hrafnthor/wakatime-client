@@ -9,7 +9,7 @@ import kotlinx.serialization.json.*
  * The Wakatime service error payload
  */
 @Serializable
-data class ServiceError(
+public data class ServiceError(
     @SerialName("error")
     val message: String = "",
     @SerialName("errors")
@@ -22,7 +22,7 @@ data class ServiceError(
  * value in some payload field
  */
 @Serializable
-data class FieldError(
+public data class FieldError(
     val name: String,
     val description: String
 )
@@ -36,15 +36,17 @@ internal object FieldErrorTransformer : JsonTransformingSerializer<List<FieldErr
 ) {
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return when (element) {
-            is JsonObject -> JsonArray(element.mapTo(mutableListOf()) {
-                val description = if (it.value is JsonArray) {
-                    it.value.jsonArray.firstOrNull()?.jsonPrimitive?.content ?: ""
-                } else ""
-                buildJsonObject {
-                    put("name", it.key)
-                    put("description", description)
+            is JsonObject -> buildJsonArray {
+                element.forEach {
+                    val description = if (it.value is JsonArray) {
+                        it.value.jsonArray.firstOrNull()?.jsonPrimitive?.content ?: ""
+                    } else ""
+                    add(buildJsonObject {
+                        put("name", it.key)
+                        put("description", description)
+                    })
                 }
-            })
+            }
             else -> super.transformDeserialize(element)
         }
     }

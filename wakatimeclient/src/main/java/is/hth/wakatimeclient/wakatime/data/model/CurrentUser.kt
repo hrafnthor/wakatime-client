@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
  * The raw detailed user information payload received from the api
  */
 @Serializable
-data class NetworkUser(
+public data class NetworkUser internal constructor(
     /**
      * whether this user's email should be shown on the public leader board
      */
@@ -181,7 +181,7 @@ data class NetworkUser(
  * Maps the [NetworkUser] to a [CurrentUser]
  */
 @Suppress("unused")
-fun NetworkUser.toCurrentUser(): CurrentUser = CurrentUser(
+public fun NetworkUser.toCurrentUser(): CurrentUser = CurrentUser(
     user = User(
         id = id,
         displayName = displayName,
@@ -222,7 +222,7 @@ fun NetworkUser.toCurrentUser(): CurrentUser = CurrentUser(
     )
 )
 
-data class Config(
+public data class Config(
     val timeout: Int,
     val weekdayStart: Int,
     val emailIsPublic: Boolean,
@@ -249,7 +249,7 @@ data class Config(
     val modifiedAt: String
 )
 
-data class CurrentUser(
+public data class CurrentUser(
     val user: User,
     val config: Config
 )

@@ -16,7 +16,7 @@ import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.*
 
 @Serializable
-data class Day(
+public data class Day internal constructor(
     /**
      * Unique id of this entry
      */
@@ -48,7 +48,7 @@ data class Day(
 )
 
 @Serializable
-data class Measurement(
+public data class Measurement internal constructor(
     /**
      * The full hour portion of this measurement
      */
@@ -85,7 +85,7 @@ data class Measurement(
 )
 
 @Serializable
-data class Machine(
+public data class Machine internal constructor(
     /**
      * Unique id of this machine with Wakatime
      */
@@ -116,7 +116,7 @@ data class Machine(
  */
 @Serializable
 @Suppress("unused")
-data class MachineMeasurement(
+public data class MachineMeasurement internal constructor(
     /**
      * The measurement done over the requested range
      */
@@ -173,7 +173,7 @@ internal object MachineMeasurementListTransformer :
 }
 
 @Serializable
-data class StatsData(
+public data class StatsData internal constructor(
     val id: String = "",
     /**
      * The unique id of the owner of these stats
@@ -321,7 +321,7 @@ data class StatsData(
 )
 
 @Serializable
-data class Status(
+public data class Status internal constructor(
     /**
      * Indicates if these stats got stuck while processing and will be recalculated in the background
      */
@@ -363,7 +363,7 @@ data class Status(
 }
 
 @Serializable(StatsTransformer::class)
-data class Stats(
+public data class Stats internal constructor(
     /**
      * The data as requested. Depending on if the data was not available and required
      * processing, it might contain default values. Verify the stats [Status] before
@@ -377,32 +377,32 @@ data class Stats(
     @SerialName(STATUS)
     val status: Status = Status()
 ) {
-    companion object {
+    public companion object {
         internal const val DATA = "data"
         internal const val STATUS = "status"
 
         /**
          * Make a request for the authenticated user's [StatsData] over the defined range
          */
-        inline fun request(
+        public inline fun request(
             range: HumanRange,
             construct: Request.Builder.() -> Unit = {}
-        ) = Request.Builder(range).also(construct).build()
+        ): Request = Request.Builder(range).also(construct).build()
     }
 
-    class Request(
-        val range: HumanRange,
-        val project: ProjectFilter?,
-        val meta: MetaFilter?,
+    public class Request(
+        public val range: HumanRange,
+        public val project: ProjectFilter?,
+        public val meta: MetaFilter?,
     ) {
         @RequestDsl
         @SuppressWarnings("unused")
-        class Builder(
-            var range: HumanRange,
-            var project: ProjectFilter? = null,
-            var meta: MetaFilter? = null,
+        public class Builder(
+            public var range: HumanRange,
+            public var project: ProjectFilter? = null,
+            public var meta: MetaFilter? = null,
         ) {
-            fun build() = Request(
+            public fun build(): Request = Request(
                 range = range,
                 project = project,
                 meta = meta,
@@ -425,10 +425,10 @@ internal object StatsTransformer : JsonTransformingSerializer<Stats>(StatsSerial
                 put(Stats.DATA, buildJsonObject {
                     element.filterKeys {
                         it != Status.IS_STUCK
-                            && it != Status.IS_ALREADY_UPDATING
-                            && it != Status.STATUS
-                            && it != Status.PERCENTAGE_CALCULATED
-                            && it != Status.IS_UP_TO_DATE
+                                && it != Status.IS_ALREADY_UPDATING
+                                && it != Status.STATUS
+                                && it != Status.PERCENTAGE_CALCULATED
+                                && it != Status.IS_UP_TO_DATE
                     }.forEach { entry ->
                         put(entry.key, entry.value)
                     }
@@ -500,8 +500,11 @@ internal object StatsSerializer : KSerializer<Stats> {
     }
 }
 
+/**
+ * Project filtering dsl for [Stats.Request] building
+ */
 @Suppress("unused")
-inline fun Stats.Request.Builder.project(
+public inline fun Stats.Request.Builder.project(
     filter: ProjectFilter.Builder.() -> Unit
 ) {
     val builder = ProjectFilter.Builder()
@@ -509,9 +512,11 @@ inline fun Stats.Request.Builder.project(
     project = builder.build()
 }
 
-
+/**
+ * Meta filtering dsl for [Stats.Request] building
+ */
 @Suppress("unused")
-inline fun Stats.Request.Builder.meta(
+public inline fun Stats.Request.Builder.meta(
     filter: MetaFilter.Builder.() -> Unit
 ) {
     val builder = MetaFilter.Builder()

@@ -4,7 +4,12 @@ package `is`.hth.wakatimeclient.core.data.auth
  * The available OAuth access scopes for Wakatime
  */
 @Suppress("unused")
-enum class Scope(val description: String) {
+public enum class Scope(
+    /**
+     * The scope's unique descriptive value
+     */
+    private val value: String
+) {
 
     /**
      * Access user’s email and identity information
@@ -42,17 +47,19 @@ enum class Scope(val description: String) {
      */
     WritePrivateLeaderboards("write_private_leaderboards");
 
-    companion object {
-        private val map = values().associateBy { it.description }
+    override fun toString(): String = value
 
-        fun convert(description: String): Scope =
+    public companion object {
+        private val map = values().associateBy(Scope::value)
+
+        public fun convert(description: String): Scope =
             map[description] ?: throw IllegalArgumentException("Unknown scope $description")
 
         /**
          * Attempts to parse any scope values that might be in the input and convert them to [Scope]s
          */
-        fun extractScopes(value: String): Set<Scope> =
-            values().filter { value.contains(it.description, ignoreCase = true) }.toSet()
+        public fun extractScopes(value: String): Set<Scope> =
+            map.values.filter { value.contains(it.value, ignoreCase = true) }.toSet()
 
     }
 }

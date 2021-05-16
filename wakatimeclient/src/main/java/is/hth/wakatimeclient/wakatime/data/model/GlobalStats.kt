@@ -16,7 +16,7 @@ import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.*
 
 @Serializable
-data class Amount(
+public data class Amount internal constructor(
     /**
      * The number of seconds for this amount type
      */
@@ -35,7 +35,7 @@ data class Amount(
 }
 
 @Serializable(AggregationJsonTransformer::class)
-data class Aggregation(
+public data class Aggregation internal constructor(
     /**
      * The name of the entity that this aggregation is for
      */
@@ -250,7 +250,7 @@ internal object AggregationSerializer : KSerializer<Aggregation> {
 
 @Suppress("unused")
 @Serializable(GlobalStatsJsonTransformer::class)
-data class GlobalStats(
+public data class GlobalStats internal constructor(
     /**
      * Contains total value aggregation for all users
      */
@@ -297,7 +297,7 @@ data class GlobalStats(
     @SerialName(WRITES_ONLY)
     val writesOnly: Boolean
 ) {
-    companion object {
+    public companion object {
         internal const val CATEGORIES = "categories"
         internal const val AVERAGES = "daily_average"
         internal const val EDITORS = "editors"
@@ -311,15 +311,23 @@ data class GlobalStats(
         /**
          * Constructs a [GlobalStats] request for the last 7 day period
          */
-        fun requestLastWeek(): Request = Request(HumanRange.WEEK.description)
+        public fun requestLastWeek(): Request = Request(HumanRange.WEEK.toString())
 
         /**
          * Constructs a [GlobalStats] request for the whole of the supplied year
          */
-        fun requestYear(year: Int): Request = Request(year.toString())
+        public fun requestYear(year: Int): Request = Request(year.toString())
     }
 
-    data class Request internal constructor(
+    /**
+     * Request payload for [GlobalStats] fetching.
+     *
+     * Use either [GlobalStats.requestLastWeek] or [GlobalStats.requestYear] to construct
+     */
+    public data class Request internal constructor(
+        /**
+         * The range for which to request [GlobalStats] for
+         */
         val range: String
     )
 }
@@ -343,7 +351,10 @@ internal object GlobalStatsJsonTransformer : JsonTransformingSerializer<GlobalSt
                     put(GlobalStats.CATEGORIES, getAggregation(data, GlobalStats.CATEGORIES))
                     put(GlobalStats.EDITORS, getAggregation(data, GlobalStats.EDITORS))
                     put(GlobalStats.LANGUAGES, getAggregation(data, GlobalStats.LANGUAGES))
-                    put(GlobalStats.OPERATING_SYSTEMS, getAggregation(data, GlobalStats.OPERATING_SYSTEMS))
+                    put(
+                        GlobalStats.OPERATING_SYSTEMS,
+                        getAggregation(data, GlobalStats.OPERATING_SYSTEMS)
+                    )
                 }
 
                 findValue(this, element, GlobalStats.RANGE) {}

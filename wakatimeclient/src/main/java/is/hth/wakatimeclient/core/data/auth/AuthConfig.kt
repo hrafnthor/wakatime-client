@@ -2,7 +2,7 @@ package `is`.hth.wakatimeclient.core.data.auth
 
 import android.net.Uri
 
-data class AuthConfig(
+public data class AuthConfig internal constructor(
     /**
      * The client id which will be used during an OAuth 2.0 flow,
      * as given by Wakatime's app dashboard
@@ -29,9 +29,26 @@ data class AuthConfig(
     /**
      * The remote endpoint which will be used during authentication
      */
-    val authorizationEndpoint: Uri = host.buildUpon().appendPath("oauth/authorize").build(),
+    val authorizationEndpoint: Uri,
     /**
      * The remote endpoint which will be used during token operations
      */
-    val tokenEndpoint: Uri = host.buildUpon().appendPath("oauth/token").build()
-)
+    val tokenEndpoint: Uri
+) {
+
+    public constructor(
+        clientId: String,
+        clientSecret: String,
+        redirectUri: Uri,
+        host: Uri,
+        method: Method
+    ) : this(
+        clientId = clientId,
+        clientSecret = clientSecret,
+        redirectUri = redirectUri,
+        host = host,
+        method = method,
+        authorizationEndpoint = host.buildUpon().appendPath("oauth/authorize").build(),
+        tokenEndpoint = host.buildUpon().appendPath("oauth/token").build()
+    )
+}

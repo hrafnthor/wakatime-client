@@ -10,7 +10,7 @@ import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 import `is`.hth.wakatimeclient.core.safeOperation
 import `is`.hth.wakatimeclient.wakatime.data.api.OauthApi
 
-interface SessionManager {
+public interface SessionManager {
 
     /**
      * Performs a logout operation, clearing the local cache and
@@ -27,13 +27,13 @@ interface SessionManager {
      * If the operation runs to completion it will return a
      * [Results.Success.Value] containing a [Report].
      */
-    suspend fun logout(force: Boolean): Results<Report>
+    public suspend fun logout(force: Boolean): Results<Report>
 }
 
 /**
  * A detailed report on the result of the logout process
  */
-data class Report(
+public data class Report(
     /**
      * Indicates if the logout operation was forced
      */

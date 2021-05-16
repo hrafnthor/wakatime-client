@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Project(
+public data class Project internal constructor(
     /**
      * The unique id of this project in the system
      */

@@ -10,72 +10,72 @@ import net.openid.appauth.browser.BrowserMatcher
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-interface AuthClient {
+public interface AuthClient {
 
     /**
      * Creates a new [Intent] for starting a new OAuth flow against Wakatime.
      * The [scopes] determine what access level the resulting authentication will have.
      */
-    fun createAuthenticationIntent(scopes: List<Scope>): Intent
+    public fun createAuthenticationIntent(scopes: List<Scope>): Intent
 
     /**
      * Processes the received [Intent] results from the OAuth flow started
      * with calling [createAuthenticationIntent]
      */
-    suspend fun onAuthenticationResult(result: Intent): Results<Boolean>
+    public suspend fun onAuthenticationResult(result: Intent): Results<Boolean>
 
     /**
-     *
+     * The current user session
      */
-    fun session(): Session
+    public fun session(): Session
 
     /**
      * Exposes utility functionality for the ongoing session
      */
-    interface Session {
+    public interface Session {
 
         /**
          * Indicates if the client is currently authorized
          */
-        fun isAuthorized(): Boolean
+        public fun isAuthorized(): Boolean
 
         /**
          * Indicates if the client is configured to use OAuth.
          */
-        fun authenticationMethod(): Method
+        public fun authenticationMethod(): Method?
 
         /**
          * The list of scopes that the user has authorized the client to have access to, if any.
          */
-        fun authorizedScopes(): Set<Scope>
+        public fun authorizedScopes(): Set<Scope>
 
         /**
          * The session's access token if any exists
          */
-        fun accessToken(): String
+        public fun accessToken(): String
 
         /**
          * The session's refresh token if any exists
          */
-        fun refreshToken(): String
+        public fun refreshToken(): String
 
         /**
          * The API key being used if any exists
          */
-        fun apiKey(): String
+        public fun apiKey(): String
 
         /**
          * Updates the access token if needed for the current session
          */
-        suspend fun update(force: Boolean): Results<Unit>
+        public suspend fun update(force: Boolean): Results<Unit>
     }
 
-    interface Builder {
+    public interface Builder {
 
         /**
          * For setting custom filtering requirements on which browsers are allowed
          */
-        fun setBrowserMatcher(matcher: BrowserMatcher): Builder
+        public fun setBrowserMatcher(matcher: BrowserMatcher): Builder
     }
 }
 
@@ -92,7 +92,7 @@ internal class AuthClientImpl internal constructor(
             config.authorizationEndpoint,
             config.tokenEndpoint
         )
-        val joined = scopes.joinToString { it.description }
+        val joined = scopes.joinToString { it.toString() }
         val request = AuthorizationRequest.Builder(
             serviceConfig,
             config.clientId,
@@ -116,14 +116,14 @@ internal class AuthClientImpl internal constructor(
                 response == null && exception != null -> {
                     val code = exception.code
                     val message = exception.message ?: "No exception message given!"
-                    continuation.resume(Results.Failure(Error.Auth.Authentication(code, message)))
+                    continuation.resume(Results.Failure(Error.Authentication.Authorization(code, message)))
                 }
                 response != null -> fetchAuthorizationToken(config, response) {
                     continuation.resume(it)
                 }
                 else -> {
                     val message = "Authentication flow resulted in neither actionable response nor exception!"
-                    continuation.resume(Results.Failure(Error.Auth.Unknown(-1, message)))
+                    continuation.resume(Results.Failure(Error.Authentication.Unknown(-1, message)))
                 }
             }
         }
@@ -151,11 +151,11 @@ internal class AuthClientImpl internal constructor(
                 }
                 exception != null -> {
                     val message = exception.message ?: "No exception message given!"
-                    Results.Failure(Error.Auth.TokenFetch(exception.code, message))
+                    Results.Failure(Error.Authentication.TokenFetch(exception.code, message))
                 }
                 else -> {
                     val message = "Token fetch operation resulted in neither success nor failure!"
-                    Results.Failure(Error.Auth.Unknown(-1, message))
+                    Results.Failure(Error.Authentication.Unknown(-1, message))
                 }
             }
             receiver(results)
@@ -173,9 +173,9 @@ internal class AuthClientImpl internal constructor(
 
         override fun isAuthorized(): Boolean {
             return when (authenticationMethod()) {
+                null -> false
                 Method.ApiKey -> apiKey().isNotEmpty()
                 Method.OAuth -> storage.getState().isAuthorized
-                Method.None -> false
             }
         }
 
@@ -204,7 +204,7 @@ internal class AuthClientImpl internal constructor(
                                 Results.Success.Empty
                             } else {
                                 val message: String = exception.message ?: "Token refresh operation failed"
-                                val error = Error.Auth.TokenRefresh(exception.code, message)
+                                val error = Error.Authentication.TokenRefresh(exception.code, message)
                                 Results.Failure(error)
                             }
                             continuation.resumeWith(Result.success(results))
@@ -215,14 +215,14 @@ internal class AuthClientImpl internal constructor(
                     }
                     else -> {
                         val msg = "No authentication found! Halting token refresh operation"
-                        val result = Results.Failure(Error.Auth.Unauthorized(msg))
+                        val result = Results.Failure(Error.Authentication.Unauthorized(msg))
                         continuation.resumeWith(Result.success(result))
                     }
                 }
             } else continuation.resumeWith(Result.success(Results.Success.Empty))
         }
 
-        override fun authenticationMethod(): Method = storage.getMethod()
+        override fun authenticationMethod(): Method? = storage.getMethod()
     }
 
     internal class Builder(

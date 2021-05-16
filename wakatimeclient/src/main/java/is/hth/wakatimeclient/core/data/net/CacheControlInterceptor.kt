@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
  * Forces cache reading onto any network request that goes through it.
  */
 @Suppress("unused")
-class ReadInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSeconds) {
+internal class ReadInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSeconds) {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val original: Request = chain.request()
@@ -27,7 +27,7 @@ class ReadInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSecond
  * value.
  */
 @Suppress("unused")
-class WriteInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSeconds) {
+internal class WriteInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSeconds) {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val request: Request = chain.request()
@@ -40,7 +40,9 @@ class WriteInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSecon
     }
 }
 
-abstract class CacheControlInterceptor internal constructor(maxAgeSeconds: Int) : Interceptor {
+internal abstract class CacheControlInterceptor internal constructor(
+    maxAgeSeconds: Int
+) : Interceptor {
 
     /**
      *  A [CacheControl] configured to use the supplied maxAgeSeconds

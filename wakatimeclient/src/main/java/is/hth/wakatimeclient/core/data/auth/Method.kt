@@ -1,12 +1,14 @@
 package `is`.hth.wakatimeclient.core.data.auth
 
-enum class Method(val key: String) {
-
+/**
+ * Defines the authentication methods available
+ */
+public enum class Method(
     /**
-     * No authentication method is being used, i.e no authentication data
-     * was locally found
+     * The method's unique descriptive value
      */
-    None(""),
+    private val value: String
+) {
 
     /**
      * OAuth 2.0 based authentication method
@@ -16,11 +18,14 @@ enum class Method(val key: String) {
     /**
      * API key based authentication
      */
-    ApiKey("key");
+    ApiKey("api_key");
 
-    companion object {
-        private val map = values().associateBy(Method::key)
+    override fun toString(): String = value
 
-        fun convert(key: String): Method = map[key] ?: throw IllegalArgumentException("Unknown method key $key")
+    public companion object {
+        private val map = values().associateBy(Method::value)
+
+        public fun convert(key: String): Method =
+            map[key] ?: throw IllegalArgumentException("Unknown method key $key")
     }
 }

@@ -18,7 +18,7 @@ import java.util.*
 
 @Serializable
 @Suppress("unused")
-data class GrandTotal(
+public data class GrandTotal internal constructor(
     /**
      * Hours portion of the coding activity
      */
@@ -44,7 +44,7 @@ data class GrandTotal(
 
 @Serializable
 @Suppress("unused")
-open class Summary(
+public data class Summary internal constructor(
     /**
      * Hours portion of coding activity for this summary
      */
@@ -82,7 +82,7 @@ open class Summary(
 
 @Serializable
 @Suppress("unused")
-data class MachineSummary(
+public data class MachineSummary internal constructor(
     /**
      * Hours portion of coding activity for this summary
      */
@@ -130,7 +130,7 @@ data class MachineSummary(
  */
 @Serializable
 @Suppress("unused")
-data class DailySummary(
+public data class DailySummary internal constructor(
     /**
      * Summary grand total information for the user's
      * activity over the requested range
@@ -187,7 +187,7 @@ data class DailySummary(
 
 @Suppress("unused")
 @Serializable(SummariesJsonTransformer::class)
-data class Summaries(
+public data class Summaries internal constructor(
     /**
      * The available branches for the request project, if any. Will always be
      * empty if no project filtering is made.
@@ -213,7 +213,7 @@ data class Summaries(
     @SerialName(RANGE)
     val range: Range
 ) {
-    companion object {
+    public companion object {
         internal const val AVAILABLE_BRANCHES = "available_branches"
         internal const val SELECTED_BRANCHES = "branches"
         internal const val END = "end"
@@ -224,11 +224,11 @@ data class Summaries(
         /**
          * Make a request for [Summaries] for the currently authenticated user
          */
-        inline fun request(
+        public inline fun request(
             startDate: Calendar,
             endDate: Calendar,
             construct: Request.Builder.() -> Unit = {}
-        ) = Request.Builder(
+        ): Request = Request.Builder(
             startDate = startDate,
             endDate = endDate
         ).also(construct).build()
@@ -236,14 +236,14 @@ data class Summaries(
         /**
          * Make a request for [Summaries] for a specific user on a specific dashboard
          */
-        inline fun requestDashboard(
+        public inline fun requestDashboard(
             organizationId: String,
             dashboardId: String,
             userId: String,
             startDate: Calendar,
             endDate: Calendar,
             construct: DashboardRequest.Builder.() -> Unit = {}
-        ) = DashboardRequest.Builder(
+        ): DashboardRequest = DashboardRequest.Builder(
             organizationId = organizationId,
             dashboardId = dashboardId,
             userId = userId,
@@ -261,12 +261,12 @@ data class Summaries(
      * @param meta (optional) meta related filtering options
      * @param project (optional) project related filtering options
      */
-    class Request(
-        val startDate: Calendar,
-        val endDate: Calendar,
-        val timezone: String?,
-        val meta: MetaFilter?,
-        val project: ProjectFilter?,
+    public class Request(
+        public val startDate: Calendar,
+        public val endDate: Calendar,
+        public val timezone: String?,
+        public val meta: MetaFilter?,
+        public val project: ProjectFilter?,
     ) {
 
         /**
@@ -278,14 +278,14 @@ data class Summaries(
          */
         @RequestDsl
         @Suppress("unused")
-        class Builder(
-            var startDate: Calendar,
-            var endDate: Calendar,
-            var timezone: String? = null,
-            var meta: MetaFilter? = null,
-            var project: ProjectFilter? = null,
+        public class Builder(
+            public var startDate: Calendar,
+            public var endDate: Calendar,
+            public var timezone: String? = null,
+            public var meta: MetaFilter? = null,
+            public var project: ProjectFilter? = null,
         ) {
-            fun build(): Request = Request(
+            public fun build(): Request = Request(
                 startDate = startDate,
                 endDate = endDate,
                 timezone = timezone,
@@ -305,13 +305,13 @@ data class Summaries(
      * @param endDate the end date of the range used in the request
      * @param project (optional) project related filtering options
      */
-    class DashboardRequest(
-        val organizationId: String,
-        val dashboardId: String,
-        val userId: String,
-        val startDate: Calendar,
-        val endDate: Calendar,
-        val project: ProjectFilter?,
+    public class DashboardRequest(
+        public val organizationId: String,
+        public val dashboardId: String,
+        public val userId: String,
+        public val startDate: Calendar,
+        public val endDate: Calendar,
+        public val project: ProjectFilter?,
     ) {
         /**
          * @param organizationId the unique id of the organization that owns the dashboard
@@ -323,15 +323,15 @@ data class Summaries(
          */
         @RequestDsl
         @Suppress("unused")
-        class Builder(
-            var organizationId: String,
-            var dashboardId: String,
-            var userId: String,
-            var startDate: Calendar,
-            var endDate: Calendar,
-            var project: ProjectFilter? = null
+        public class Builder(
+            public var organizationId: String,
+            public var dashboardId: String,
+            public var userId: String,
+            public var startDate: Calendar,
+            public var endDate: Calendar,
+            public var project: ProjectFilter? = null
         ) {
-            fun build() = DashboardRequest(
+            public fun build(): DashboardRequest = DashboardRequest(
                 organizationId,
                 dashboardId,
                 userId,
@@ -454,8 +454,11 @@ internal object SummariesSerializer : KSerializer<Summaries> {
     }
 }
 
+/**
+ * Meta filtering dsl for [Summaries.Request] building
+ */
 @Suppress("unused")
-inline fun Summaries.Request.Builder.meta(
+public inline fun Summaries.Request.Builder.meta(
     filter: MetaFilter.Builder.() -> Unit
 ) {
     val builder = MetaFilter.Builder()
@@ -463,8 +466,11 @@ inline fun Summaries.Request.Builder.meta(
     meta = builder.build()
 }
 
+/**
+ * Project filtering dsl for [Summaries.Request] building
+ */
 @Suppress("unused")
-inline fun Summaries.Request.Builder.project(
+public inline fun Summaries.Request.Builder.project(
     filter: ProjectFilter.Builder.() -> Unit
 ) {
     val builder = ProjectFilter.Builder()
@@ -472,8 +478,11 @@ inline fun Summaries.Request.Builder.project(
     project = builder.build()
 }
 
+/**
+ * Project filtering dsl for [Summaries.DashboardRequest] building
+ */
 @Suppress("unused")
-inline fun Summaries.DashboardRequest.Builder.project(
+public inline fun Summaries.DashboardRequest.Builder.project(
     filter: ProjectFilter.Builder.() -> Unit
 ) {
     val builder = ProjectFilter.Builder()

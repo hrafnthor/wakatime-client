@@ -12,19 +12,21 @@ import retrofit2.Retrofit
 import java.io.File
 import kotlin.math.abs
 
-interface NetworkClient {
+public interface CacheControl {
+    /**
+     * Clears the underlying cache if any is set
+     */
+    public fun clearCache()
+}
+
+public interface NetworkClient : CacheControl {
 
     /**
      * Creates a network service interface through the use of a backing [Retrofit] client
      */
-    fun <T> createService(clazz: Class<T>): T
+    public fun <T> createService(clazz: Class<T>): T
 
-    /**
-     * Clears the underlying cache if any is set
-     */
-    fun clearCache()
-
-    interface Builder {
+    public interface Builder {
 
         /**
          * Exposes the underlying [OkHttpClient.Builder] for configurations outside the scope of
@@ -32,13 +34,13 @@ interface NetworkClient {
          * Be advised that any [Authenticator] set though the resulting builder will be overwritten,
          * so [Builder.setAuthenticator] should be used if a custom authenticator is needed.
          */
-        fun getOKHttpBuilder(): OkHttpClient.Builder
+        public fun getOKHttpBuilder(): OkHttpClient.Builder
 
         /**
          * Exposes the underlying [Retrofit.Builder] for configurations outside of the scope
          * of what this builder implements.
          */
-        fun getRetrofitBuilder(): Retrofit.Builder
+        public fun getRetrofitBuilder(): Retrofit.Builder
 
         /**
          * Assign the [Authenticator] that will handle authentication for network requests.
@@ -46,7 +48,7 @@ interface NetworkClient {
          * with the OAuth flow.
          * In the case of using a API key, a custom [Authenticator] will be needed.
          */
-        fun setAuthenticator(authenticator: Authenticator): Builder
+        public fun setAuthenticator(authenticator: Authenticator): Builder
 
         /**
          * Assigns the global cache lifetime in seconds used to determine if new
@@ -54,7 +56,7 @@ interface NetworkClient {
          * @param cacheDir The location of where the cache will be stored, for instance Context.cacheDir
          * @param cacheLifetimeInSeconds The lifetime of the cache in seconds
          */
-        fun enableCache(cacheDir: File, cacheLifetimeInSeconds: Int): Builder
+        public fun enableCache(cacheDir: File, cacheLifetimeInSeconds: Int): Builder
     }
 }
 
@@ -107,7 +109,7 @@ internal class NetworkClientImpl private constructor(
         internal fun build(): NetworkClient {
             val factory: Converter.Factory = WakatimeJsonFactory
                 .makeJson()
-                .asConverterFactory(MediaType.get(Mime.ApplicationJson.name))
+                .asConverterFactory(MediaType.get(Mime.ApplicationJson.toString()))
 
             val client: OkHttpClient = clientBuilder
                 .authenticator(authenticator)

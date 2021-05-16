@@ -9,7 +9,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
-class StatsTests : DescribeSpec({
+private class StatsTests : DescribeSpec({
 
     val json = WakatimeJsonFactory.makeJson()
 
