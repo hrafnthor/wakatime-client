@@ -9,15 +9,10 @@ private class GoalTests : DescribeSpec({
 
     val json = WakatimeJsonFactory.makeJson()
 
-
-    describe("serialization") {
-
-    }
     describe("deserialization") {
         describe("of InvitedUser") {
             it("as received from server") {
-
-                val invitedUser = InvitedUser(
+                val expected = InvitedUser(
                     id = "123",
                     status = InvitationStatus.Accepted,
                     // No all values used in a user object are received from the
@@ -37,24 +32,54 @@ private class GoalTests : DescribeSpec({
                 // response from the server as it exists inside of Goal.
                 val received = buildJsonArray {
                     add(buildJsonObject {
-                        put("display_name", invitedUser.user.displayName)
-                        put("email", invitedUser.user.email)
-                        put("full_name", invitedUser.user.fullName)
-                        put("id", invitedUser.id)
-                        put("photo", invitedUser.user.photoUrl)
-                        put("status", json.encodeToJsonElement(invitedUser.status))
-                        put("user_id", invitedUser.user.id)
-                        put("username", invitedUser.user.username)
+                        put("display_name", expected.user.displayName)
+                        put("email", expected.user.email)
+                        put("full_name", expected.user.fullName)
+                        put("id", expected.id)
+                        put("photo", expected.user.photoUrl)
+                        put("status", json.encodeToJsonElement(expected.status))
+                        put("user_id", expected.user.id)
+                        put("username", expected.user.username)
                     })
                 }
 
                 json.decodeFromJsonElement(
                     deserializer = InvitedUserListTransformer,
                     element = received
-                ) shouldBe listOf (invitedUser)
+                ) shouldBe listOf(expected)
             }
-            it("as serialized locally") {
+        }
 
+        describe("of Subscriber") {
+            it("as received from server") {
+                val expected = Subscriber(
+                    // No all values used in a user object are received from the
+                    // server, so only configure those which are.
+                    user = User(
+                        id = "some id",
+                        email = "some email",
+                        username = "some username",
+                        fullName = "some name",
+                        displayName = "some display name"
+                    ),
+                    frequency = Frequency.EveryOtherDay
+                )
+
+                val received = buildJsonArray {
+                    add(buildJsonObject {
+                        put("display_name", expected.user.displayName)
+                        put("email", expected.user.email)
+                        put("email_frequency", json.encodeToJsonElement(expected.frequency))
+                        put("full_name", expected.user.fullName)
+                        put("user_id", expected.user.id)
+                        put("username", expected.user.username)
+                    })
+                }
+
+                json.decodeFromJsonElement(
+                    deserializer = SubscriberListTransformer,
+                    element = received
+                ) shouldBe listOf(expected)
             }
         }
     }
