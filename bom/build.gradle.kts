@@ -8,96 +8,93 @@ javaPlatform {
 
 dependencies {
     constraints {
-        val kotlin_version: String by project
-        api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version")
+        val kotlinVersion: String by project
+        api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
 
         //#region KotlinX Serialization
-        val kotlinx_serialization_version: String by project
-        api("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_version")
-        api("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinx_serialization_version")
+        val kotlinxSerializationVersion: String by project
+        api("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
+        api("org.jetbrains.kotlinx:kotlinx-serialization-core:$kotlinxSerializationVersion")
         //#endregion
 
-        val material_version: String by project
-        api("com.google.android.material:material:$material_version")
+        val materialVersion: String by project
+        api("com.google.android.material:material:$materialVersion")
 
-        val appauth_version: String by project
-        api("net.openid:appauth:$appauth_version")
+        val appauthVersion: String by project
+        api("net.openid:appauth:$appauthVersion")
 
-        val timber_version: String by project
-        api("com.jakewharton.timber:timber:$timber_version")
+        val timberVersion: String by project
+        api("com.jakewharton.timber:timber:$timberVersion")
 
         //#region OKHttp3
-        val okhttp3_version: String by project
-        api("com.squareup.okhttp3:logging-interceptor:$okhttp3_version")
+        val okhttp3Version: String by project
+        api("com.squareup.okhttp3:logging-interceptor:$okhttp3Version")
         //#endregion
 
         //#region Retrofit2
-        val retrofit2_version: String by project
-        api("com.squareup.retrofit2:retrofit:$retrofit2_version")
+        val retrofit2Version: String by project
+        api("com.squareup.retrofit2:retrofit:$retrofit2Version")
 
-        val retrofit2_kotlinx_serialization_converter_version: String by project
-        api("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:$retrofit2_kotlinx_serialization_converter_version")
+        val retrofit2SerializationConverterVersion: String by project
+        api("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:$retrofit2SerializationConverterVersion")
         //#endregion
 
         //#region AndroidX
-        val androidx_core_version: String by project
-        api("androidx.core:core-ktx:$androidx_core_version")
+        val androidxCoreVersion: String by project
+        api("androidx.core:core-ktx:$androidxCoreVersion")
 
-        val appcompat_version: String by project
-        api("androidx.appcompat:appcompat:$appcompat_version")
+        val appcompatVersion: String by project
+        api("androidx.appcompat:appcompat:$appcompatVersion")
 
-        val androidx_constraintlayout_version: String by project
-        api("androidx.constraintlayout:constraintlayout:$androidx_constraintlayout_version")
+        val androidxConstraintlayoutVersion: String by project
+        api("androidx.constraintlayout:constraintlayout:$androidxConstraintlayoutVersion")
 
-        val androidx_security_version: String by project
-        api("androidx.security:security-crypto:$androidx_security_version")
+        val androidxSecurityVersion: String by project
+        api("androidx.security:security-crypto:$androidxSecurityVersion")
 
-        val androidx_swiperefreshlayout_version: String by project
-        api("androidx.swiperefreshlayout:swiperefreshlayout:$androidx_swiperefreshlayout_version")
+        val androidxSwiperefreshlayoutVersion: String by project
+        api("androidx.swiperefreshlayout:swiperefreshlayout:$androidxSwiperefreshlayoutVersion")
         //#endregion
 
         //#region AndroidX UI
-        val androidx_activity_version: String by project
-        api("androidx.activity:activity-ktx:$androidx_activity_version")
-
-        val androidx_fragment_version: String by project
-        api("androidx.fragment:fragment-ktx:$androidx_fragment_version")
+        val androidxActivityVersion: String by project
+        api("androidx.activity:activity-ktx:$androidxActivityVersion")
         //#endregion
 
         //#region AndroidX Lifecycle
-        val androidx_lifecycle_version: String by project
-        api("androidx.lifecycle:lifecycle-livedata-ktx:$androidx_lifecycle_version")
-        api("androidx.lifecycle:lifecycle-runtime-ktx:$androidx_lifecycle_version")
-        api("androidx.lifecycle:lifecycle-viewmodel-ktx$androidx_lifecycle_version")
+        val androidxLifecycleVersion: String by project
+        api("androidx.lifecycle:lifecycle-livedata-ktx:$androidxLifecycleVersion")
+        api("androidx.lifecycle:lifecycle-runtime-ktx:$androidxLifecycleVersion")
+        api("androidx.lifecycle:lifecycle-viewmodel-ktx$androidxLifecycleVersion")
         //#endregion
 
         //#region Kotest
-        val kotest_version: String by project
-        api("io.kotest:kotest-assertions-core:$kotest_version")
-        api("io.kotest:kotest-runner-junit5:$kotest_version")
-        api("io.kotest:kotest-property:$kotest_version")
+        val kotestVersion: String by project
+        api("io.kotest:kotest-assertions-core:$kotestVersion")
+        api("io.kotest:kotest-runner-junit5:$kotestVersion")
+        api("io.kotest:kotest-property:$kotestVersion")
         //#endregion
 
         //#region JUnit5
-        val junit5_version: String by project
-        api("org.junit.jupiter:junit-jupiter-api:$junit5_version")
-        api("org.junit.jupiter:junit-jupiter-engine:$junit5_version")
-        api("org.junit.jupiter:junit-jupiter-params:$junit5_version")
-        api("org.junit.vintage:junit-vintage-engine:$junit5_version")
+        val junit5Version: String by project
+        api("org.junit.jupiter:junit-jupiter-api:$junit5Version")
+        api("org.junit.jupiter:junit-jupiter-engine:$junit5Version")
+        api("org.junit.jupiter:junit-jupiter-params:$junit5Version")
+        api("org.junit.vintage:junit-vintage-engine:$junit5Version")
         //#endregion
 
         //#region Mannodermaus
-        val mannodermaus_version: String by project
-        api("de.mannodermaus.junit5:android-test-core:$mannodermaus_version")
-        api("de.mannodermaus.junit5:android-test-runner:$mannodermaus_version")
+        val mannodermausLibraryVersion: String by project
+        api("de.mannodermaus.junit5:android-test-core:$mannodermausLibraryVersion")
+        api("de.mannodermaus.junit5:android-test-runner:$mannodermausLibraryVersion")
         //#endregion
 
         //#region AndroidX Test
-        val androidx_junit_ext: String by project
-        api("androidx.test.ext:junit:$androidx_junit_ext")
+        val androidxJunitExtVersion: String by project
+        api("androidx.test.ext:junit:$androidxJunitExtVersion")
 
-        val androidx_test_runner: String by project
-        api("androidx.test:runner:$androidx_test_runner")
+        val androidxTestRunner: String by project
+        api("androidx.test:runner:$androidxTestRunner")
         //#endregion
     }
 }
