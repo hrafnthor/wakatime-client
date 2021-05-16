@@ -1,5 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
+import `is`.hth.wakatimeclient.core.findValue
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -229,19 +230,21 @@ internal object InvitedUserListTransformer : JsonTransformingSerializer<List<Inv
                         // The inner element is of the correct type and does not seem to
                         // be already processed payload
                         buildJsonObject {
-                            innerElement[InvitedUser.ID]?.let { value ->
-                                put(InvitedUser.ID, value)
-                            }
-
-                            innerElement[InvitedUser.STATUS]?.let { value ->
-                                put(InvitedUser.STATUS, value)
-                            }
+                            findValue(this, innerElement, InvitedUser.ID) {}
+                            findValue(this, innerElement, InvitedUser.STATUS) {}
 
                             put(InvitedUser.USER, buildJsonObject {
                                 innerElement
                                     .filterKeys { it != InvitedUser.ID && it != InvitedUser.STATUS }
                                     .forEach {
-                                        put(it.key, it.value)
+                                        if(it.key == "user_id"){
+                                            // One of the many instances where different field names
+                                            // are used in the response from API. Replace with the
+                                            // standard field name
+                                            put("id", it.value)
+                                        } else {
+                                            put(it.key, it.value)
+                                        }
                                     }
                             })
                         }
