@@ -65,7 +65,6 @@ dependencies {
     implementation("androidx.core:core-ktx")
     implementation("androidx.appcompat:appcompat")
     implementation("androidx.activity:activity-ktx")
-    implementation("androidx.fragment:fragment-ktx")
     implementation("androidx.security:security-crypto")
     implementation("androidx.constraintlayout:constraintlayout")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout")
