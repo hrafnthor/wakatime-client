@@ -38,7 +38,7 @@ internal inline fun findValue(
 internal fun JsonObjectBuilder.findValue(
     element: JsonObject,
     key: String,
-    default: Int
+    default: Number
 ): Unit = findValue(this, element, key, key) { JsonPrimitive(default) }
 
 /**
