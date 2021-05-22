@@ -1,6 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.api
 
-import `is`.hth.wakatimeclient.core.findValue
+import `is`.hth.wakatimeclient.wakatime.data.findValue
 import kotlinx.serialization.*
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
@@ -125,38 +125,56 @@ internal class PagedResponseTransformer<T : Any>(
                     add(buildJsonObject {
                         // Data payload is being delivered in the root response object
                         // Iterate over it and create a new stand along object
-                        element.filterKeys { PagedResponse.set.contains(it).not() }
-                            .forEach { put(it.key, it.value) }
+                        element.filterKeys { PagedResponse.set.contains(it).not() }.forEach {
+                            put(it.key, it.value)
+                        }
                     })
                 })
 
-                findValue(this, element, PagedResponse.PAGE) { key ->
-                    put(key, PagedResponse.PAGE_DEFAULT)
-                }
+                findValue(
+                    builder = this,
+                    element = element,
+                    key = PagedResponse.PAGE,
+                    default = PagedResponse.PAGE_DEFAULT
+                )
+                findValue(
+                    builder = this,
+                    element = element,
+                    key = PagedResponse.NEXT_PAGE,
+                    default = PagedResponse.NEXT_PAGE_DEFAULT
+                )
+                findValue(
+                    builder = this,
+                    element = element,
+                    key = PagedResponse.NEXT_PAGE_URL,
+                    default = PagedResponse.NEXT_PAGE_URL_DEFAULT
+                )
+                findValue(
+                    builder = this,
+                    element = element,
+                    key = PagedResponse.PREVIOUS_PAGE,
+                    default = PagedResponse.PREVIOUS_PAGE_DEFAULT
+                )
+                findValue(
+                    builder = this,
+                    element = element,
+                    key = PagedResponse.PREVIOUS_PAGE_URL,
+                    default = PagedResponse.PREVIOUS_PAGE_URL_DEFAULT
+                )
 
-                findValue(this, element, PagedResponse.NEXT_PAGE) { key ->
-                    put(key, PagedResponse.NEXT_PAGE_DEFAULT)
-                }
+                findValue(
+                    builder = this,
+                    element = element,
+                    key = PagedResponse.TOTAL_PAGES,
+                    default = PagedResponse.TOTAL_PAGES_DEFAULT
+                )
 
-                findValue(this, element, PagedResponse.NEXT_PAGE_URL) { key ->
-                    put(key, PagedResponse.NEXT_PAGE_URL_DEFAULT)
-                }
-
-                findValue(this, element, PagedResponse.PREVIOUS_PAGE) { key ->
-                    put(key, PagedResponse.PREVIOUS_PAGE_DEFAULT)
-                }
-
-                findValue(this, element, PagedResponse.PREVIOUS_PAGE_URL) { key ->
-                    put(key, PagedResponse.PREVIOUS_PAGE_URL_DEFAULT)
-                }
-
-                findValue(this, element, PagedResponse.TOTAL_PAGES) { key ->
-                    put(key, PagedResponse.TOTAL_PAGES_DEFAULT)
-                }
-
-                findValue(this, element, PagedResponse.TOTAL_ITEMS) { key ->
-                    put(key, PagedResponse.TOTAL_ITEMS_DEFAULT)
-                }
+                findValue(
+                    builder = this,
+                    element = element,
+                    key = PagedResponse.TOTAL_ITEMS,
+                    default = PagedResponse.TOTAL_ITEMS_DEFAULT
+                )
             }
         }
         throw IllegalArgumentException("Incorrect JsonElement type received for PagedResponse deserialization!")

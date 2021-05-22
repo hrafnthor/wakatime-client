@@ -45,3 +45,14 @@ internal fun findValue(
         builder.put(key, default)
     }
 }
+
+internal fun findValue(
+    builder: JsonObjectBuilder,
+    element: JsonObject,
+    key: String,
+    default: Int
+) {
+    findValue(builder, element, key) {
+        builder.put(key, default)
+    }
+}
