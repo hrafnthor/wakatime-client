@@ -1,7 +1,10 @@
 package `is`.hth.wakatimeclient.wakatime.data.api
 
 import `is`.hth.wakatimeclient.wakatime.data.findValue
-import kotlinx.serialization.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
@@ -132,45 +135,38 @@ internal class PagedResponseTransformer<T : Any>(
                 })
 
                 findValue(
-                    builder = this,
                     element = element,
                     key = PagedResponse.PAGE,
                     default = PagedResponse.PAGE_DEFAULT
                 )
                 findValue(
-                    builder = this,
                     element = element,
                     key = PagedResponse.NEXT_PAGE,
                     default = PagedResponse.NEXT_PAGE_DEFAULT
                 )
                 findValue(
-                    builder = this,
                     element = element,
                     key = PagedResponse.NEXT_PAGE_URL,
                     default = PagedResponse.NEXT_PAGE_URL_DEFAULT
                 )
                 findValue(
-                    builder = this,
                     element = element,
                     key = PagedResponse.PREVIOUS_PAGE,
                     default = PagedResponse.PREVIOUS_PAGE_DEFAULT
                 )
                 findValue(
-                    builder = this,
                     element = element,
                     key = PagedResponse.PREVIOUS_PAGE_URL,
                     default = PagedResponse.PREVIOUS_PAGE_URL_DEFAULT
                 )
 
                 findValue(
-                    builder = this,
                     element = element,
                     key = PagedResponse.TOTAL_PAGES,
                     default = PagedResponse.TOTAL_PAGES_DEFAULT
                 )
 
                 findValue(
-                    builder = this,
                     element = element,
                     key = PagedResponse.TOTAL_ITEMS,
                     default = PagedResponse.TOTAL_ITEMS_DEFAULT
