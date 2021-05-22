@@ -1,6 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
-import `is`.hth.wakatimeclient.core.findValue
+import `is`.hth.wakatimeclient.wakatime.data.findValue
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -11,6 +11,7 @@ import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
+import kotlinx.serialization.encoding.encodeStructure
 import kotlinx.serialization.json.*
 
 @Serializable
@@ -333,20 +334,31 @@ internal object MemberTransformSerializer : JsonTransformingSerializer<Member>(M
                 // The inner element is of the correct type and does not seem to
                 // be already processed payload
                 buildJsonObject {
-                    findValue(this, element, Member.CAN_VIEW_DASHBOARD) { key ->
-                        put(key, Member.CAN_VIEW_DASHBOARD_DEFAULT)
-                    }
+                    findValue(
+                        builder = this,
+                        element = element,
+                        key = Member.CAN_VIEW_DASHBOARD,
+                        default = Member.CAN_VIEW_DASHBOARD_DEFAULT
+                    )
 
-                    findValue(this, element, Member.IS_ONLY_VIEWING_DASHBOARD) { key ->
-                        put(key, Member.IS_ONLY_VIEWING_DASHBOARD_DEFAULT)
-                    }
+                    findValue(
+                        builder = this,
+                        element = element,
+                        key = Member.IS_ONLY_VIEWING_DASHBOARD,
+                        default = Member.IS_ONLY_VIEWING_DASHBOARD_DEFAULT
+                    )
 
                     put(Member.USER, buildJsonObject {
-                        element.filterKeys {
-                            it != Member.IS_ONLY_VIEWING_DASHBOARD && it != Member.CAN_VIEW_DASHBOARD
-                        }.forEach {
-                            put(it.key, it.value)
-                        }
+                        findValue(this, element, User.ID, "")
+                        findValue(this, element, User.PHOTO_URL, "")
+                        findValue(this, element, User.IS_HIREABLE, false)
+                        findValue(this, element, User.EMAIL, "")
+                        findValue(this, element, User.USERNAME, "")
+                        findValue(this, element, User.FULL_NAME, "")
+                        findValue(this, element, User.DISPLAY_NAME, "")
+                        findValue(this, element, User.WEBSITE, "")
+                        findValue(this, element, User.WEBSITE_HUMAN, "")
+                        findValue(this, element, User.LOCATION, "")
                     })
                 }
 
@@ -369,18 +381,44 @@ internal object MemberSerializer : KSerializer<Member> {
             element<User>(elementName = Member.USER)
         }
 
+    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: Member) {
-        throw NotImplementedError("The serialization method has not been implemented for 'Member'")
+        return encoder.encodeStructure(descriptor) {
+            encodeBooleanElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(Member.CAN_VIEW_DASHBOARD),
+                value = value.canViewDashboard
+            )
+            encodeBooleanElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(Member.IS_ONLY_VIEWING_DASHBOARD),
+                value = value.isOnlyViewingDashboard
+            )
+            encodeSerializableElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(Member.USER),
+                serializer = User.serializer(),
+                value = value.user
+            )
+        }
     }
 
     @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): Member {
         return decoder.decodeStructure(descriptor) {
-            val canView = decodeBooleanElement(descriptor, getIndex(Member.CAN_VIEW_DASHBOARD))
-            val isViewOnly =
-                decodeBooleanElement(descriptor, getIndex(Member.IS_ONLY_VIEWING_DASHBOARD))
-            val user =
-                decodeSerializableElement(descriptor, getIndex(Member.USER), User.serializer())
+            val canView = decodeBooleanElement(
+                descriptor = descriptor,
+                index = getIndex(Member.CAN_VIEW_DASHBOARD)
+            )
+            val isViewOnly = decodeBooleanElement(
+                descriptor = descriptor,
+                index = getIndex(Member.IS_ONLY_VIEWING_DASHBOARD)
+            )
+            val user = decodeSerializableElement(
+                descriptor = descriptor,
+                index = getIndex(Member.USER),
+                deserializer = User.serializer()
+            )
             Member(
                 canViewDashboard = canView,
                 isOnlyViewingDashboard = isViewOnly,
