@@ -8,46 +8,65 @@ public data class User internal constructor(
     /**
      * unique id of user
      */
+    @SerialName(ID)
     val id: String = "",
     /**
      * The user's photo url if any is set and it is public
      */
-    @SerialName("photo")
+    @SerialName(PHOTO_URL)
     val photoUrl: String = "",
     /**
-     * represents the “hireable” badge on user profiles
+     * Represents the “hireable” badge on user profiles.
+     * Defaults to false if not shared.
      */
-    @SerialName("is_hireable")
+    @SerialName(IS_HIREABLE)
     val isHireable: Boolean = false,
     /**
-     * email address of user, if public
+     * The email address of the user, if public
      */
+    @SerialName(EMAIL)
     val email: String = "",
     /**
-     *  users public username
+     * The user's public username
      */
+    @SerialName(USERNAME)
     val username: String = "",
     /**
-     * full name of user
+     * The full name of the user
      */
-    @SerialName("full_name")
+    @SerialName(FULL_NAME)
     val fullName: String = "",
     /**
      * display name of this user taken from full_name or @username. Defaults to 'Anonymous User'
      */
-    @SerialName("display_name")
+    @SerialName(DISPLAY_NAME)
     val displayName: String = "",
     /**
-     *  website of user
+     *  The website for this user if any has been set.
      */
+    @SerialName(WEBSITE)
     val website: String = "",
     /**
-     *  website of user without url scheme
+     *  The website of the user without url scheme, if available
      */
-    @SerialName("human_readable_website")
+    @SerialName(WEBSITE_HUMAN)
     val websiteHumanReadable: String = "",
     /**
-     * Geographical location of the user
+     * Geographical location of the user, if available
      */
+    @SerialName(LOCATION)
     val location: String = "",
-)
+) {
+    internal companion object {
+        const val ID = "id"
+        const val PHOTO_URL = "photo"
+        const val IS_HIREABLE = "is_hireable"
+        const val EMAIL = "email"
+        const val USERNAME = "username"
+        const val FULL_NAME =  "full_name"
+        const val DISPLAY_NAME = "display_name"
+        const val WEBSITE = "website"
+        const val WEBSITE_HUMAN = "human_readable_website"
+        const val LOCATION = "location"
+    }
+}
