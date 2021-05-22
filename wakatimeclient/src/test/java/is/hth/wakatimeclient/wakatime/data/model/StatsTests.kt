@@ -26,7 +26,7 @@ private class StatsTests : DescribeSpec({
         hours = 12,
         minutes = 10,
         percent = 10.0,
-        secondsTotal = 11.0,
+        totalSeconds = 11.0,
         total24Hour = "total 24 hour",
         name = "a entity name",
         humanReadableTotal24Hour = "total 24 hour in readable format"
@@ -163,7 +163,7 @@ private class StatsTests : DescribeSpec({
                         put("name", machineMeasurement.measurement.name)
                         put("percent", machineMeasurement.measurement.percent)
                         put("text", machineMeasurement.measurement.humanReadableTotal24Hour)
-                        put("total_seconds", machineMeasurement.measurement.secondsTotal)
+                        put("total_seconds", machineMeasurement.measurement.totalSeconds)
                     })
                 }
 
