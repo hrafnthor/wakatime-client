@@ -335,30 +335,28 @@ internal object MemberTransformSerializer : JsonTransformingSerializer<Member>(M
                 // be already processed payload
                 buildJsonObject {
                     findValue(
-                        builder = this,
                         element = element,
                         key = Member.CAN_VIEW_DASHBOARD,
                         default = Member.CAN_VIEW_DASHBOARD_DEFAULT
                     )
 
                     findValue(
-                        builder = this,
                         element = element,
                         key = Member.IS_ONLY_VIEWING_DASHBOARD,
                         default = Member.IS_ONLY_VIEWING_DASHBOARD_DEFAULT
                     )
 
                     put(Member.USER, buildJsonObject {
-                        findValue(this, element, User.ID, "")
-                        findValue(this, element, User.PHOTO_URL, "")
-                        findValue(this, element, User.IS_HIREABLE, false)
-                        findValue(this, element, User.EMAIL, "")
-                        findValue(this, element, User.USERNAME, "")
-                        findValue(this, element, User.FULL_NAME, "")
-                        findValue(this, element, User.DISPLAY_NAME, "")
-                        findValue(this, element, User.WEBSITE, "")
-                        findValue(this, element, User.WEBSITE_HUMAN, "")
-                        findValue(this, element, User.LOCATION, "")
+                        findValue(element, User.ID, "")
+                        findValue(element, User.PHOTO_URL, "")
+                        findValue(element, User.IS_HIREABLE, false)
+                        findValue(element, User.EMAIL, "")
+                        findValue(element, User.USERNAME, "")
+                        findValue(element, User.FULL_NAME, "")
+                        findValue(element, User.DISPLAY_NAME, "")
+                        findValue(element, User.WEBSITE, "")
+                        findValue(element, User.WEBSITE_HUMAN, "")
+                        findValue(element, User.LOCATION, "")
                     })
                 }
 
