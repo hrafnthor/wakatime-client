@@ -51,36 +51,37 @@ private class GlobalStatsTests : DescribeSpec({
 
     describe("serialization") {
         describe("of Aggregation") {
-            val expectedJsonStructure = buildJsonObject {
-                put(Aggregation.NAME, aggregation.name)
-                put(Aggregation.VERIFIED, aggregation.verified)
-                put(Aggregation.HUMAN_READABLE_COUNT, aggregation.humanReadableCount)
-                put(Aggregation.AVERAGE, json.encodeToJsonElement(aggregation.average))
-                put(Aggregation.MAX, json.encodeToJsonElement(aggregation.max))
-                put(Aggregation.MEDIAN, json.encodeToJsonElement(aggregation.median))
-                put(Aggregation.SUM, json.encodeToJsonElement(aggregation.sum))
-            }
+            it("from local values") {
+                val expectedJsonStructure = buildJsonObject {
+                    put(Aggregation.NAME, aggregation.name)
+                    put(Aggregation.VERIFIED, aggregation.verified)
+                    put(Aggregation.HUMAN_READABLE_COUNT, aggregation.humanReadableCount)
+                    put(Aggregation.AVERAGE, json.encodeToJsonElement(aggregation.average))
+                    put(Aggregation.MAX, json.encodeToJsonElement(aggregation.max))
+                    put(Aggregation.MEDIAN, json.encodeToJsonElement(aggregation.median))
+                    put(Aggregation.SUM, json.encodeToJsonElement(aggregation.sum))
+                }
 
-            json.encodeToJsonElement(aggregation) shouldBe expectedJsonStructure
+                json.encodeToJsonElement(aggregation) shouldBe expectedJsonStructure
+            }
         }
 
         describe("of GlobalStats") {
-            val expectedJsonStructure = buildJsonObject {
-                put(GlobalStats.TOTAL, json.encodeToJsonElement(globalStats.total))
-                put(GlobalStats.AVERAGES, json.encodeToJsonElement(globalStats.dailyAverages))
-                put(GlobalStats.CATEGORIES, json.encodeToJsonElement(globalStats.categories))
-                put(GlobalStats.EDITORS, json.encodeToJsonElement(globalStats.editors))
-                put(GlobalStats.LANGUAGES, json.encodeToJsonElement(globalStats.languages))
-                put(
-                    GlobalStats.OPERATING_SYSTEMS,
-                    json.encodeToJsonElement(globalStats.operatingSystems)
-                )
-                put(GlobalStats.RANGE, json.encodeToJsonElement(globalStats.range))
-                put(GlobalStats.TIMEOUT, globalStats.timeout)
-                put(GlobalStats.WRITES_ONLY, globalStats.writesOnly)
-            }
+            it("from local values") {
+                val expectedJsonStructure = buildJsonObject {
+                    put(GlobalStats.TOTAL, json.encodeToJsonElement(globalStats.total))
+                    put(GlobalStats.AVERAGES, json.encodeToJsonElement(globalStats.dailyAverages))
+                    put(GlobalStats.CATEGORIES, json.encodeToJsonElement(globalStats.categories))
+                    put(GlobalStats.EDITORS, json.encodeToJsonElement(globalStats.editors))
+                    put(GlobalStats.LANGUAGES, json.encodeToJsonElement(globalStats.languages))
+                    put(GlobalStats.OPERATING_SYSTEMS, json.encodeToJsonElement(globalStats.operatingSystems))
+                    put(GlobalStats.RANGE, json.encodeToJsonElement(globalStats.range))
+                    put(GlobalStats.TIMEOUT, globalStats.timeout)
+                    put(GlobalStats.WRITES_ONLY, globalStats.writesOnly)
+                }
 
-            json.encodeToJsonElement(globalStats) shouldBe expectedJsonStructure
+                json.encodeToJsonElement(globalStats) shouldBe expectedJsonStructure
+            }
         }
     }
 
@@ -121,10 +122,7 @@ private class GlobalStatsTests : DescribeSpec({
                         put(GlobalStats.CATEGORIES, json.encodeToJsonElement(globalStats.categories))
                         put(GlobalStats.EDITORS, json.encodeToJsonElement(globalStats.editors))
                         put(GlobalStats.LANGUAGES, json.encodeToJsonElement(globalStats.languages))
-                        put(
-                            GlobalStats.OPERATING_SYSTEMS,
-                            json.encodeToJsonElement(globalStats.operatingSystems)
-                        )
+                        put(GlobalStats.OPERATING_SYSTEMS, json.encodeToJsonElement(globalStats.operatingSystems))
                     })
                     put(GlobalStats.RANGE, json.encodeToJsonElement(globalStats.range))
                     put(GlobalStats.TIMEOUT, globalStats.timeout)
