@@ -58,21 +58,23 @@ public enum class Delta {
  */
 @Serializable
 @Suppress("unused")
-public enum class Frequency {
+public enum class Frequency(private val value: String) {
     @SerialName("Daily")
-    Daily,
+    Daily("Daily"),
 
     @SerialName("Every other day")
-    EveryOtherDay,
+    EveryOtherDay("Every other day"),
 
     @SerialName("Once per week")
-    OncePerWeek,
+    OncePerWeek("Once per week"),
 
     @SerialName("Once per month")
-    OncePerMonth,
+    OncePerMonth("Once per month"),
 
-    @SerialName("")
-    None
+    @SerialName("None")
+    None("None");
+
+    override fun toString(): String = value
 }
 
 /**
@@ -221,22 +223,24 @@ public enum class ExportStatus {
 
 @Serializable
 @Suppress("unused")
-public enum class ProcessingStatus {
+public enum class ProcessingStatus(private val value: String) {
     /**
      * There is processing pending server side, which hasn't yet started
      */
     @SerialName("pending_update")
-    Pending,
+    Pending("pending_update"),
 
     /**
      * There is processing happening server side
      */
     @SerialName("updating")
-    Processing,
+    Processing("updating"),
 
     /**
      * All processing has finished
      */
     @SerialName("ok")
-    Done
+    Done("ok");
+
+    override fun toString(): String = value
 }

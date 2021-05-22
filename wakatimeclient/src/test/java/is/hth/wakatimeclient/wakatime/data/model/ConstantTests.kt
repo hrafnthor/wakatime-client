@@ -87,16 +87,16 @@ private class ConstantTests : DescribeSpec({
 
         describe("of Frequency") {
             it("daily") {
-                decodeAndMatch(json, "Daily", Frequency.Daily)
+                decodeAndMatch(json, Frequency.Daily.toString(), Frequency.Daily)
             }
             it("every other day") {
-                decodeAndMatch(json, "Every other day", Frequency.EveryOtherDay)
+                decodeAndMatch(json, Frequency.EveryOtherDay.toString(), Frequency.EveryOtherDay)
             }
             it("once per week") {
-                decodeAndMatch(json, "Once per week", Frequency.OncePerWeek)
+                decodeAndMatch(json, Frequency.OncePerWeek.toString(), Frequency.OncePerWeek)
             }
             it("none") {
-                decodeAndMatch(json, "", Frequency.None)
+                decodeAndMatch(json, Frequency.None.toString(), Frequency.None)
             }
         }
 
