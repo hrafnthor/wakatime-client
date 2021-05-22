@@ -1,6 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
-import `is`.hth.wakatimeclient.core.findValue
+import `is`.hth.wakatimeclient.wakatime.data.findValue
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.MetaFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.ProjectFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.RequestDsl
@@ -353,18 +353,13 @@ internal object SummariesJsonTransformer : JsonTransformingSerializer<Summaries>
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return when {
             element is JsonObject && element.containsKey(Summaries.RANGE).not() -> buildJsonObject {
-                findValue(this, element, Summaries.AVAILABLE_BRANCHES) { key ->
-                    put(key, JsonArray(emptyList()))
-                }
-                findValue(this, element, Summaries.SELECTED_BRANCHES) { key ->
-                    put(key, JsonArray(emptyList()))
-                }
-                findValue(this, element, Summaries.SUMMARIES) { key ->
-                    put(key, JsonArray(emptyList()))
-                }
-                val start = element[Summaries.START] ?: JsonPrimitive("")
-                val end = element[Summaries.END] ?: JsonPrimitive("")
+                findValue(element, Summaries.AVAILABLE_BRANCHES) { JsonArray(emptyList()) }
+                findValue(element, Summaries.SELECTED_BRANCHES) { JsonArray(emptyList()) }
+                findValue(element, Summaries.SUMMARIES) { JsonArray(emptyList()) }
+
                 put(Summaries.RANGE, buildJsonObject {
+                    val start = element[Summaries.START] ?: JsonPrimitive("")
+                    val end = element[Summaries.END] ?: JsonPrimitive("")
                     put(Range.START, start)
                     put(Range.END, end)
                 })
