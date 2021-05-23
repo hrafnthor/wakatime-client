@@ -1,6 +1,7 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
-import `is`.hth.wakatimeclient.core.findValue
+import `is`.hth.wakatimeclient.core.data.net.WakatimeJsonFactory
+import `is`.hth.wakatimeclient.wakatime.data.findValue
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -90,7 +91,6 @@ public data class Aggregation internal constructor(
 internal object AggregationJsonTransformer : JsonTransformingSerializer<Aggregation>(
     AggregationSerializer
 ) {
-
     private val defaultAmount: JsonObject = buildJsonObject {
         put(Amount.SECONDS, 0.0f)
         put(Amount.SECONDS_HUMAN_READABLE, "")
@@ -101,35 +101,25 @@ internal object AggregationJsonTransformer : JsonTransformingSerializer<Aggregat
             element is JsonObject && !element.containsKey(Aggregation.HUMAN_READABLE_COUNT) -> {
                 // Payload has not had its contents transformed yet
                 buildJsonObject {
-                    findValue(this, element, Aggregation.NAME) {
-                        put(it, "")
-                    }
+                    findValue(element, Aggregation.NAME, "")
+                    findValue(element, Aggregation.VERIFIED, false)
 
-                    findValue(this, element, Aggregation.VERIFIED) {
-                        put(it, false)
-                    }
-
-                    element["count"]?.let { inner ->
-                        if (inner is JsonObject) {
-                            inner["text"]?.let { put(Aggregation.HUMAN_READABLE_COUNT, it) }
+                    element["count"]?.let { innerElement ->
+                        if (innerElement is JsonObject) {
+                            // Flatten count object into a simple field in the root
+                            findValue(
+                                builder = this,
+                                element = innerElement,
+                                sourceKey = "text",
+                                destKey = Aggregation.HUMAN_READABLE_COUNT
+                            ) { JsonPrimitive("") }
                         }
                     }
 
-                    findValue(this, element, Aggregation.AVERAGE) {
-                        put(it, defaultAmount)
-                    }
-
-                    findValue(this, element, Aggregation.MAX) {
-                        put(it, defaultAmount)
-                    }
-
-                    findValue(this, element, Aggregation.MEDIAN) {
-                        put(it, defaultAmount)
-                    }
-
-                    findValue(this, element, Aggregation.SUM) {
-                        put(it, defaultAmount)
-                    }
+                    findValue(element, Aggregation.AVERAGE) { defaultAmount }
+                    findValue(element, Aggregation.MAX) { defaultAmount }
+                    findValue(element, Aggregation.MEDIAN) { defaultAmount }
+                    findValue(element, Aggregation.SUM) { defaultAmount }
                 }
             }
             element is JsonObject -> element
@@ -340,7 +330,9 @@ internal object GlobalStatsJsonTransformer : JsonTransformingSerializer<GlobalSt
     GlobalStatsSerializer
 ) {
 
+    private val json = WakatimeJsonFactory.makeJson()
     private val empty = JsonArray(emptyList())
+    private val defaultRange: JsonElement = json.encodeToJsonElement(Range())
 
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return when {
@@ -357,13 +349,9 @@ internal object GlobalStatsJsonTransformer : JsonTransformingSerializer<GlobalSt
                     )
                 }
 
-                findValue(this, element, GlobalStats.RANGE) {}
-                findValue(this, element, GlobalStats.TIMEOUT) {
-                    put(it, 15)
-                }
-                findValue(this, element, GlobalStats.WRITES_ONLY) {
-                    put(it, false)
-                }
+                findValue(element, GlobalStats.RANGE) { defaultRange }
+                findValue(element, GlobalStats.TIMEOUT, 15)
+                findValue(element, GlobalStats.WRITES_ONLY, false)
             }
             element is JsonObject -> element
             else -> throw IllegalArgumentException(

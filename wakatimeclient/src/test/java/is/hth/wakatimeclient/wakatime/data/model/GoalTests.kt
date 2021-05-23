@@ -10,7 +10,7 @@ private class GoalTests : DescribeSpec({
     val json = WakatimeJsonFactory.makeJson()
 
     describe("deserialization") {
-        describe("of InvitedUser") {
+        describe("of list of InvitedUser") {
             it("as received from server") {
                 val expected = InvitedUser(
                     id = "123",
@@ -50,7 +50,7 @@ private class GoalTests : DescribeSpec({
             }
         }
 
-        describe("of Subscriber") {
+        describe("of list of Subscriber") {
             it("as received from server") {
                 val expected = Subscriber(
                     // No all values used in a user object are received from the

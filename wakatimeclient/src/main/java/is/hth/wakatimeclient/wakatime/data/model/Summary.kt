@@ -1,6 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
-import `is`.hth.wakatimeclient.core.findValue
+import `is`.hth.wakatimeclient.wakatime.data.findValue
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.MetaFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.ProjectFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.RequestDsl
@@ -9,6 +9,7 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.decodeStructure
@@ -22,24 +23,24 @@ public data class GrandTotal internal constructor(
     /**
      * Hours portion of the coding activity
      */
-    val hours: Int,
+    val hours: Int = 0,
     /**
      * Minutes portion of the coding activity
      */
-    val minutes: Int,
+    val minutes: Int = 0,
     /**
      * Total coding activity in as seconds
      */
     @SerialName("total_seconds")
-    val totalSeconds: Double,
+    val totalSeconds: Double = 0.0,
     /**
      *  total coding activity in digital clock format
      */
-    val digital: String,
+    val digital: String = "",
     /**
      * Total coding activity in human readable format
      */
-    val text: String
+    val text: String = ""
 )
 
 @Serializable
@@ -48,80 +49,148 @@ public data class Summary internal constructor(
     /**
      * Hours portion of coding activity for this summary
      */
-    val hours: Int,
+    @SerialName(FIELD_HOURS)
+    val hours: Int = 0,
     /**
      * Minutes portion of coding activity for this summary
      */
-    val minutes: Int,
+    @SerialName(FIELD_MINUTES)
+    val minutes: Int = 0,
     /**
      * Seconds portion of coding activity for this summary
      */
-    val seconds: Int,
+    @SerialName(FIELD_SECONDS)
+    val seconds: Int = 0,
     /**
      * Percent of total time that this summary represents
      */
-    val percent: Double,
+    @SerialName(FIELD_PERCENT)
+    val percent: Double = 0.0,
     /**
      * Total seconds that this summary represents
      */
-    @SerialName("total_seconds")
-    val totalSeconds: Double,
+    @SerialName(FIELD_TOTAL_SECONDS)
+    val totalSeconds: Double = 0.0,
     /**
      * Total coding activity that this summary represents in digital clock format
      */
-    val digital: String = "",
+    @SerialName(FIELD_DIGITAL_CLOCK)
+    val digitalClockFormat: String = "",
     /**
      * The name of the entity that this summary represents
      */
+    @SerialName(FIELD_NAME)
     val name: String = "",
     /**
      * Total coding activity that this summary represents in human readable format
      */
-    val text: String = "",
-)
+    @SerialName(FIELD_HUMAN_READABLE_TOTAL_TIME)
+    val humanReadableTotalTime: String = "",
+) {
+    internal companion object {
+        const val FIELD_HOURS = "hours"
+        const val FIELD_MINUTES = "minutes"
+        const val FIELD_SECONDS = "seconds"
+        const val FIELD_PERCENT = "percent"
+        const val FIELD_TOTAL_SECONDS = "total_seconds"
+        const val FIELD_DIGITAL_CLOCK = "digital"
+        const val FIELD_NAME = "name"
+        const val FIELD_HUMAN_READABLE_TOTAL_TIME = "text"
+    }
+}
 
-@Serializable
+@Serializable(MachineSummaryJsonTransformer::class)
 @Suppress("unused")
 public data class MachineSummary internal constructor(
-    /**
-     * Hours portion of coding activity for this summary
-     */
-    val hours: Int,
-    /**
-     * Minutes portion of coding activity for this summary
-     */
-    val minutes: Int,
-    /**
-     * Seconds portion of coding activity for this summary
-     */
-    val seconds: Int,
-    /**
-     * Percent of total time that this summary represents
-     */
-    val percent: Double,
-    /**
-     * Total seconds that this summary represents
-     */
-    @SerialName("total_seconds")
-    val totalSeconds: Double,
-    /**
-     * Total coding activity that this summary represents in digital clock format
-     */
-    val digital: String = "",
-    /**
-     * The name of the entity that this summary represents
-     */
-    val name: String = "",
-    /**
-     * Total coding activity that this summary represents in human readable format
-     */
-    val text: String = "",
+    @SerialName(FIELD_SUMMARY)
+    val summary: Summary = Summary(),
     /**
      * The unique id of this machine
      */
-    @SerialName("machine_name_id")
+    @SerialName(FIELD_MACHINE_NAME_ID)
     val machineNameId: String = ""
-)
+) {
+    internal companion object {
+        const val FIELD_SUMMARY = "summary"
+        const val FIELD_MACHINE_NAME_ID = "machine_name_id"
+    }
+}
+
+/**
+ * Transforms the json payload to contain a [Summary] child object for matching values.
+ */
+internal object MachineSummaryJsonTransformer : JsonTransformingSerializer<MachineSummary>(
+    MachineSummarySerializer
+) {
+    override fun transformDeserialize(element: JsonElement): JsonElement {
+        return when {
+            element is JsonObject && element.size > 2 -> buildJsonObject {
+                put(MachineSummary.FIELD_SUMMARY, buildJsonObject {
+                    findValue(element, Summary.FIELD_HOURS, 0)
+                    findValue(element, Summary.FIELD_MINUTES, 0)
+                    findValue(element, Summary.FIELD_SECONDS, 0)
+                    findValue(element, Summary.FIELD_PERCENT, 0.0)
+                    findValue(element, Summary.FIELD_TOTAL_SECONDS, 0)
+                    findValue(element, Summary.FIELD_DIGITAL_CLOCK, "")
+                    findValue(element, Summary.FIELD_NAME, "")
+                    findValue(element, Summary.FIELD_HUMAN_READABLE_TOTAL_TIME, "")
+                })
+                findValue(element, MachineSummary.FIELD_MACHINE_NAME_ID, "")
+            }
+            element is JsonObject -> element
+            else -> throw IllegalArgumentException(
+                "Incorrect JsonElement received during deserialization!"
+            )
+        }
+    }
+}
+
+internal object MachineSummarySerializer : KSerializer<MachineSummary> {
+
+    private val summarySerializer: KSerializer<Summary> = Summary.serializer()
+
+    override val descriptor: SerialDescriptor
+        get() = buildClassSerialDescriptor("machine_summary") {
+            element(MachineSummary.FIELD_SUMMARY, summarySerializer.descriptor)
+            element<String>(MachineSummary.FIELD_MACHINE_NAME_ID)
+        }
+
+    @ExperimentalSerializationApi
+    override fun deserialize(decoder: Decoder): MachineSummary {
+        return decoder.decodeStructure(descriptor) {
+            val summary = decodeSerializableElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(MachineSummary.FIELD_SUMMARY),
+                deserializer = summarySerializer
+            )
+            val machineName = decodeStringElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(MachineSummary.FIELD_MACHINE_NAME_ID)
+            )
+            MachineSummary(
+                summary = summary,
+                machineNameId = machineName
+            )
+        }
+    }
+
+    @ExperimentalSerializationApi
+    override fun serialize(encoder: Encoder, value: MachineSummary) {
+        encoder.encodeStructure(descriptor) {
+            encodeSerializableElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(MachineSummary.FIELD_SUMMARY),
+                serializer = summarySerializer,
+                value = value.summary
+            )
+            encodeStringElement(
+                descriptor = descriptor,
+                index = descriptor.getElementIndex(MachineSummary.FIELD_MACHINE_NAME_ID),
+                value = value.machineNameId
+            )
+        }
+    }
+}
 
 
 /**
@@ -136,54 +205,56 @@ public data class DailySummary internal constructor(
      * activity over the requested range
      */
     @SerialName("grand_total")
-    val grandTotal: GrandTotal,
+    val grandTotal: GrandTotal = GrandTotal(),
     /**
      * Summary information by activity categories
      */
-    val categories: List<Summary>,
+    val categories: List<Summary> = emptyList(),
     /**
      * Summary information by dependencies
      */
-    val dependencies: List<Summary>,
+    val dependencies: List<Summary> = emptyList(),
     /**
      * Summary information by editors used
      */
-    val editors: List<Summary>,
+    val editors: List<Summary> = emptyList(),
     /**
      * Summary information by programming languages
      */
-    val languages: List<Summary>,
+    val languages: List<Summary> = emptyList(),
     /**
      * Summary information by unique machines
      */
-    val machines: List<MachineSummary>,
+    val machines: List<MachineSummary> = emptyList(),
     /**
      * Summary information by operating systems
      */
     @SerialName("operating_systems")
-    val operatingSystems: List<Summary>,
+    val operatingSystems: List<Summary> = emptyList(),
     /**
      * Summary information by projects. Will be empty if querying by a specific project
      */
-    @Transient
     val projects: List<Summary> = emptyList(),
     /**
      * Summary information for project branches. Will always be empty when not querying
      * for a specific project.
      */
-    @Transient
     val branches: List<Summary> = emptyList(),
     /**
      * Summary information for each individual entity within a project. Will always be
      * empty when not querying for a specific project.
      */
-    @Transient
     val entities: List<Summary> = emptyList(),
     /**
      * Calendar range for these summaries
      */
-    val range: Range
-)
+    @SerialName(FIELD_RANGE)
+    val range: Range = Range()
+) {
+    internal companion object {
+        const val FIELD_RANGE = "range"
+    }
+}
 
 @Suppress("unused")
 @Serializable(SummariesJsonTransformer::class)
@@ -206,12 +277,12 @@ public data class Summaries internal constructor(
      * The summaries for the request made, segmented by days
      */
     @SerialName(SUMMARIES)
-    val summaries: List<DailySummary>,
+    val summaries: List<DailySummary> = emptyList(),
     /**
      * The range over which the summaries go
      */
     @SerialName(RANGE)
-    val range: Range
+    val range: Range = Range()
 ) {
     public companion object {
         internal const val AVAILABLE_BRANCHES = "available_branches"
@@ -353,20 +424,17 @@ internal object SummariesJsonTransformer : JsonTransformingSerializer<Summaries>
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return when {
             element is JsonObject && element.containsKey(Summaries.RANGE).not() -> buildJsonObject {
-                findValue(this, element, Summaries.AVAILABLE_BRANCHES) { key ->
-                    put(key, JsonArray(emptyList()))
-                }
-                findValue(this, element, Summaries.SELECTED_BRANCHES) { key ->
-                    put(key, JsonArray(emptyList()))
-                }
-                findValue(this, element, Summaries.SUMMARIES) { key ->
-                    put(key, JsonArray(emptyList()))
-                }
-                val start = element[Summaries.START] ?: JsonPrimitive("")
-                val end = element[Summaries.END] ?: JsonPrimitive("")
+                findValue(element, Summaries.AVAILABLE_BRANCHES) { JsonArray(emptyList()) }
+                findValue(element, Summaries.SELECTED_BRANCHES) { JsonArray(emptyList()) }
+                findValue(element, Summaries.SUMMARIES) { JsonArray(emptyList()) }
+
                 put(Summaries.RANGE, buildJsonObject {
+                    val start = element[Summaries.START] ?: JsonPrimitive("")
+                    val end = element[Summaries.END] ?: JsonPrimitive("")
+                    val timezone = extractTimezone(element)
                     put(Range.START, start)
                     put(Range.END, end)
+                    put(Range.TIMEZONE, timezone)
                 })
             }
             element is JsonObject -> element
@@ -374,6 +442,18 @@ internal object SummariesJsonTransformer : JsonTransformingSerializer<Summaries>
                 "Incorrect JsonElement received for Summaries deserialization!"
             )
         }
+    }
+
+    internal fun extractTimezone(element: JsonObject): String {
+        return element[Summaries.SUMMARIES]
+            ?.takeIf { it is JsonArray }
+            ?.jsonArray?.firstOrNull { it is JsonObject }
+            ?.jsonObject?.get(DailySummary.FIELD_RANGE)
+            ?.takeIf { it is JsonObject }
+            ?.jsonObject?.get(Range.TIMEZONE)
+            ?.takeIf { it is JsonPrimitive }
+            ?.jsonPrimitive?.content
+            ?: ""
     }
 }
 

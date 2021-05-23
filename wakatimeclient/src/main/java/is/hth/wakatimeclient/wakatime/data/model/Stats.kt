@@ -1,10 +1,14 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
-import `is`.hth.wakatimeclient.core.findValue
+import `is`.hth.wakatimeclient.core.data.net.WakatimeJsonFactory
+import `is`.hth.wakatimeclient.wakatime.data.findValue
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.MetaFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.ProjectFilter
 import `is`.hth.wakatimeclient.wakatime.data.model.filters.RequestDsl
-import kotlinx.serialization.*
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
@@ -52,37 +56,51 @@ public data class Measurement internal constructor(
     /**
      * The full hour portion of this measurement
      */
+    @SerialName(HOURS)
     val hours: Int = 0,
     /**
      * The minutes portion of this measurement
      */
+    @SerialName(MINUTES)
     val minutes: Int = 0,
     /**
      * The percentage that this measurement represents of the whole observed time
      * over the requested range
      */
+    @SerialName(PERCENT)
     val percent: Double = 0.0,
     /**
      * The total amount of seconds in this measurement
      */
-    @SerialName("total_seconds")
-    val secondsTotal: Double = 0.0,
+    @SerialName(TOTAL_SECONDS)
+    val totalSeconds: Double = 0.0,
     /**
      * The total amount of time in this measurement in 24 hour format
      */
-    @SerialName("digital")
+    @SerialName(TOTAL_DAY)
     val total24Hour: String = "",
     /**
      * The descriptive name of this measurement, dependent on the context.
      * Could be a category, a project name or a ide name depending on the context
      */
+    @SerialName(NAME)
     val name: String = "",
     /**
      * The total amount of time in this measurement in human readable 24 hour format
      */
-    @SerialName("text")
-    val humanReadableTotal24Hour: String = "",
-)
+    @SerialName(HUMAN_READABLE_TOTAL_DAY)
+    val humanReadableTotalTime: String = "",
+) {
+    internal companion object {
+        const val HOURS = "hours"
+        const val MINUTES = "minutes"
+        const val PERCENT = "percent"
+        const val TOTAL_SECONDS = "total_seconds"
+        const val TOTAL_DAY = "digital"
+        const val NAME = "name"
+        const val HUMAN_READABLE_TOTAL_DAY = "text"
+    }
+}
 
 @Serializable
 public data class Machine internal constructor(
@@ -142,6 +160,10 @@ internal object MachineMeasurementListTransformer :
     JsonTransformingSerializer<List<MachineMeasurement>>(
         ListSerializer(MachineMeasurement.serializer())
     ) {
+
+    private val json = WakatimeJsonFactory.makeJson()
+    private val machine: JsonElement = json.encodeToJsonElement(Machine())
+
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return when (element) {
             is JsonArray -> buildJsonArray {
@@ -150,15 +172,20 @@ internal object MachineMeasurementListTransformer :
                         // The inner element is of the correct type and contains as many
                         // keys as would be expected for the transformation to take place
                         buildJsonObject {
-
-                            findValue(this, innerElement, MachineMeasurement.MACHINE) {}
+                            findValue(
+                                element = innerElement,
+                                key = MachineMeasurement.MACHINE,
+                                default = { machine }
+                            )
 
                             put(MachineMeasurement.MEASUREMENT, buildJsonObject {
-                                innerElement
-                                    .filterKeys { it != MachineMeasurement.MACHINE }
-                                    .forEach {
-                                        put(it.key, it.value)
-                                    }
+                                findValue(innerElement, Measurement.HOURS, 0)
+                                findValue(innerElement, Measurement.MINUTES, 0)
+                                findValue(innerElement, Measurement.PERCENT, 0.0)
+                                findValue(innerElement, Measurement.TOTAL_SECONDS, 0.0)
+                                findValue(innerElement, Measurement.TOTAL_DAY, "")
+                                findValue(innerElement, Measurement.NAME, "")
+                                findValue(innerElement, Measurement.HUMAN_READABLE_TOTAL_DAY, "")
                             })
                         }
                     } else innerElement
@@ -350,11 +377,19 @@ public data class Status internal constructor(
     val isUpToDate: Boolean = true,
 ) {
     internal companion object {
-        internal const val IS_STUCK = "is_stuck"
-        internal const val IS_ALREADY_UPDATING = "is_already_updating"
-        internal const val STATUS = "status"
-        internal const val PERCENTAGE_CALCULATED = "percent_calculated"
-        internal const val IS_UP_TO_DATE = "is_up_to_date"
+        const val IS_STUCK = "is_stuck"
+        const val IS_ALREADY_UPDATING = "is_already_updating"
+        const val STATUS = "status"
+        const val PERCENTAGE_CALCULATED = "percent_calculated"
+        const val IS_UP_TO_DATE = "is_up_to_date"
+
+        val set: Set<String> = setOf(
+            IS_STUCK,
+            IS_ALREADY_UPDATING,
+            STATUS,
+            PERCENTAGE_CALCULATED,
+            IS_UP_TO_DATE
+        )
     }
 
     init {
@@ -423,33 +458,17 @@ internal object StatsTransformer : JsonTransformingSerializer<Stats>(StatsSerial
             // already have the modified structure
             buildJsonObject {
                 put(Stats.DATA, buildJsonObject {
-                    element.filterKeys {
-                        it != Status.IS_STUCK
-                                && it != Status.IS_ALREADY_UPDATING
-                                && it != Status.STATUS
-                                && it != Status.PERCENTAGE_CALCULATED
-                                && it != Status.IS_UP_TO_DATE
-                    }.forEach { entry ->
+                    element.filterKeys { Status.set.contains(it).not() }.forEach { entry ->
                         put(entry.key, entry.value)
                     }
                 })
 
                 put(Stats.STATUS, buildJsonObject {
-                    findValue(this, element, Status.IS_STUCK) {
-                        put(it, false)
-                    }
-                    findValue(this, element, Status.IS_ALREADY_UPDATING) {
-                        put(it, false)
-                    }
-                    findValue(this, element, Status.STATUS) {
-                        put(it, ProcessingStatus.Done.name)
-                    }
-                    findValue(this, element, Status.PERCENTAGE_CALCULATED) {
-                        put(it, 100)
-                    }
-                    findValue(this, element, Status.IS_UP_TO_DATE) {
-                        put(it, true)
-                    }
+                    findValue(element, Status.IS_STUCK, false)
+                    findValue(element, Status.IS_ALREADY_UPDATING, false)
+                    findValue(element, Status.STATUS, ProcessingStatus.Done.toString())
+                    findValue(element, Status.PERCENTAGE_CALCULATED, 100)
+                    findValue(element, Status.IS_UP_TO_DATE, true)
                 })
             }
         } else super.transformDeserialize(element)

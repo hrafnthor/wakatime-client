@@ -1,6 +1,6 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
-import `is`.hth.wakatimeclient.core.findValue
+import `is`.hth.wakatimeclient.wakatime.data.findValue
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -221,7 +221,6 @@ public data class InvitedUser internal constructor(
 internal object InvitedUserListTransformer : JsonTransformingSerializer<List<InvitedUser>>(
     ListSerializer(InvitedUser.serializer())
 ) {
-
     override fun transformDeserialize(element: JsonElement): JsonElement {
         if (element is JsonArray) {
             return buildJsonArray {
@@ -230,22 +229,29 @@ internal object InvitedUserListTransformer : JsonTransformingSerializer<List<Inv
                         // The inner element is of the correct type and does not seem to
                         // be already processed payload
                         buildJsonObject {
-                            findValue(this, innerElement, InvitedUser.ID) {}
-                            findValue(this, innerElement, InvitedUser.STATUS) {}
+                            findValue(innerElement, InvitedUser.ID, "")
+                            findValue(innerElement, InvitedUser.STATUS, "")
 
-                            put(InvitedUser.USER, buildJsonObject {
-                                innerElement
-                                    .filterKeys { it != InvitedUser.ID && it != InvitedUser.STATUS }
-                                    .forEach {
-                                        if(it.key == "user_id"){
-                                            // One of the many instances where different field names
-                                            // are used in the response from API. Replace with the
-                                            // standard field name
-                                            put("id", it.value)
-                                        } else {
-                                            put(it.key, it.value)
-                                        }
-                                    }
+                            put(Member.USER, buildJsonObject {
+                                // One of the many instances where different field names
+                                // are used in the response from API. Replace with the
+                                // standard field name
+                                findValue(
+                                    builder = this,
+                                    element = innerElement,
+                                    sourceKey = "user_id",
+                                    destKey = "id"
+                                ) { JsonPrimitive("") }
+
+                                findValue(innerElement, User.PHOTO_URL, "")
+                                findValue(innerElement, User.IS_HIREABLE, false)
+                                findValue(innerElement, User.EMAIL, "")
+                                findValue(innerElement, User.USERNAME, "")
+                                findValue(innerElement, User.FULL_NAME, "")
+                                findValue(innerElement, User.DISPLAY_NAME, "")
+                                findValue(innerElement, User.WEBSITE, "")
+                                findValue(innerElement, User.WEBSITE_HUMAN, "")
+                                findValue(innerElement, User.LOCATION, "")
                             })
                         }
                     } else innerElement
@@ -294,23 +300,28 @@ internal object SubscriberListTransformer : JsonTransformingSerializer<List<Subs
                         // The inner element is of the correct type and doesn't seem to
                         // be already processed
                         buildJsonObject {
-                            innerElement[Subscriber.FREQUENCY]?.let { value ->
-                                put(Subscriber.FREQUENCY, value)
-                            }
+                            findValue(innerElement, Subscriber.FREQUENCY, Frequency.None.toString())
 
-                            put(Subscriber.USER, buildJsonObject {
-                                innerElement
-                                    .filterKeys { it != Subscriber.FREQUENCY }
-                                    .forEach {
-                                        if(it.key == "user_id"){
-                                            // One of the many instances where different field names
-                                            // are used in the response from API. Replace with the
-                                            // standard field name
-                                            put("id", it.value)
-                                        } else {
-                                            put(it.key, it.value)
-                                        }
-                                    }
+                            put(Member.USER, buildJsonObject {
+                                // One of the many instances where different field names
+                                // are used in the response from API. Replace with the
+                                // standard field name
+                                findValue(
+                                    builder = this,
+                                    element = innerElement,
+                                    sourceKey = "user_id",
+                                    destKey = "id",
+                                ) { JsonPrimitive("") }
+
+                                findValue(innerElement, User.PHOTO_URL, "")
+                                findValue(innerElement, User.IS_HIREABLE, false)
+                                findValue(innerElement, User.EMAIL, "")
+                                findValue(innerElement, User.USERNAME, "")
+                                findValue(innerElement, User.FULL_NAME, "")
+                                findValue(innerElement, User.DISPLAY_NAME, "")
+                                findValue(innerElement, User.WEBSITE, "")
+                                findValue(innerElement, User.WEBSITE_HUMAN, "")
+                                findValue(innerElement, User.LOCATION, "")
                             })
                         }
                     } else innerElement
