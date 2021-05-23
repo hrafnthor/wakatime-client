@@ -89,7 +89,7 @@ public data class Measurement internal constructor(
      * The total amount of time in this measurement in human readable 24 hour format
      */
     @SerialName(HUMAN_READABLE_TOTAL_DAY)
-    val humanReadableTotal24Hour: String = "",
+    val humanReadableTotalTime: String = "",
 ) {
     internal companion object {
         const val HOURS = "hours"
