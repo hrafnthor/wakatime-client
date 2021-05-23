@@ -59,6 +59,9 @@ dependencies {
         //#region AndroidX UI
         val androidxActivityVersion: String by project
         api("androidx.activity:activity-ktx:$androidxActivityVersion")
+        // fragment required for the use of ActivityResultLauncher
+        val androidxFragmentVersion: String by project
+        api("androidx.fragment:fragment-ktx:$androidxFragmentVersion")
         //#endregion
 
         //#region AndroidX Lifecycle
