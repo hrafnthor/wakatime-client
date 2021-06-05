@@ -11,8 +11,7 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.serialization.json.*
 
-private class ErrorTests : DescribeSpec({
-
+public class ErrorTests : DescribeSpec({
 
     val json = WakatimeJsonFactory.makeJson()
 

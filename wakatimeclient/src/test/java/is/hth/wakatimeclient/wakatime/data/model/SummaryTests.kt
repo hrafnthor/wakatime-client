@@ -5,7 +5,7 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.json.*
 
-private class SummaryTests : DescribeSpec({
+public class SummaryTests : DescribeSpec({
 
     //#region Setup
     val json = WakatimeJsonFactory.makeJson()

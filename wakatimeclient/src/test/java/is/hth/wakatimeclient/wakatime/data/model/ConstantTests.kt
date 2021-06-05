@@ -6,7 +6,7 @@ import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 
-private class ConstantTests : DescribeSpec({
+public class ConstantTests : DescribeSpec({
 
     val json = Json {
         ignoreUnknownKeys = true
@@ -212,8 +212,8 @@ private class ConstantTests : DescribeSpec({
         }
     }
 }) {
-    companion object {
-        inline fun <reified T> decodeAndMatch(json: Json, value: String, match: T) {
+    public companion object {
+        public inline fun <reified T> decodeAndMatch(json: Json, value: String, match: T) {
             json.decodeFromString<T>("\"$value\"") shouldBe match
         }
     }

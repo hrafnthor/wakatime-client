@@ -5,7 +5,7 @@ import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import kotlinx.serialization.json.*
 
-private class OrganizationTests : DescribeSpec({
+public class OrganizationTests : DescribeSpec({
 
     val json = WakatimeJsonFactory.makeJson()
 
