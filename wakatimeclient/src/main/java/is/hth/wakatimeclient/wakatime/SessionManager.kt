@@ -49,7 +49,7 @@ internal class SessionManagerImpl(
     private val oauthApi: OauthApi,
     private val storage: AuthStorageWrapper,
     private val session: AuthClient.Session,
-    private val netProcessor: NetworkErrorProcessor
+    private val processor: NetworkErrorProcessor
 ) : SessionManager {
 
     override suspend fun logout(force: Boolean): Results<Report> {
@@ -81,11 +81,17 @@ internal class SessionManagerImpl(
     }
 
     private suspend fun revoke(id: String, secret: String, token: String): Results<Nothing> {
-        return safeOperation(netProcessor) {
-            val response = oauthApi.revoke(id, secret, token)
-            when {
-                response.isSuccessful -> Results.Success.Empty
-                else -> Results.Failure(netProcessor.onError(response))
+        return safeOperation(processor) {
+            with(oauthApi.revoke(id, secret, token)) {
+                when {
+                    isSuccessful -> Results.Success.Empty
+                    else -> Results.Failure(errorBody()?.charStream().use {
+                        processor.onNetworkError(
+                            code = code(),
+                            error = it?.readText() ?: message() ?: ""
+                        )
+                    })
+                }
             }
         }
     }

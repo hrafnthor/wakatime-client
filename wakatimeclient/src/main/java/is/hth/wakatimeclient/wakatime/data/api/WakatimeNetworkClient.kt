@@ -6,7 +6,7 @@ import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 
 internal class WakatimeNetworkClient internal constructor(
     private val client: NetworkClient,
-    private val errorProcessor: NetworkErrorProcessor
+    private val processor: NetworkErrorProcessor
 ): CacheControl by client {
 
     private val api: WakatimeApi = client.createService(WakatimeApi::class.java)
@@ -16,5 +16,5 @@ internal class WakatimeNetworkClient internal constructor(
 
     fun oauthApi(): OauthApi = oauthApi
 
-    fun processor(): NetworkErrorProcessor = errorProcessor
+    fun processor(): NetworkErrorProcessor = processor
 }
