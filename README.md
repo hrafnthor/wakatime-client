@@ -106,7 +106,7 @@ Then either in the calling context's onActivityResults or using the latest Activ
 simply pass the received data on to the client
 
 ```kotlin
-when(val authenticated = client.onAuthenticationResult(result)) {
+when(val results = client.onAuthenticationResult(result)) {
     is Results.Failure -> displayError(results.error)
     is Results.Success -> {
         // Start fetching data
