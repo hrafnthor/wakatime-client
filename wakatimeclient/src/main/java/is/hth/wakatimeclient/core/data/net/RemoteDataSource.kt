@@ -42,7 +42,12 @@ internal open class RemoteDataSource(
                 when {
                     isSuccessful && body != null -> Results.Success.Value(transform(body))
                     isSuccessful -> Results.Success.Empty
-                    else -> Results.Failure(processor.onError(this))
+                    else -> Results.Failure(errorBody()?.charStream().use {
+                        processor.onNetworkError(
+                            code = code(),
+                            error = it?.readText() ?: message() ?: "No error message nor payload received"
+                        )
+                    })
                 }
             }
         }

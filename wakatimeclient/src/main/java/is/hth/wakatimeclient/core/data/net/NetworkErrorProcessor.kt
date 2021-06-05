@@ -53,6 +53,5 @@ internal open class NetworkErrorProcessor : ErrorProcessor {
     /**
      * Converts the supplied failed [Response] into a [Error]
      */
-    open fun onNetworkError(code: Int, message: String, error: String?): Error =
-        onError(code, message)
+    open fun onNetworkError(code: Int, error: String): Error = onError(code, error)
 }
