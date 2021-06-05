@@ -1,10 +1,5 @@
 package `is`.hth.wakatimeclient.core.data
 
-import kotlinx.serialization.SerializationException
-import java.net.ProtocolException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
-
 /**
  * Contains information regarding a error.
  *
@@ -227,7 +222,7 @@ public sealed class Error(
             }
 
             /**
-             * A [UnknownHostException] was thrown during operation
+             * An UnknownHostException was thrown during operation
              */
             public class UnknownHost internal constructor(
                 message: String
@@ -238,7 +233,8 @@ public sealed class Error(
             }
 
             /**
-             * A [SerializationException] was thrown during operation
+             * An SocketTimeoutException was thrown, indicating an error with serialization of
+             * network payload.
              */
             public class Serialization internal constructor(
                 message: String
@@ -249,7 +245,8 @@ public sealed class Error(
             }
 
             /**
-             * A [SocketTimeoutException] was thrown
+             * An SocketTimeoutException was thrown, indicating an error with communicating
+             * with the server
              */
             public class SocketTimeout internal constructor(
                 message: String
@@ -260,7 +257,7 @@ public sealed class Error(
             }
 
             /**
-             * A [ProtocolException] was thrown
+             * An ProtocolException was thrown, indicating malformed network request
              */
             public class Protocol internal constructor(
                 message: String
@@ -270,6 +267,17 @@ public sealed class Error(
                 }
             }
 
+            /**
+             * A retrofit HttpException was thrown, indicating a unexpected non standard 2xx
+             * response was received
+             */
+            public class Http internal constructor(
+                message: String
+            ): Internal(CODE, message) {
+                public companion object {
+                    public const val CODE: Int = Internal.CODE + 6
+                }
+            }
         }
 
         /**
