@@ -2,14 +2,109 @@ package `is`.hth.wakatimeclient.wakatime.data.model
 
 import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
+import `is`.hth.wakatimeclient.core.data.net.WakatimeJsonFactory
+import `is`.hth.wakatimeclient.wakatime.data.api.FieldError
+import `is`.hth.wakatimeclient.wakatime.data.api.ServiceError
+import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeErrorProcessor
 import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import kotlinx.serialization.json.*
 
 private class ErrorTests : DescribeSpec({
 
+
+    val json = WakatimeJsonFactory.makeJson()
+
+    describe("deserialization") {
+        describe("of ServiceError") {
+            describe("as received from server") {
+
+                it("with only error message") {
+                    json.decodeFromJsonElement<ServiceError>(buildJsonObject {
+                        put("error", "Start date can't come after end date.")
+                    }) shouldBe ServiceError(
+                        message = "Start date can't come after end date."
+                    )
+                }
+
+                it("with only one field error") {
+                    json.decodeFromJsonElement<ServiceError>(buildJsonObject {
+                        putJsonObject("errors") {
+                            putJsonArray("entity") {
+                                add(JsonPrimitive("This field is required."))
+                            }
+                        }
+                    }) shouldBe ServiceError(
+                        message = "",
+                        fieldErrors = listOf(
+                            FieldError(
+                                name = "entity",
+                                description = "This field is required."
+                            )
+                        )
+                    )
+                }
+
+                it("with only two field errors") {
+                    json.decodeFromJsonElement<ServiceError>(buildJsonObject {
+                        putJsonObject("errors") {
+                            putJsonArray("entity") {
+                                add(JsonPrimitive("This field is required."))
+                            }
+                            putJsonArray("time") {
+                                add(JsonPrimitive("Number must be between 1388534400 and 99999999999."))
+                            }
+                        }
+                    }) shouldBe ServiceError(
+                        message = "",
+                        fieldErrors = listOf(
+                            FieldError(
+                                name = "entity",
+                                description = "This field is required."
+                            ),
+                            FieldError(
+                                name = "time",
+                                description = "Number must be between 1388534400 and 99999999999."
+                            )
+                        )
+                    )
+                }
+
+                it("with error message and two field errors") {
+                    json.decodeFromJsonElement<ServiceError>(buildJsonObject {
+                        put("error", "a error message")
+                        putJsonObject("errors") {
+                            putJsonArray("entity") {
+                                add(JsonPrimitive("This field is required."))
+                            }
+                            putJsonArray("time") {
+                                add(JsonPrimitive("Number must be between 1388534400 and 99999999999."))
+                            }
+                        }
+                    }) shouldBe ServiceError(
+                        message = "a error message",
+                        fieldErrors = listOf(
+                            FieldError(
+                                name = "entity",
+                                description = "This field is required."
+                            ),
+                            FieldError(
+                                name = "time",
+                                description = "Number must be between 1388534400 and 99999999999."
+                            )
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     describe("of NetworkErrorProcessor") {
         val processor = NetworkErrorProcessor()
+
         describe("status code conversion") {
+
             describe("of standard network codes") {
                 it("of 'Http Bad Request' (400)") {
                     processor.onError(400, "")
@@ -44,6 +139,7 @@ private class ErrorTests : DescribeSpec({
                         .shouldBeInstanceOf<Error.Network.Unavailable>()
                 }
             }
+
             describe("of internal network codes") {
                 it("of 'No Network Access' (1001)") {
                     processor.onError(Error.Network.Internal.NoNetwork.CODE, "")
@@ -70,5 +166,45 @@ private class ErrorTests : DescribeSpec({
                 }
             }
         }
+    }
+
+    describe("of WakatimeProcessor") {
+        val processor = WakatimeErrorProcessor(json)
+
+        describe("conversion of ServiceError to Error") {
+
+            it("with error message and full error body") {
+                val processed = processor.onNetworkError(
+                    code = Error.Network.Unauthorized.CODE,
+                    error = buildJsonObject {
+                        put("error", "a error message")
+                        putJsonObject("errors") {
+                            putJsonArray("entity") {
+                                add(JsonPrimitive("This field is required."))
+                            }
+                            putJsonArray("time") {
+                                add(JsonPrimitive("Number must be between 1388534400 and 99999999999."))
+                            }
+                        }
+                    }.toString()
+                )
+
+                processed.shouldBeInstanceOf<Error.Network.Unauthorized>()
+                processed.message shouldBe "a error message"
+                processed.extra.size shouldBe 2
+            }
+
+            it("with non json error message") {
+                val processed = processor.onNetworkError(
+                    code = Error.Network.Unauthorized.CODE,
+                    error = "a error message"
+                )
+
+                processed.shouldBeInstanceOf<Error.Network.Unauthorized>()
+                processed.message shouldBe "a error message"
+                processed.extra.size shouldBe 0
+            }
+        }
+
     }
 })
