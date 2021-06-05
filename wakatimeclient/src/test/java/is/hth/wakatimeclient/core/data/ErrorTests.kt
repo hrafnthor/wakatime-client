@@ -1,6 +1,5 @@
-package `is`.hth.wakatimeclient.wakatime.data.model
+package `is`.hth.wakatimeclient.core.data
 
-import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 import `is`.hth.wakatimeclient.core.data.net.WakatimeJsonFactory
 import `is`.hth.wakatimeclient.wakatime.data.api.FieldError
