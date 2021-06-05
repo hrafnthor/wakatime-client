@@ -31,12 +31,15 @@ public sealed class Error(
         /**
          * An unknown error occurred during the authentication processes
          */
-        public class Unknown(code: Int, message: String) : Authentication(code, message)
+        public class Unknown internal constructor(
+            code: Int,
+            message: String
+        ) : Authentication(code, message)
 
         /**
          * An error occurred during initial authorization flow
          */
-        public class Authorization(
+        public class Authorization internal constructor(
             /**
              * A unique error code given by AppAuth describing the cause of the error.
              *
@@ -53,7 +56,9 @@ public sealed class Error(
         /**
          * User is not authenticated and so the operation was not possible
          */
-        public class Unauthorized(message: String) : Authentication(CODE, message) {
+        public class Unauthorized internal constructor(
+            message: String
+        ) : Authentication(CODE, message) {
             public companion object {
                 public const val CODE: Int = 101
             }
@@ -95,7 +100,9 @@ public sealed class Error(
         /**
          * A 400 Bad Request error occurred
          */
-        public class BadRequest(message: String) : Network(CODE, message) {
+        public class BadRequest internal constructor(
+            message: String
+        ) : Network(CODE, message) {
             public companion object {
                 public const val CODE: Int = 400
             }
@@ -104,7 +111,9 @@ public sealed class Error(
         /**
          * Authentication is not present or has expired
          */
-        public class Unauthorized(message: String) : Network(CODE, message) {
+        public class Unauthorized internal constructor(
+            message: String
+        ) : Network(CODE, message) {
             public companion object {
                 public const val CODE: Int = 401
             }
@@ -113,7 +122,9 @@ public sealed class Error(
         /**
          * You are authenticated, but do not have permission to access the resource.
          */
-        public class Forbidden(message: String) : Network(CODE, message) {
+        public class Forbidden internal constructor(
+            message: String
+        ) : Network(CODE, message) {
             public companion object {
                 public const val CODE: Int = 403
             }
@@ -122,86 +133,169 @@ public sealed class Error(
         /**
          * A 404 Not Found error occurred
          */
-        public class NotFound(message: String) : Network(CODE, message) {
+        public class NotFound internal constructor(
+            message: String
+        ) : Network(CODE, message) {
             public companion object {
                 public const val CODE: Int = 404
             }
         }
 
         /**
-         * A 500/503 Service Unavailable error occurred, try again later.
+         * A network operation timeout occurred
          */
-        public class Unavailable(message: String) : Network(CODE, message) {
-            public companion object {
-                public const val CODE: Int = 503
-            }
-        }
+        public sealed class Timeout(code: Int, message: String) : Network(code, message) {
 
-        /**
-         * Either a 504 Gateway Timeout, a 408 Client Timeout or a
-         * socket timeout exception error occurred
-         */
-        public class Timeout(message: String) : Network(CODE, message) {
-            public companion object {
-                public const val CODE: Int = 408
+            /**
+             * A 408 Client Timeout error occurred
+             */
+            public class Client internal constructor(
+                message: String
+            ) : Timeout(CODE, message) {
+                public companion object {
+                    public const val CODE: Int = 408
+                }
+            }
+
+            /**
+             * A 504 Gateway Timeout error occurred
+             */
+            public class Gateway internal constructor(
+                message: String
+            ) : Timeout(CODE, message) {
+                public companion object {
+                    public const val CODE: Int = 504
+                }
             }
         }
 
         /**
          * You are being rate limited, try making fewer than 5 requests per second.
          */
-        public class TooManyRequests(message: String) : Network(CODE, message) {
+        public class TooManyRequests internal constructor(
+            message: String
+        ) : Network(CODE, message) {
             public companion object {
                 public const val CODE: Int = 429
             }
         }
 
         /**
+         * A 500 Internal Server error occurred, try again later
+         */
+        public class InternalServer internal constructor(
+            message: String
+        ) : Network(CODE, message) {
+            public companion object {
+                public const val CODE: Int = 500
+            }
+        }
+
+        /**
+         * A 503 Service Unavailable error occurred, try again later.
+         */
+        public class Unavailable internal constructor(
+            message: String
+        ) : Network(CODE, message) {
+            public companion object {
+                public const val CODE: Int = 503
+            }
+        }
+
+        /**
          * The error originates internally
          */
-        public class Internal(message: String) : Network(CODE, message) {
-            public companion object {
-                public const val CODE: Int = 470
+        public sealed class Internal(code: Int, message: String) : Network(code, message) {
+            private companion object {
+                const val CODE: Int = 1000
             }
-        }
 
-        /**
-         * No network access was found
-         */
-        public class NoNetwork(message: String) : Network(CODE, message) {
-            public companion object {
-                public const val CODE: Int = 471
+            /**
+             * No network access was found
+             */
+            public class NoNetwork internal constructor(
+                message: String
+            ) : Internal(CODE, message) {
+                public companion object {
+                    public const val CODE: Int = Internal.CODE + 1
+                }
             }
-        }
 
-        /**
-         * The host's IP address could not be determined
-         */
-        public class UnknownHost(message: String) : Network(CODE, message) {
-            public companion object {
-                public const val CODE: Int = 472
+            /**
+             * An UnknownHostException was thrown during operation
+             */
+            public class UnknownHost internal constructor(
+                message: String
+            ) : Internal(CODE, message) {
+                public companion object {
+                    public const val CODE: Int = Internal.CODE + 2
+                }
             }
-        }
 
-        /**
-         * Serialization of what ever payload was being processed failed
-         */
-        public class Serialization(message: String) : Network(CODE, message) {
-            public companion object {
-                public const val CODE: Int = 473
+            /**
+             * An SocketTimeoutException was thrown, indicating an error with serialization of
+             * network payload.
+             */
+            public class Serialization internal constructor(
+                message: String
+            ) : Internal(CODE, message) {
+                public companion object {
+                    public const val CODE: Int = Internal.CODE + 3
+                }
+            }
+
+            /**
+             * An SocketTimeoutException was thrown, indicating an error with communicating
+             * with the server
+             */
+            public class SocketTimeout internal constructor(
+                message: String
+            ) : Internal(CODE, message) {
+                public companion object {
+                    public const val CODE: Int = Internal.CODE + 4
+                }
+            }
+
+            /**
+             * An ProtocolException was thrown, indicating malformed network request
+             */
+            public class Protocol internal constructor(
+                message: String
+            ) : Internal(CODE, message) {
+                public companion object {
+                    public const val CODE: Int = Internal.CODE + 5
+                }
+            }
+
+            /**
+             * A retrofit HttpException was thrown, indicating a unexpected non standard 2xx
+             * response was received
+             */
+            public class Http internal constructor(
+                message: String
+            ): Internal(CODE, message) {
+                public companion object {
+                    public const val CODE: Int = Internal.CODE + 6
+                }
             }
         }
 
         /**
          * An unknown network error occurred that couldn't be matched with a specific case
          */
-        public class Unknown(code: Int, message: String) : Network(code, message)
+        public class Unknown internal constructor(
+            code: Int,
+            message: String
+        ) : Network(code, message)
     }
 
     /**
      * An unknown error occurred that couldn't be matched with a layer case
      */
-    public class Unknown(code: Int, message: String) : Error(code, message)
+    public class Unknown internal constructor(
+        code: Int,
+        message: String
+    ) : Error(code, message)
 }
 
 public interface ErrorProcessor {

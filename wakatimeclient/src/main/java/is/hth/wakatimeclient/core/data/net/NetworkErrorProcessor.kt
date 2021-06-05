@@ -6,7 +6,6 @@ import `is`.hth.wakatimeclient.core.data.ErrorProcessor
 import kotlinx.serialization.SerializationException
 import retrofit2.HttpException
 import retrofit2.Response
-import java.net.HttpURLConnection
 import java.net.ProtocolException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -18,15 +17,21 @@ internal open class NetworkErrorProcessor : ErrorProcessor {
 
     override fun onError(code: Int, message: String): Error {
         return when (code) {
-            HttpURLConnection.HTTP_NOT_FOUND -> Network.NotFound(message)
-            HttpURLConnection.HTTP_UNAVAILABLE -> Network.Unavailable(message)
-            HttpURLConnection.HTTP_CLIENT_TIMEOUT -> Network.Timeout(message)
-            HttpURLConnection.HTTP_GATEWAY_TIMEOUT -> Network.Timeout(message)
-            HttpURLConnection.HTTP_UNAUTHORIZED -> Network.Unauthorized(message)
-            HttpURLConnection.HTTP_BAD_REQUEST -> Network.BadRequest(message)
-            HttpURLConnection.HTTP_FORBIDDEN -> Network.Forbidden(message)
-            HttpURLConnection.HTTP_INTERNAL_ERROR -> Network.Unavailable(message)
-            429 -> Network.TooManyRequests(message)
+            Network.BadRequest.CODE -> Network.BadRequest(message)
+            Network.Unauthorized.CODE -> Network.Unauthorized(message)
+            Network.Forbidden.CODE -> Network.Forbidden(message)
+            Network.NotFound.CODE -> Network.NotFound(message)
+            Network.Timeout.Client.CODE -> Network.Timeout.Client(message)
+            Network.Timeout.Gateway.CODE -> Network.Timeout.Gateway(message)
+            Network.InternalServer.CODE -> Network.InternalServer(message)
+            Network.Unavailable.CODE -> Network.Unavailable(message)
+            Network.TooManyRequests.CODE -> Network.TooManyRequests(message)
+            Network.Internal.NoNetwork.CODE -> Network.Internal.NoNetwork(message)
+            Network.Internal.UnknownHost.CODE -> Network.Internal.UnknownHost(message)
+            Network.Internal.Serialization.CODE -> Network.Internal.Serialization(message)
+            Network.Internal.SocketTimeout.CODE -> Network.Internal.SocketTimeout(message)
+            Network.Internal.Protocol.CODE -> Network.Internal.Protocol(message)
+            Network.Internal.Http.CODE -> Network.Internal.Http(message)
             else -> Network.Unknown(code, message)
         }
     }
@@ -34,18 +39,19 @@ internal open class NetworkErrorProcessor : ErrorProcessor {
     override fun onError(throwable: Throwable): Error {
         val message = throwable.message ?: ""
         return when (throwable) {
-            is SocketTimeoutException -> Network.Timeout(message)
-            is UnknownHostException -> Network.UnknownHost(message)
-            is ProtocolException -> Network.Internal(message)
-            is SerializationException -> Network.Serialization(message)
-            is HttpException -> onError(throwable.code(), message)
-            else -> Network.Unknown(-1, message)
+            is SocketTimeoutException -> Network.Internal.SocketTimeout.CODE
+            is UnknownHostException -> Network.Internal.UnknownHost.CODE
+            is ProtocolException -> Network.Internal.Protocol.CODE
+            is SerializationException -> Network.Internal.Serialization.CODE
+            is HttpException -> Network.Internal.Http.CODE
+            else -> -1
+        }.let { code ->
+            onError(code, message)
         }
     }
 
     /**
      * Converts the supplied failed [Response] into a [Error]
      */
-    open fun onError(response: Response<*>): Error =
-        onError(response.code(), response.message() ?: "")
+    open fun onNetworkError(code: Int, error: String): Error = onError(code, error)
 }

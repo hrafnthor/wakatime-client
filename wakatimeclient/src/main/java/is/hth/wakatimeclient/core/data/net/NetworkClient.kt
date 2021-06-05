@@ -106,9 +106,8 @@ internal class NetworkClientImpl private constructor(
         }
 
         @ExperimentalSerializationApi
-        internal fun build(): NetworkClient {
-            val factory: Converter.Factory = WakatimeJsonFactory
-                .makeJson()
+        internal fun build(json: Json): NetworkClient {
+            val factory: Converter.Factory = json
                 .asConverterFactory(MediaType.get(Mime.ApplicationJson.toString()))
 
             val client: OkHttpClient = clientBuilder

@@ -8,7 +8,7 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.put
 
-private class RangeTests : DescribeSpec({
+public class RangeTests : DescribeSpec({
 
     val json = WakatimeJsonFactory.makeJson()
 

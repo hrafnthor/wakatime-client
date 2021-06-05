@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.*
 
-private class ResponseTests : DescribeSpec({
+public class ResponseTests : DescribeSpec({
 
     val json = WakatimeJsonFactory.makeJson()
 

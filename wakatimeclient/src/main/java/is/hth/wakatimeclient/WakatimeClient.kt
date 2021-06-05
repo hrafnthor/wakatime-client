@@ -6,6 +6,7 @@ import `is`.hth.wakatimeclient.core.data.auth.DefaultAuthenticator
 import `is`.hth.wakatimeclient.core.data.net.CacheControl
 import `is`.hth.wakatimeclient.core.data.net.NetworkClient
 import `is`.hth.wakatimeclient.core.data.net.NetworkClientImpl
+import `is`.hth.wakatimeclient.core.data.net.WakatimeJsonFactory
 import `is`.hth.wakatimeclient.wakatime.SessionManager
 import `is`.hth.wakatimeclient.wakatime.SessionManagerImpl
 import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeErrorProcessor
@@ -93,19 +94,21 @@ public class WakatimeClient private constructor(
          */
         @ExperimentalSerializationApi
         public fun build(context: Context, storage: AuthStorage): WakatimeClient {
+            val json = WakatimeJsonFactory.makeJson()
+
             val authClient: AuthClientImpl = authBuilder.build(context, storage)
             val netClient: NetworkClient = netBuilder
                 .setAuthenticatorIfNeeded(DefaultAuthenticator(authClient.session()))
-                .build()
+                .build(json)
 
-            val network = WakatimeNetworkClient(netClient, WakatimeErrorProcessor())
+            val network = WakatimeNetworkClient(netClient, WakatimeErrorProcessor(json))
 
             val manager = SessionManagerImpl(
                 config = config,
                 storage = authClient.storage,
                 session = authClient.session(),
                 oauthApi = network.oauthApi(),
-                netProcessor = network.processor(),
+                processor = network.processor(),
             )
 
             val remoteSource: WakatimeRemoteDataSource = WakatimeRemoteDataSourceImpl(

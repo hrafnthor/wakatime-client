@@ -4,32 +4,28 @@ import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import okhttp3.ResponseBody
-import retrofit2.Response
-import timber.log.Timber
 
 /**
  * Handles Wakatime specific error response payloads
  */
-internal class WakatimeErrorProcessor : NetworkErrorProcessor() {
+internal class WakatimeErrorProcessor(private val json: Json) : NetworkErrorProcessor() {
 
-    override fun onError(response: Response<*>): Error {
-        val serviceError = convert(response.errorBody())
-        return onError(response.code(), serviceError.message).apply {
+    override fun onNetworkError(code: Int, error: String): Error {
+        val serviceError = convert(error)
+        return onError(code, serviceError.message).apply {
             serviceError.fieldErrors.forEach {
                 extra.add("Field '${it.name}' had error '${it.description}'")
             }
         }
     }
 
-    private fun convert(errorBody: ResponseBody?): ServiceError {
-        return errorBody?.let {
+    private fun convert(error: String?): ServiceError {
+        return error?.let {
             try {
-                Json.decodeFromString<ServiceError>(it.string())
+                json.decodeFromString<ServiceError>(error)
             } catch (e: Exception) {
-                Timber.e(e)
                 null
             }
-        } ?: ServiceError("")
+        } ?: ServiceError(error ?: "")
     }
 }
