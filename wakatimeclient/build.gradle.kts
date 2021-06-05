@@ -75,9 +75,12 @@ dependencies {
     //#endregion
 
     //#region Test
-    testImplementation("org.jetbrains.kotlin:kotlin-reflect")
+    testRuntimeOnly("org.jetbrains.kotlin:kotlin-reflect")
+
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+
+    testRuntimeOnly("com.squareup.okhttp3:mockwebserver3-junit5")
     //#endregion
 
     //#region Android Test
