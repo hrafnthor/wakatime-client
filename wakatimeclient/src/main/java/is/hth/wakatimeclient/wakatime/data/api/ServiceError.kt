@@ -9,7 +9,7 @@ import kotlinx.serialization.json.*
  * The Wakatime service error payload
  */
 @Serializable
-public data class ServiceError(
+public data class ServiceError internal constructor(
     @SerialName("error")
     val message: String = "",
     @SerialName("errors")
@@ -22,7 +22,7 @@ public data class ServiceError(
  * value in some payload field
  */
 @Serializable
-public data class FieldError(
+public data class FieldError internal constructor(
     val name: String,
     val description: String
 )
