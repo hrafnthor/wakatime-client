@@ -10,6 +10,7 @@ dependencies {
     constraints {
         val kotlinVersion: String by project
         api("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
+        api("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
 
         //#region KotlinX Serialization
         val kotlinxSerializationVersion: String by project

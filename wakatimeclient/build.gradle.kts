@@ -75,9 +75,9 @@ dependencies {
     //#endregion
 
     //#region Test
+    testImplementation("org.jetbrains.kotlin:kotlin-reflect")
     testImplementation("org.junit.jupiter:junit-jupiter-api")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-
     //#endregion
 
     //#region Android Test
