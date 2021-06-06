@@ -7,7 +7,7 @@ import kotlinx.serialization.json.*
 
 public class GoalTests : DescribeSpec({
 
-    val json = WakatimeJsonFactory.makeJson()
+    val json = WakatimeJsonFactory.json
 
     describe("deserialization") {
         describe("of list of InvitedUser") {

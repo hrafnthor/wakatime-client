@@ -330,7 +330,7 @@ internal object GlobalStatsJsonTransformer : JsonTransformingSerializer<GlobalSt
     GlobalStatsSerializer
 ) {
 
-    private val json = WakatimeJsonFactory.makeJson()
+    private val json = WakatimeJsonFactory.json
     private val empty = JsonArray(emptyList())
     private val defaultRange: JsonElement = json.encodeToJsonElement(Range())
 

@@ -7,7 +7,7 @@ import kotlinx.serialization.json.*
 
 public class OrganizationTests : DescribeSpec({
 
-    val json = WakatimeJsonFactory.makeJson()
+    val json = WakatimeJsonFactory.json
 
     val member = Member(
         canViewDashboard = true,

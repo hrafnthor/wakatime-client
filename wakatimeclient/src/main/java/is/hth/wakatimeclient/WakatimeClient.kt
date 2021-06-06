@@ -94,7 +94,7 @@ public class WakatimeClient private constructor(
          */
         @ExperimentalSerializationApi
         public fun build(context: Context, storage: AuthStorage): WakatimeClient {
-            val json = WakatimeJsonFactory.makeJson()
+            val json = WakatimeJsonFactory.json
 
             val authClient: AuthClientImpl = authBuilder.build(context, storage)
             val netClient: NetworkClient = netBuilder

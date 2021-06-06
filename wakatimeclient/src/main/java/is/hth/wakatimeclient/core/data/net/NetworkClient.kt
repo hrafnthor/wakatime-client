@@ -144,7 +144,7 @@ internal object WakatimeJsonFactory {
     private const val coerceInputValues: Boolean = true
     private const val encodeDefaults: Boolean = true
 
-    fun makeJson(): Json = Json {
+    val json: Json = Json {
         ignoreUnknownKeys = WakatimeJsonFactory.ignoreUnknownKeys
         coerceInputValues = WakatimeJsonFactory.coerceInputValues
         encodeDefaults = WakatimeJsonFactory.encodeDefaults
