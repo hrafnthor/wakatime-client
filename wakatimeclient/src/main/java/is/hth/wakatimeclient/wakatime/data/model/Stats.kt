@@ -458,19 +458,19 @@ internal object StatsTransformer : JsonTransformingSerializer<Stats>(StatsSerial
             // Payload is of the correct type and does not seem to
             // already have the modified structure
             buildJsonObject {
-                put(Stats.DATA, buildJsonObject {
+                putJsonObject(Stats.DATA) {
                     element.filterKeys { Status.set.contains(it).not() }.forEach { entry ->
                         put(entry.key, entry.value)
                     }
-                })
+                }
 
-                put(Stats.STATUS, buildJsonObject {
+                putJsonObject(Stats.STATUS) {
                     findValue(element, Status.IS_STUCK, false)
                     findValue(element, Status.IS_ALREADY_UPDATING, false)
                     findValue(element, Status.STATUS, ProcessingStatus.Done.toString())
                     findValue(element, Status.PERCENTAGE_CALCULATED, 100)
                     findValue(element, Status.IS_UP_TO_DATE, true)
-                })
+                }
             }
         } else super.transformDeserialize(element)
     }

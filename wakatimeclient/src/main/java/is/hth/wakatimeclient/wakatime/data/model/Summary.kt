@@ -125,7 +125,7 @@ internal object MachineSummaryJsonTransformer : JsonTransformingSerializer<Machi
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return when {
             element is JsonObject && element.size > 2 -> buildJsonObject {
-                put(MachineSummary.FIELD_SUMMARY, buildJsonObject {
+                putJsonObject(MachineSummary.FIELD_SUMMARY) {
                     findValue(element, Summary.FIELD_HOURS, 0)
                     findValue(element, Summary.FIELD_MINUTES, 0)
                     findValue(element, Summary.FIELD_SECONDS, 0)
@@ -134,7 +134,7 @@ internal object MachineSummaryJsonTransformer : JsonTransformingSerializer<Machi
                     findValue(element, Summary.FIELD_DIGITAL_CLOCK, "")
                     findValue(element, Summary.FIELD_NAME, "")
                     findValue(element, Summary.FIELD_HUMAN_READABLE_TOTAL_TIME, "")
-                })
+                }
                 findValue(element, MachineSummary.FIELD_MACHINE_NAME_ID, "")
             }
             element is JsonObject -> element
