@@ -117,6 +117,42 @@ public enum class HumanRange(private val value: String) {
     override fun toString(): String = value
 }
 
+@Serializable
+@Suppress("unused")
+public enum class DefaultRange(private val value: String) {
+    @SerialName("Today")
+    TODAY("Today"),
+
+    @SerialName("Yesterday")
+    YESTERDAY("Yesterday"),
+
+    @SerialName("Last 7 Days")
+    LAST_SEVEN_DAYS("Last 7 Days"),
+
+    @SerialName("This Week")
+    THIS_WEEK("This Week"),
+
+    @SerialName("Last Week")
+    LAST_WEEK("Last Week"),
+
+    @SerialName("Last 7 Days from Yesterday")
+    LAST_SEVEN_DAYS_FROM_YESTERDAY("Last 7 Days from Yesterday"),
+
+    @SerialName("Last 14 Days")
+    LAST_FOURTEEN_DAYS("Last 14 Days"),
+
+    @SerialName("Last 30 Days")
+    LAST_THIRTY_DAYS("Last 30 Days"),
+
+    @SerialName("This Month")
+    THIS_MONTH("This Month"),
+
+    @SerialName("Last Month")
+    LAST_MONTH("Last Month");
+
+    override fun toString(): String = value
+}
+
 /**
  * Defines the statuses that an invitation to observe a goal can take
  */
