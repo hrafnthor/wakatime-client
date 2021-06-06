@@ -6,26 +6,25 @@ import kotlinx.serialization.json.*
  * Convenience method for extracting a potential value from a JsonObject and
  * adding it to a new builder
  *
- * @param builder that is being used to construct a new JsonObject
  * @param element from which fields are being parsed from
  * @param sourceKey for the field that is being looked for in the supplied element
  * @param destKey to use for storing the found value into the builder
  * @param default called when the element is not found, or the value is null, and whatever default step should be
  * performed. Is passed the previously supplied key
  */
-internal inline fun findValue(
-    builder: JsonObjectBuilder,
+internal inline fun JsonObjectBuilder.findValue(
     element: JsonObject,
     sourceKey: String,
     destKey: String,
     default: () -> JsonElement
 ) {
     val innerElement = element[sourceKey]?.let {
-        if (it == JsonNull) {
-            default()
-        } else it
+        when (it) {
+            is JsonNull -> default()
+            else -> it
+        }
     } ?: default()
-    builder.put(destKey, innerElement)
+    put(destKey, innerElement)
 }
 
 /**
@@ -39,7 +38,11 @@ internal fun JsonObjectBuilder.findValue(
     element: JsonObject,
     key: String,
     default: Number
-): Unit = findValue(this, element, key, key) { JsonPrimitive(default) }
+): Unit = findValue(
+    element = element,
+    sourceKey = key,
+    destKey = key
+) { JsonPrimitive(default) }
 
 /**
  * Convenience method for extracting and setting a value to the builder
@@ -52,7 +55,11 @@ internal fun JsonObjectBuilder.findValue(
     element: JsonObject,
     key: String,
     default: Boolean
-): Unit = findValue(this, element, key, key) { JsonPrimitive(default) }
+): Unit = findValue(
+    element = element,
+    sourceKey = key,
+    destKey = key
+) { JsonPrimitive(default) }
 
 /**
  * Convenience method for extracting and setting a value to the builder
@@ -65,7 +72,11 @@ internal fun JsonObjectBuilder.findValue(
     element: JsonObject,
     key: String,
     default: String
-): Unit = findValue(this, element, key, key) { JsonPrimitive(default) }
+): Unit = findValue(
+    element = element,
+    sourceKey = key,
+    destKey = key
+) { JsonPrimitive(default) }
 
 /**
  * Convenience method for extracting and setting a value to the builder
@@ -78,5 +89,9 @@ internal inline fun JsonObjectBuilder.findValue(
     element: JsonObject,
     key: String,
     default: () -> JsonElement
-): Unit = findValue(this, element, key, key, default)
-
+): Unit = findValue(
+    element = element,
+    sourceKey = key,
+    destKey = key,
+    default = default
+)

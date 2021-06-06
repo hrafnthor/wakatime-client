@@ -237,7 +237,6 @@ internal object InvitedUserListTransformer : JsonTransformingSerializer<List<Inv
                                 // are used in the response from API. Replace with the
                                 // standard field name
                                 findValue(
-                                    builder = this,
                                     element = innerElement,
                                     sourceKey = "user_id",
                                     destKey = "id"
@@ -307,7 +306,6 @@ internal object SubscriberListTransformer : JsonTransformingSerializer<List<Subs
                                 // are used in the response from API. Replace with the
                                 // standard field name
                                 findValue(
-                                    builder = this,
                                     element = innerElement,
                                     sourceKey = "user_id",
                                     destKey = "id",
