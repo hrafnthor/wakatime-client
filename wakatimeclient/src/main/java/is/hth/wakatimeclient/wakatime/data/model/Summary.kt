@@ -428,14 +428,14 @@ internal object SummariesJsonTransformer : JsonTransformingSerializer<Summaries>
                 findValue(element, Summaries.SELECTED_BRANCHES) { JsonArray(emptyList()) }
                 findValue(element, Summaries.SUMMARIES) { JsonArray(emptyList()) }
 
-                put(Summaries.RANGE, buildJsonObject {
+                putJsonObject(Summaries.RANGE) {
                     val start = element[Summaries.START] ?: JsonPrimitive("")
                     val end = element[Summaries.END] ?: JsonPrimitive("")
                     val timezone = extractTimezone(element)
                     put(Range.START, start)
                     put(Range.END, end)
                     put(Range.TIMEZONE, timezone)
-                })
+                }
             }
             element is JsonObject -> element
             else -> throw IllegalArgumentException(

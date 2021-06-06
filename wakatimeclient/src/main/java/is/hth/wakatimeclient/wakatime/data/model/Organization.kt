@@ -346,7 +346,7 @@ internal object MemberTransformSerializer : JsonTransformingSerializer<Member>(M
                         default = Member.IS_ONLY_VIEWING_DASHBOARD_DEFAULT
                     )
 
-                    put(Member.USER, buildJsonObject {
+                    putJsonObject(Member.USER) {
                         findValue(element, User.ID, "")
                         findValue(element, User.PHOTO_URL, "")
                         findValue(element, User.IS_HIREABLE, false)
@@ -357,7 +357,7 @@ internal object MemberTransformSerializer : JsonTransformingSerializer<Member>(M
                         findValue(element, User.WEBSITE, "")
                         findValue(element, User.WEBSITE_HUMAN, "")
                         findValue(element, User.LOCATION, "")
-                    })
+                    }
                 }
 
             } else element

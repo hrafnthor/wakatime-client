@@ -96,7 +96,7 @@ public data class Goal internal constructor(
      */
     val owner: User,
     /**
-     * goal status set to "ignored" instead of "failed" for these weekdsays, when delta is "day"
+     * goal status set to "ignored" instead of "failed" for these weekdays, when delta is "day"
      */
     @SerialName("ignore_days")
     val ignoreDays: Set<String> = emptySet(),

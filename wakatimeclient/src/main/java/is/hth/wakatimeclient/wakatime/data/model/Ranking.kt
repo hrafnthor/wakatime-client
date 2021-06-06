@@ -3,6 +3,7 @@ package `is`.hth.wakatimeclient.wakatime.data.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+@Suppress("unused")
 @Serializable
 public data class Leaders internal constructor(
     /**
