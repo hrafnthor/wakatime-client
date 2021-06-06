@@ -253,7 +253,7 @@ internal class WakatimeRemoteDataSourceImpl(
         return makeCall(networkCall = {
             api.getCurrentUser()
         }, transform = {
-            it.data.toCurrentUser()
+            it.data
         })
     }
 
