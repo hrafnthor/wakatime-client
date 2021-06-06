@@ -161,7 +161,7 @@ internal object MachineMeasurementListTransformer :
         ListSerializer(MachineMeasurement.serializer())
     ) {
 
-    private val json = WakatimeJsonFactory.makeJson()
+    private val json = WakatimeJsonFactory.json
     private val machine: JsonElement = json.encodeToJsonElement(Machine())
 
     override fun transformDeserialize(element: JsonElement): JsonElement {

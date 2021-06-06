@@ -8,7 +8,7 @@ import kotlinx.serialization.json.*
 public class SummaryTests : DescribeSpec({
 
     //#region Setup
-    val json = WakatimeJsonFactory.makeJson()
+    val json = WakatimeJsonFactory.json
 
     val summary = Summary(
         hours = 1,

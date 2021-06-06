@@ -10,7 +10,7 @@ import kotlinx.serialization.json.put
 
 public class GlobalStatsTests : DescribeSpec({
 
-    val json = WakatimeJsonFactory.makeJson()
+    val json = WakatimeJsonFactory.json
 
     val aggregation = Aggregation(
         name = "testing",

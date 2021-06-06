@@ -10,7 +10,7 @@ import kotlinx.serialization.json.put
 
 public class RangeTests : DescribeSpec({
 
-    val json = WakatimeJsonFactory.makeJson()
+    val json = WakatimeJsonFactory.json
 
     describe("serialization") {
         it("of Range") {

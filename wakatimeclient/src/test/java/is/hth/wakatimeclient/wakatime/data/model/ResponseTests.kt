@@ -10,7 +10,7 @@ import kotlinx.serialization.json.*
 
 public class ResponseTests : DescribeSpec({
 
-    val json = WakatimeJsonFactory.makeJson()
+    val json = WakatimeJsonFactory.json
 
     val payload = Payload(
         id = "123",

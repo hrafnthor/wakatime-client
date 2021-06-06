@@ -10,7 +10,7 @@ import kotlinx.serialization.json.put
 
 public class CommitTests : DescribeSpec({
 
-    val json = WakatimeJsonFactory.makeJson()
+    val json = WakatimeJsonFactory.json
 
     val commit = Commit(
         id = "some kind of url",

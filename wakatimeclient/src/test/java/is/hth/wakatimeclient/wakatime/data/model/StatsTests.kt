@@ -11,7 +11,7 @@ import kotlinx.serialization.json.*
 
 public class StatsTests : DescribeSpec({
 
-    val json = WakatimeJsonFactory.makeJson()
+    val json = WakatimeJsonFactory.json
 
     val day = Day(
         id = "123",

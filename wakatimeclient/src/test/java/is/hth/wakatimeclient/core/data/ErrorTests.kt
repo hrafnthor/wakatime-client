@@ -1,6 +1,5 @@
-package `is`.hth.wakatimeclient.wakatime.data.model
+package `is`.hth.wakatimeclient.core.data
 
-import `is`.hth.wakatimeclient.core.data.Error
 import `is`.hth.wakatimeclient.core.data.net.NetworkErrorProcessor
 import `is`.hth.wakatimeclient.core.data.net.WakatimeJsonFactory
 import `is`.hth.wakatimeclient.wakatime.data.api.FieldError
@@ -13,7 +12,7 @@ import kotlinx.serialization.json.*
 
 public class ErrorTests : DescribeSpec({
 
-    val json = WakatimeJsonFactory.makeJson()
+    val json = WakatimeJsonFactory.json
 
     describe("deserialization") {
         describe("of ServiceError") {
