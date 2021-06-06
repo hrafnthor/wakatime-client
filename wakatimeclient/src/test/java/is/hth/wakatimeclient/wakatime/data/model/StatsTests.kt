@@ -1,6 +1,7 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
 import `is`.hth.wakatimeclient.core.data.net.WakatimeJsonFactory
+import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
@@ -93,57 +94,55 @@ public class StatsTests : DescribeSpec({
     describe("serialization") {
 
         describe("of Stats") {
-            val expectedSerialized = buildJsonObject {
-                put(Stats.DATA, buildJsonObject {
-                    put("id", stats.data.id)
-                    put("user_id", stats.data.userId)
-                    put("username", stats.data.username)
-                    put("daily_average", stats.data.dailyAverage)
-                    put("daily_average_including_other_language", stats.data.dailyAverageTotal)
-                    put("days_including_holidays", stats.data.daysWithHolidays)
-                    put("days_minus_holidays", stats.data.daysWithoutHolidays)
-                    put("holidays", stats.data.holidays)
-                    put("timeout", stats.data.timeout)
-                    put("total_seconds", stats.data.totalSeconds)
-                    put(
-                        "total_seconds_including_other_language",
-                        stats.data.totalSecondsAllLanguages
-                    )
-                    put("human_readable_daily_average", stats.data.humanReadableDailyAverage)
-                    put("human_readable_total", stats.data.humanReadableTotal)
-                    put("created_at", stats.data.createdAt)
-                    put("modified_at", stats.data.modifiedAt)
-                    put("start", stats.data.start)
-                    put("end", stats.data.end)
-                    put("project", stats.data.project)
-                    put("range", json.encodeToJsonElement(stats.data.range))
-                    put("timezone", stats.data.timezone)
-                    put("is_coding_activity_visible", stats.data.codingActivityPubliclyVisible)
-                    put("is_including_today", stats.data.includesToday)
-                    put("is_other_usage_visible", stats.data.otherActivityPubliclyVisible)
-                    put("writes_only", stats.data.writesOnly)
-                    put("best_day", json.encodeToJsonElement(day))
-                    put("machines", json.encodeToJsonElement(stats.data.machines))
-                    put("categories", json.encodeToJsonElement(stats.data.categories))
-                    put("dependencies", json.encodeToJsonElement(stats.data.dependencies))
-                    put("editors", json.encodeToJsonElement(stats.data.editors))
-                    put("languages", json.encodeToJsonElement(stats.data.languages))
-                    put("operating_systems", json.encodeToJsonElement(stats.data.operatingSystems))
-                    put("projects", json.encodeToJsonElement(stats.data.projects))
-                })
-                put(Stats.STATUS, buildJsonObject {
-                    put(Status.IS_ALREADY_UPDATING, stats.status.isAlreadyUpdating)
-                    put(Status.IS_STUCK, stats.status.isStuck)
-                    put(Status.IS_UP_TO_DATE, stats.status.isUpToDate)
-                    put(Status.PERCENTAGE_CALCULATED, stats.status.percentCalculated)
-                    put(Status.STATUS, json.encodeToJsonElement(stats.status.status))
-                })
-            }
-
-            val serialized = json.encodeToJsonElement(stats)
 
             it("matches expected serialization") {
-                serialized shouldBe expectedSerialized
+                val expected = buildJsonObject {
+                    putJsonObject(Stats.DATA) {
+                        put("id", stats.data.id)
+                        put("user_id", stats.data.userId)
+                        put("username", stats.data.username)
+                        put("daily_average", stats.data.dailyAverage)
+                        put("daily_average_including_other_language", stats.data.dailyAverageTotal)
+                        put("days_including_holidays", stats.data.daysWithHolidays)
+                        put("days_minus_holidays", stats.data.daysWithoutHolidays)
+                        put("holidays", stats.data.holidays)
+                        put("timeout", stats.data.timeout)
+                        put("total_seconds", stats.data.totalSeconds)
+                        put(
+                            "total_seconds_including_other_language",
+                            stats.data.totalSecondsAllLanguages
+                        )
+                        put("human_readable_daily_average", stats.data.humanReadableDailyAverage)
+                        put("human_readable_total", stats.data.humanReadableTotal)
+                        put("created_at", stats.data.createdAt)
+                        put("modified_at", stats.data.modifiedAt)
+                        put("start", stats.data.start)
+                        put("end", stats.data.end)
+                        put("project", stats.data.project)
+                        put("range", json.encodeToJsonElement(stats.data.range))
+                        put("timezone", stats.data.timezone)
+                        put("is_coding_activity_visible", stats.data.codingActivityPubliclyVisible)
+                        put("is_including_today", stats.data.includesToday)
+                        put("is_other_usage_visible", stats.data.otherActivityPubliclyVisible)
+                        put("writes_only", stats.data.writesOnly)
+                        put("best_day", json.encodeToJsonElement(day))
+                        put("machines", json.encodeToJsonElement(stats.data.machines))
+                        put("categories", json.encodeToJsonElement(stats.data.categories))
+                        put("dependencies", json.encodeToJsonElement(stats.data.dependencies))
+                        put("editors", json.encodeToJsonElement(stats.data.editors))
+                        put("languages", json.encodeToJsonElement(stats.data.languages))
+                        put("operating_systems", json.encodeToJsonElement(stats.data.operatingSystems))
+                        put("projects", json.encodeToJsonElement(stats.data.projects))
+                    }
+                    putJsonObject(Stats.STATUS) {
+                        put(Status.IS_ALREADY_UPDATING, stats.status.isAlreadyUpdating)
+                        put(Status.IS_STUCK, stats.status.isStuck)
+                        put(Status.IS_UP_TO_DATE, stats.status.isUpToDate)
+                        put(Status.PERCENTAGE_CALCULATED, stats.status.percentCalculated)
+                        put(Status.STATUS, json.encodeToJsonElement(stats.status.status))
+                    }
+                }.toString()
+                json.encodeToString(stats).shouldEqualJson(expected)
             }
         }
     }
