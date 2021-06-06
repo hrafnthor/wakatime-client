@@ -39,8 +39,8 @@ dependencies {
         val retrofit2SerializationConverterVersion: String by project
         api("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:$retrofit2SerializationConverterVersion")
 
-        val retrofit2MockWebServerJUnit5Version: String by project
-        api("com.squareup.okhttp3:mockwebserver3-junit5:$retrofit2MockWebServerJUnit5Version")
+        val retrofit2MockWebServerVersion: String by project
+        api("com.squareup.okhttp3:mockwebserver:$retrofit2MockWebServerVersion")
         //#endregion
 
         //#region AndroidX
