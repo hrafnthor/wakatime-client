@@ -72,6 +72,7 @@ dependencies {
     //#region Kotest
     testImplementation("io.kotest:kotest-runner-junit5")
     testImplementation("io.kotest:kotest-assertions-core")
+    testImplementation("io.kotest:kotest-assertions-json")
     //#endregion
 
     //#region Test
