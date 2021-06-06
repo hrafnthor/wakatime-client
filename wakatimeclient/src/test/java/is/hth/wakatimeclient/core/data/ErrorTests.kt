@@ -12,7 +12,7 @@ import kotlinx.serialization.json.*
 
 public class ErrorTests : DescribeSpec({
 
-    val json = WakatimeJsonFactory.makeJson()
+    val json = WakatimeJsonFactory.json
 
     describe("deserialization") {
         describe("of ServiceError") {

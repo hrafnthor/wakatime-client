@@ -118,7 +118,7 @@ internal class NetworkClientImpl private constructor(
                             val cacheSize: Long = (10 * 1028 * 1028).toLong()
                             cache(Cache(directory, cacheSize))
                             addInterceptor(ReadInterceptor(cacheLifetimeInSeconds))
-                            addInterceptor(WriteInterceptor(cacheLifetimeInSeconds))
+                            addNetworkInterceptor(WriteInterceptor(cacheLifetimeInSeconds))
                         }
                     }
                 }
