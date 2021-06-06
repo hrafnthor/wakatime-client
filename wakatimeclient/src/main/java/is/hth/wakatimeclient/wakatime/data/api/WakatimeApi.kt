@@ -23,7 +23,7 @@ public interface WakatimeApi {
      * Requires the [Email] authentication scope
      */
     @GET("$API/users/current")
-    public suspend fun getCurrentUser(): Response<WrappedResponse<NetworkUser>>
+    public suspend fun getCurrentUser(): Response<WrappedResponse<CurrentUser>>
 
     /**
      * Retrieves the total recorded time for the current user.

@@ -167,8 +167,10 @@ internal object MachineMeasurementListTransformer :
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return when (element) {
             is JsonArray -> buildJsonArray {
-                element.map { innerElement ->
-                    if (innerElement is JsonObject && innerElement.size == 8) {
+                element
+                    .filter { it is JsonObject && it.size == 8 }
+                    .map {
+                        val innerElement: JsonObject = it as JsonObject
                         // The inner element is of the correct type and contains as many
                         // keys as would be expected for the transformation to take place
                         buildJsonObject {
@@ -178,7 +180,7 @@ internal object MachineMeasurementListTransformer :
                                 default = { machine }
                             )
 
-                            put(MachineMeasurement.MEASUREMENT, buildJsonObject {
+                            putJsonObject(MachineMeasurement.MEASUREMENT) {
                                 findValue(innerElement, Measurement.HOURS, 0)
                                 findValue(innerElement, Measurement.MINUTES, 0)
                                 findValue(innerElement, Measurement.PERCENT, 0.0)
@@ -186,10 +188,9 @@ internal object MachineMeasurementListTransformer :
                                 findValue(innerElement, Measurement.TOTAL_DAY, "")
                                 findValue(innerElement, Measurement.NAME, "")
                                 findValue(innerElement, Measurement.HUMAN_READABLE_TOTAL_DAY, "")
-                            })
+                            }
                         }
-                    } else innerElement
-                }.forEach(this::add)
+                    }.forEach(this::add)
             }
             is JsonNull -> JsonArray(emptyList())
             else -> throw IllegalArgumentException(
@@ -457,19 +458,19 @@ internal object StatsTransformer : JsonTransformingSerializer<Stats>(StatsSerial
             // Payload is of the correct type and does not seem to
             // already have the modified structure
             buildJsonObject {
-                put(Stats.DATA, buildJsonObject {
+                putJsonObject(Stats.DATA) {
                     element.filterKeys { Status.set.contains(it).not() }.forEach { entry ->
                         put(entry.key, entry.value)
                     }
-                })
+                }
 
-                put(Stats.STATUS, buildJsonObject {
+                putJsonObject(Stats.STATUS) {
                     findValue(element, Status.IS_STUCK, false)
                     findValue(element, Status.IS_ALREADY_UPDATING, false)
                     findValue(element, Status.STATUS, ProcessingStatus.Done.toString())
                     findValue(element, Status.PERCENTAGE_CALCULATED, 100)
                     findValue(element, Status.IS_UP_TO_DATE, true)
-                })
+                }
             }
         } else super.transformDeserialize(element)
     }

@@ -1,8 +1,10 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
 import `is`.hth.wakatimeclient.core.data.net.WakatimeJsonFactory
+import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.*
 
 public class OrganizationTests : DescribeSpec({
@@ -30,10 +32,10 @@ public class OrganizationTests : DescribeSpec({
     describe("serialization") {
         describe("of Member") {
             it("from local value") {
-                json.encodeToJsonElement(
+                json.encodeToString(
                     serializer = MemberSerializer,
                     value = member
-                ) shouldBe serializedMember
+                ).shouldEqualJson(serializedMember.toString())
             }
         }
     }

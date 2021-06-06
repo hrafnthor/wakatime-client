@@ -96,7 +96,7 @@ public data class Goal internal constructor(
      */
     val owner: User,
     /**
-     * goal status set to "ignored" instead of "failed" for these weekdsays, when delta is "day"
+     * goal status set to "ignored" instead of "failed" for these weekdays, when delta is "day"
      */
     @SerialName("ignore_days")
     val ignoreDays: Set<String> = emptySet(),
@@ -237,7 +237,6 @@ internal object InvitedUserListTransformer : JsonTransformingSerializer<List<Inv
                                 // are used in the response from API. Replace with the
                                 // standard field name
                                 findValue(
-                                    builder = this,
                                     element = innerElement,
                                     sourceKey = "user_id",
                                     destKey = "id"
@@ -307,7 +306,6 @@ internal object SubscriberListTransformer : JsonTransformingSerializer<List<Subs
                                 // are used in the response from API. Replace with the
                                 // standard field name
                                 findValue(
-                                    builder = this,
                                     element = innerElement,
                                     sourceKey = "user_id",
                                     destKey = "id",

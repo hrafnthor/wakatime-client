@@ -1,8 +1,10 @@
 package `is`.hth.wakatimeclient.wakatime.data.model
 
 import `is`.hth.wakatimeclient.core.data.net.WakatimeJsonFactory
+import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
@@ -60,9 +62,9 @@ public class GlobalStatsTests : DescribeSpec({
                     put(Aggregation.MAX, json.encodeToJsonElement(aggregation.max))
                     put(Aggregation.MEDIAN, json.encodeToJsonElement(aggregation.median))
                     put(Aggregation.SUM, json.encodeToJsonElement(aggregation.sum))
-                }
+                }.toString()
 
-                json.encodeToJsonElement(aggregation) shouldBe expectedJsonStructure
+                json.encodeToString(aggregation).shouldEqualJson(expectedJsonStructure)
             }
         }
 
@@ -78,9 +80,9 @@ public class GlobalStatsTests : DescribeSpec({
                     put(GlobalStats.RANGE, json.encodeToJsonElement(globalStats.range))
                     put(GlobalStats.TIMEOUT, globalStats.timeout)
                     put(GlobalStats.WRITES_ONLY, globalStats.writesOnly)
-                }
+                }.toString()
 
-                json.encodeToJsonElement(globalStats) shouldBe expectedJsonStructure
+                json.encodeToString(globalStats).shouldEqualJson(expectedJsonStructure)
             }
         }
     }

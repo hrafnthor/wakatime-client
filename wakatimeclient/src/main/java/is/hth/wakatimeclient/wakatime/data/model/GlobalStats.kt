@@ -108,7 +108,6 @@ internal object AggregationJsonTransformer : JsonTransformingSerializer<Aggregat
                         if (innerElement is JsonObject) {
                             // Flatten count object into a simple field in the root
                             findValue(
-                                builder = this,
                                 element = innerElement,
                                 sourceKey = "text",
                                 destKey = Aggregation.HUMAN_READABLE_COUNT
