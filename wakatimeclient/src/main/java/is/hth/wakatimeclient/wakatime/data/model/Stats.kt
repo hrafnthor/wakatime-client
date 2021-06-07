@@ -167,10 +167,8 @@ internal object MachineMeasurementListTransformer :
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return when (element) {
             is JsonArray -> buildJsonArray {
-                element
-                    .filter { it is JsonObject && it.size == 8 }
-                    .map {
-                        val innerElement: JsonObject = it as JsonObject
+                element.map { innerElement ->
+                    if (innerElement is JsonObject && innerElement.size == 8) {
                         // The inner element is of the correct type and contains as many
                         // keys as would be expected for the transformation to take place
                         buildJsonObject {
@@ -190,7 +188,8 @@ internal object MachineMeasurementListTransformer :
                                 findValue(innerElement, Measurement.HUMAN_READABLE_TOTAL_DAY, "")
                             }
                         }
-                    }.forEach(this::add)
+                    } else innerElement
+                }.forEach(this::add)
             }
             is JsonNull -> JsonArray(emptyList())
             else -> throw IllegalArgumentException(
