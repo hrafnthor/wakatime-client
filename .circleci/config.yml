@@ -1,0 +1,45 @@
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+orbs:
+  android: circleci/android@1.0.3
+
+jobs:
+  test:
+    executor:
+      name: android/android-machine
+
+    steps:
+      - checkout
+
+      - android/run-tests:
+          test-command: ./gradlew lint testDebug --continue
+          
+  build-and-test:  
+    executor:
+      name: android/android-machine
+
+    steps:
+      - checkout
+
+      - android/run-tests:
+          test-command: ./gradlew lint testDebug --continue
+          
+      - run:
+          name: Assemble client library release build
+          command: |
+            ./gradlew wakatimeclient:assembleRelease    
+
+workflows:
+  sample: 
+    jobs:
+      - test:
+          filters:
+            branches:
+              only:
+                - develop
+      - build-and-test:
+          filters:
+            branches:
+              only:
+                - master
