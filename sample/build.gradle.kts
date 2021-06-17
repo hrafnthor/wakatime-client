@@ -53,28 +53,27 @@ android {
 
 dependencies {
     //#region Local
-    implementation(enforcedPlatform(project(":bom")))
     implementation(project(":wakatimeclient"))
     //#endregion
 
     //#region Kotlin
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation(catalog.kotlin.stdlib.jdk8)
     //#endregion
 
     //#region Androidx
-    implementation("androidx.core:core-ktx")
-    implementation("androidx.appcompat:appcompat")
-    implementation("androidx.activity:activity-ktx")
-    implementation("androidx.security:security-crypto")
-    implementation("androidx.constraintlayout:constraintlayout")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout")
+    implementation(catalog.androidx.core.ktx)
+    implementation(catalog.androidx.appcompat)
+    implementation(catalog.androidx.activity.ktx)
+    implementation(catalog.androidx.security.crypto)
+    implementation(catalog.androidx.constraintlayout)
+    implementation(catalog.androidx.swiperefreshlayout)
     //#endregion
 
     //#region AndroidX Lifecycle
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx")
+    implementation(catalog.androidx.lifecycle.livedata.ktx)
+    implementation(catalog.androidx.lifecycle.runtime.ktx)
+    implementation(catalog.androidx.lifecycle.viewmodel.ktx)
     //#endregion
 
-    implementation("com.squareup.okhttp3:logging-interceptor")
+    implementation(catalog.square.okhttp3.logging)
 }
