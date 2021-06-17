@@ -11,7 +11,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:$androidGradlePluginVersion")
+        classpath("com.android.tools.build:gradle:7.0.0-beta04")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("de.mannodermaus.gradle.plugins:android-junit5:$mannodermausPluginVersion")
     }

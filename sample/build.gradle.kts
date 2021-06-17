@@ -1,4 +1,8 @@
-import com.android.build.gradle.internal.dsl.BuildType
+import com.android.build.api.dsl.ApplicationBuildType
+
+fun ApplicationBuildType.setBuildConfigField(key: String, value: String) {
+    buildConfigField("String", key, "\"$value\"")
+}
 
 plugins {
     id("com.android.application")
@@ -45,10 +49,6 @@ android {
             it.useJUnitPlatform()
         }
     }
-}
-
-fun BuildType.setBuildConfigField(key: String, value: String) {
-    buildConfigField("String", key, "\"$value\"")
 }
 
 dependencies {
