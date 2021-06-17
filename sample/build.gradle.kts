@@ -1,4 +1,8 @@
-import com.android.build.gradle.internal.dsl.BuildType
+import com.android.build.api.dsl.ApplicationBuildType
+
+fun ApplicationBuildType.setBuildConfigField(key: String, value: String) {
+    buildConfigField("String", key, "\"$value\"")
+}
 
 plugins {
     id("com.android.application")
@@ -7,12 +11,12 @@ plugins {
 }
 
 android {
-    compileSdkVersion(30)
+    compileSdk = 30
     buildToolsVersion = "30.0.3"
     defaultConfig {
         applicationId = "is.hth.wakatimeclient.sample"
-        minSdkVersion(23)
-        targetSdkVersion(30)
+        minSdk = 23
+        targetSdk = 30
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -47,34 +51,29 @@ android {
     }
 }
 
-fun BuildType.setBuildConfigField(key: String, value: String) {
-    buildConfigField("String", key, "\"$value\"")
-}
-
 dependencies {
     //#region Local
-    implementation(enforcedPlatform(project(":bom")))
     implementation(project(":wakatimeclient"))
     //#endregion
 
     //#region Kotlin
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation(catalog.kotlin.stdlib.jdk8)
     //#endregion
 
     //#region Androidx
-    implementation("androidx.core:core-ktx")
-    implementation("androidx.appcompat:appcompat")
-    implementation("androidx.activity:activity-ktx")
-    implementation("androidx.security:security-crypto")
-    implementation("androidx.constraintlayout:constraintlayout")
-    implementation("androidx.swiperefreshlayout:swiperefreshlayout")
+    implementation(catalog.androidx.core.ktx)
+    implementation(catalog.androidx.appcompat)
+    implementation(catalog.androidx.activity.ktx)
+    implementation(catalog.androidx.security.crypto)
+    implementation(catalog.androidx.constraintlayout)
+    implementation(catalog.androidx.swiperefreshlayout)
     //#endregion
 
     //#region AndroidX Lifecycle
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx")
+    implementation(catalog.androidx.lifecycle.livedata.ktx)
+    implementation(catalog.androidx.lifecycle.runtime.ktx)
+    implementation(catalog.androidx.lifecycle.viewmodel.ktx)
     //#endregion
 
-    implementation("com.squareup.okhttp3:logging-interceptor")
+    implementation(catalog.square.okhttp3.logging)
 }

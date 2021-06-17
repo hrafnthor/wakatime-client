@@ -44,52 +44,47 @@ android {
     }
 }
 
-
 dependencies {
-    //#region Local
-    implementation(enforcedPlatform(project(":bom")))
-    //#endregion
-
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation(catalog.kotlin.stdlib.jdk8)
 
     //#region KotlinX Serialization
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core")
+    implementation(catalog.kotlinx.serialization.json)
+    implementation(catalog.kotlinx.serialization.core)
     //#endregion
 
     //#region Androidx
-    implementation("androidx.core:core-ktx")
-    implementation("androidx.appcompat:appcompat")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx")
+    implementation(catalog.androidx.core.ktx)
+    implementation(catalog.androidx.appcompat)
+    implementation(catalog.androidx.lifecycle.runtime.ktx)
     //#endregion
 
-    api("net.openid:appauth")
+    api(catalog.appauth)
 
-    implementation("com.squareup.retrofit2:retrofit")
-    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter")
-    implementation("com.jakewharton.timber:timber")
+    implementation(catalog.square.retrofit2)
+    implementation(catalog.jakewharton.retrofit2.serialization)
+    implementation(catalog.jakewharton.timber)
 
     //#region Kotest
-    testImplementation("io.kotest:kotest-runner-junit5")
-    testImplementation("io.kotest:kotest-assertions-core")
-    testImplementation("io.kotest:kotest-assertions-json")
+    testImplementation(catalog.kotest.junit5.runner)
+    testImplementation(catalog.kotest.assertions.core)
+    testImplementation(catalog.kotest.assertions.json)
     //#endregion
 
-    //#region Test
-    testImplementation("org.jetbrains.kotlin:kotlin-reflect")
+    //#region JVM test
+    testImplementation(catalog.kotlin.reflect)
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
+    testImplementation(catalog.junit5.api)
+    testRuntimeOnly(catalog.junit5.engine)
 
-    testImplementation("com.squareup.okhttp3:mockwebserver")
+    testImplementation(catalog.square.okhttp3.mockwebserver)
     //#endregion
 
     //#region Android Test
-    androidTestImplementation("androidx.test:runner")
-    androidTestImplementation("androidx.test.ext:junit")
-    androidTestImplementation("org.junit.jupiter:junit-jupiter-api")
+    androidTestImplementation(catalog.androidx.test.runner)
+    androidTestImplementation(catalog.androidx.test.extensions.junit)
+    androidTestImplementation(catalog.junit5.api)
 
-    androidTestImplementation("de.mannodermaus.junit5:android-test-core")
-    androidTestRuntimeOnly("de.mannodermaus.junit5:android-test-runner")
+    androidTestImplementation(catalog.mannodermaus.junit5.android.core)
+    androidTestRuntimeOnly(catalog.mannodermaus.junit5.android.runner)
     //#endregion
 }

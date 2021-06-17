@@ -1,19 +1,14 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 buildscript {
-    val bom = project(":bom")
-    val kotlinVersion: String by bom
-    val androidGradlePluginVersion: String by bom
-    val mannodermausPluginVersion: String by bom
-
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:$androidGradlePluginVersion")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-        classpath("de.mannodermaus.gradle.plugins:android-junit5:$mannodermausPluginVersion")
+        classpath("com.android.tools.build:gradle:7.0.0-beta04")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.0")
+        classpath("de.mannodermaus.gradle.plugins:android-junit5:1.7.1.1")
     }
 }
 
