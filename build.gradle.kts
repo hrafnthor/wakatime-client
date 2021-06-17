@@ -2,6 +2,7 @@ import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
 buildscript {
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
     }
@@ -21,6 +22,7 @@ plugins {
 
 allprojects {
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
     }
