@@ -2,7 +2,7 @@
 [![wakatime](https://wakatime.com/badge/github/hrafnthor/wakatime-client.svg)](https://wakatime.com/badge/github/hrafnthor/wakatime-client)
 [![CircleCI](https://circleci.com/gh/hrafnthor/wakatime-client/tree/develop.svg?style=svg)](https://circleci.com/gh/hrafnthor/wakatime-client/tree/develop)
 
-This project is a native Android wrapper ontop of the restful api supplied by the code activity tracker [Wakatime](https://www.wakatime.com).
+A native Android library facilitating authentication and interaction with the restful API supplied by the code activity tracker [Wakatime](https://www.wakatime.com).
 
 ## Setup
 
