@@ -5,7 +5,7 @@
 
 A native Android library facilitating authentication and interaction with the restful API supplied by the code activity tracker [Wakatime](https://www.wakatime.com).
 
-## Depdency setup
+### Dependency setup
 
 The first step is to include WakatimeClient into your project, for example, as a Gradle compile dependency:
 
@@ -14,13 +14,13 @@ implementation("is.hth:wakatimeclient:X.Y.Z")
 ```
 Replace X.Y.Z with the latest published version [![Maven Central](https://img.shields.io/maven-central/v/is.hth/wakatimeclient.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22is.hth%22%20AND%20a:%22wakatimeclient%22)
 
-## Configuration
+### Configuration
 
-### Authentication
+#### Authentication
 
 The client supports both an OAuth 2.0 flow (courtesy of [AppAuth](https://github.com/openid/AppAuth-Android)) as well as simply using an api key.
 
-#### OAuth flow
+##### OAuth flow
 
 When going for the OAuth 2.0 authentication flow, you first need to create a new application within Wakatime's [app dashboard](https://wakatime.com/apps).
 
@@ -54,7 +54,7 @@ Going for an OAuth flow like this will allow your implementation to be used by o
 **Make sure that you do not bundle the id and secret within the application, as it is trivial to retrieve these values from an APK**
 Rather have them be delivered to the client from a service you trust.
 
-#### Api key
+##### Api key
 
 When going for an API key authentication, each user first needs to grab their api key from the [accounts settings](https://wakatime.com/settings/accounts) inside of Wakatime.
 
@@ -67,7 +67,7 @@ WakatimeClient.Builder(
 ```
 **Make sure that you do not bundle the API key within the application, as it is your own private one!** Each user will have to supply their own.
 
-### Configuration
+#### Configuration
 
 The client builder exposes the internal network client for further configuration such as adding network interceptors or configuring timeout limits
 
@@ -93,7 +93,7 @@ builder.network {
 }...
 ```
 
-### Credential storage
+#### Credential storage
 
 Lastly the client requires an implementation of `AuthStorage` for storing credentials and related information.
 
@@ -102,9 +102,9 @@ builder.build(context, <Your implementation of AuthStorage>)
 ```
 The reason this is left to the implementer is that there are multiple ways of securing authentication data on Android, and the best practices are constantly evolving and changing. By leaving this implementation detail out, this project allows for unforseen future changes without having to react to them it self.
 
-## Usage
+### Usage
 
-### Authentication
+#### Authentication
 
 With the client configured, authentication becomes as easy as creating an authentication intent
 
@@ -125,7 +125,7 @@ when(val results = client.onAuthenticationResult(received)) {
 }
 
 ```
-### Retrieving data
+#### Retrieving data
 
 With the authentication out of the way, sending a heartbeat for writing this markdown would not be much more complex than
 
