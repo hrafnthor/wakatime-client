@@ -39,7 +39,6 @@ plugins {
     kotlin("plugin.serialization") version "1.5.0"
     // static code analysis for Kotlin
     id("io.gitlab.arturbosch.detekt").version("1.17.1")
-
     // used for publishing into nexus repositories
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
