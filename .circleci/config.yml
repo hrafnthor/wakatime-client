@@ -33,12 +33,12 @@ jobs:
 workflows:
   sample: 
     jobs:
-      - test:
+      - run-tests:
           filters:
             branches:
               only:
-                - develop
-      - build-and-test:
+                - pipeline
+      - build-and-run-test:
           filters:
             branches:
               only:
