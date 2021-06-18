@@ -107,3 +107,53 @@ tasks {
         from(android.sourceSets.getByName("main").java.srcDirs)
     }
 }
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+    publications{
+        create<MavenPublication>("release") {
+            groupId = "is.hth"
+            artifactId = "wakatimeclient"
+            version = "0.0.6"
+
+            pom {
+                name.set("WakatimeClient")
+                description.set("""
+                    A native Android library facilitating authentication and interaction with 
+                    the restful API supplied by the code activity tracker Wakatime 
+                    (https://wakatime.com).
+                """.trimIndent())
+                url.set("https://www.hth.is/wakatime-client")
+
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("hrafnthor")
+                        name.set("Hrafn Thorvaldsson")
+                        email.set("hrafn@hth.is")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:git://github.com/hrafnthor/wakatime-client.git")
+                    developerConnection.set("scm:git:ssh://github.com/hrafnthor/wakatime-client.git")
+                    url.set("https://github.com/hrafnthor/wakatime-client")
+                }
+            }
+
+            // Components are only generated after the evaluation phase
+            // see: https://developer.android.com/studio/build/maven-publish-plugin
+            afterEvaluate {
+                from(components["release"])
+                artifact(tasks.getByName("androidHtmlDocJar"))
+                artifact(tasks.getByPath("androidSourceJar"))
+            }
+        }
+    }
+}
