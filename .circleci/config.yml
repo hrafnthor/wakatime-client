@@ -13,22 +13,7 @@ jobs:
       - checkout
 
       - android/run-tests:
-          test-command: ./gradlew lint testDebug --continue
-          
-  build-and-run-unit-test:  
-    executor:
-      name: android/android-machine
-
-    steps:
-      - checkout
-
-      - android/run-tests:
-          test-command: ./gradlew lint testDebug --continue
-          
-      - run:
-          name: Assemble client library release build
-          command: |
-            ./gradlew wakatimeclient:assembleRelease    
+          test-command: ./gradlew testDebug --continue
 
 workflows:
   sample: 
@@ -38,8 +23,5 @@ workflows:
             branches:
               only:
                 - pipeline
-      - build-and-run-unit-test:
-          filters:
-            branches:
-              only:
+                - develop
                 - master
