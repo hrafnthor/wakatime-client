@@ -5,9 +5,10 @@ orbs:
   android: circleci/android@1.0.3
 
 jobs:
-  test:
+  run-jvm-tests:
     executor:
       name: android/android-machine
+      resources-class: medium
 
     steps:
       - checkout
@@ -33,7 +34,7 @@ jobs:
 workflows:
   sample: 
     jobs:
-      - run-tests:
+      - run-jvm-tests:
           filters:
             branches:
               only:
