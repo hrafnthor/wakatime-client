@@ -16,12 +16,11 @@ jobs:
           test-command: ./gradlew testDebug --continue
 
 workflows:
-  sample: 
+  quality-gate:
     jobs:
       - run-jvm-tests:
           filters:
             branches:
               only:
-                - pipeline
                 - develop
                 - master
