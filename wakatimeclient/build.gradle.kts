@@ -121,13 +121,11 @@ afterEvaluate {
 
                 pom {
                     name.set("WakatimeClient")
-                    description.set(
-                        """
-                    A native Android library facilitating authentication and interaction with
-                    the restful API supplied by the code activity tracker Wakatime
-                    (https://wakatime.com).
-                """.trimIndent()
-                    )
+                    description.set("""
+                        A native Android library facilitating authentication and interaction with
+                        the restful API supplied by the code activity tracker Wakatime
+                        (https://wakatime.com).
+                    """.trimIndent())
                     url.set("https://www.hth.is/wakatime-client")
 
                     licenses {
