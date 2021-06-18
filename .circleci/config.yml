@@ -1,0 +1,26 @@
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+orbs:
+  android: circleci/android@1.0.3
+
+jobs:
+  run-jvm-tests:
+    executor:
+      name: android/android-machine
+
+    steps:
+      - checkout
+
+      - android/run-tests:
+          test-command: ./gradlew testDebug --continue
+
+workflows:
+  quality-gate:
+    jobs:
+      - run-jvm-tests:
+          filters:
+            branches:
+              only:
+                - develop
+                - master

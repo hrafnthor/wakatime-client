@@ -4,13 +4,17 @@
 .cxx
 
 # IntelliJ
-.idea
 *.iml
-*.iws
-*.ipr
+/.idea
+/.idea/*.xml
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
 classes
 gen-external-apklibs
-
 
 # Gradle
 .gradle
@@ -21,3 +25,4 @@ reports
 
 # OS related
 .DS_Store
+/.gpg-keys/

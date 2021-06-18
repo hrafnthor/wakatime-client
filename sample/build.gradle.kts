@@ -1,43 +1,79 @@
+import com.android.build.api.dsl.ApplicationBuildType
+
+fun ApplicationBuildType.setBuildConfigField(key: String, value: String) {
+    buildConfigField("String", key, "\"$value\"")
+}
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
-    id("kotlin-android-extensions")
     id("kotlin-kapt")
 }
 
-
 android {
-    compileSdkVersion(Properties.Common.compileSdkVersion)
+    compileSdk = 30
+    buildToolsVersion = "30.0.3"
     defaultConfig {
         applicationId = "is.hth.wakatimeclient.sample"
-        minSdkVersion(Properties.Common.minimumSdkVersion)
-        targetSdkVersion(Properties.Common.targetSdkVersion)
+        minSdk = 23
+        targetSdk = 30
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    buildFeatures {
+        dataBinding = true
+    }
     buildTypes {
         getByName("debug") {
-
-        }
-        getByName("release") {
-            //            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // The defined OAuth redirect scheme as defined inside Wakatime's app dashboard
+            val redirectScheme = "<Your redirect scheme>"
+            val redirectHost = "<Your redirect host>"
+            manifestPlaceholders["appAuthRedirectScheme"] = redirectScheme
+            manifestPlaceholders["appAuthRedirectHost"] = redirectHost
+            setBuildConfigField("APPID", "<Your Wakatime generated app id")
+            setBuildConfigField("SECRET", "<Your Wakatime generated secret>")
+            setBuildConfigField("REDIRECT_URI", "$redirectScheme://$redirectHost")
         }
     }
     compileOptions {
-        sourceCompatibility = Properties.Common.javaCompatibility
-        targetCompatibility = Properties.Common.javaCompatibility
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
-    buildToolsVersion = Properties.Common.buildToolVersion
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
+
+    testOptions {
+        unitTests.all {
+            it.useJUnitPlatform()
+        }
+    }
 }
 
 dependencies {
-    implementation(fileTree(Pair("dir", "libs"), Pair("include", listOf("*.jar"))))
-    implementation(Libs.kotlin_stdlib_jdk7)
-    implementation(Libs.appcompat)
-    implementation(Libs.core_ktx)
-    implementation(Libs.constraintlayout)
-    testImplementation(Libs.junit)
-    androidTestImplementation(Libs.androidx_test_runner)
-    androidTestImplementation(Libs.espresso_core)
+    //#region Local
+    implementation(project(":wakatimeclient"))
+    //#endregion
+
+    //#region Kotlin
+    implementation(catalog.kotlin.stdlib.jdk8)
+    //#endregion
+
+    //#region Androidx
+    implementation(catalog.androidx.core.ktx)
+    implementation(catalog.androidx.appcompat)
+    implementation(catalog.androidx.activity.ktx)
+    implementation(catalog.androidx.security.crypto)
+    implementation(catalog.androidx.constraintlayout)
+    implementation(catalog.androidx.swiperefreshlayout)
+    //#endregion
+
+    //#region AndroidX Lifecycle
+    implementation(catalog.androidx.lifecycle.livedata.ktx)
+    implementation(catalog.androidx.lifecycle.runtime.ktx)
+    implementation(catalog.androidx.lifecycle.viewmodel.ktx)
+    //#endregion
+
+    implementation(catalog.square.okhttp3.logging)
 }
