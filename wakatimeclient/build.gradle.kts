@@ -13,7 +13,8 @@ android {
         minSdk = 16
         targetSdk = 30
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
+        testInstrumentationRunnerArguments["runnerBuilder"] =
+            "de.mannodermaus.junit5.AndroidJUnit5Builder"
 
         // Default values given for the benefit of AppAuth to shut
         // up the manifest merger during tests
@@ -21,26 +22,25 @@ android {
         manifestPlaceholders["appAuthRedirectHost"] = ""
 
     }
-    buildTypes {
-        getByName("debug") {
 
-        }
+    buildTypes {
         getByName("release") {
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
+        // Turn on strict compiler flags to force a stance on library visibility
         freeCompilerArgs = freeCompilerArgs + "-Xexplicit-api=strict"
-    }
-    packagingOptions {
-        exclude("META-INF/LICENSE*")
     }
 }
 
