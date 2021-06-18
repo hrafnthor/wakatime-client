@@ -117,7 +117,7 @@ afterEvaluate {
             create<MavenPublication>("release") {
                 groupId = "is.hth"
                 artifactId = "wakatimeclient"
-                version = "0.0.7"
+                version = ""
 
                 pom {
                     name.set("WakatimeClient")
