@@ -4,6 +4,8 @@ plugins {
     id("kotlin-kapt")
     id("kotlinx-serialization")
     id("de.mannodermaus.android-junit5")
+    id("maven-publish")
+    id("org.jetbrains.dokka") version "1.4.32"
 }
 
 android {
@@ -87,4 +89,21 @@ dependencies {
     androidTestImplementation(catalog.mannodermaus.junit5.android.core)
     androidTestRuntimeOnly(catalog.mannodermaus.junit5.android.runner)
     //#endregion
+}
+
+tasks {
+    val htmlDocPath = "$buildDir/docs/html"
+    dokkaHtml.configure {
+        outputDirectory.set(File(htmlDocPath))
+    }
+    register("androidHtmlDocJar", Jar::class) {
+        archiveClassifier.set("html")
+        from(htmlDocPath)
+        dependsOn(dokkaHtml)
+    }
+
+    register("androidSourceJar", Jar::class) {
+        archiveClassifier.set("sources")
+        from(android.sourceSets.getByName("main").java.srcDirs)
+    }
 }
