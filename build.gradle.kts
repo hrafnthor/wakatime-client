@@ -39,7 +39,7 @@ tasks {
 
     // Set dependency update task configuration to filter unstable updates.
     // see https://github.com/ben-manes/gradle-versions-plugin for details
-    named<DependencyUpdatesTask>("dependencyUpdates") {
+    register("dependencyUpdated", DependencyUpdatesTask::class) {
         checkConstraints = true
         checkForGradleUpdate = true
         rejectVersionIf {
