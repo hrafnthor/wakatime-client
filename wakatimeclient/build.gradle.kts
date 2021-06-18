@@ -6,6 +6,7 @@ plugins {
     id("de.mannodermaus.android-junit5")
     id("maven-publish")
     id("org.jetbrains.dokka") version "1.4.32"
+    signing
 }
 
 android {
@@ -91,6 +92,7 @@ dependencies {
     //#endregion
 }
 
+//#region publishing
 tasks {
     val htmlDocPath = "$buildDir/docs/html"
     dokkaHtml.configure {
@@ -107,49 +109,47 @@ tasks {
         from(android.sourceSets.getByName("main").java.srcDirs)
     }
 }
+// Components are only generated after the evaluation phase
+// see: https://developer.android.com/studio/build/maven-publish-plugin
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                groupId = "is.hth"
+                artifactId = "wakatimeclient"
+                version = "0.0.7"
 
-publishing {
-    repositories {
-        mavenLocal()
-    }
-    publications{
-        create<MavenPublication>("release") {
-            groupId = "is.hth"
-            artifactId = "wakatimeclient"
-            version = "0.0.6"
-
-            pom {
-                name.set("WakatimeClient")
-                description.set("""
-                    A native Android library facilitating authentication and interaction with 
-                    the restful API supplied by the code activity tracker Wakatime 
+                pom {
+                    name.set("WakatimeClient")
+                    description.set(
+                        """
+                    A native Android library facilitating authentication and interaction with
+                    the restful API supplied by the code activity tracker Wakatime
                     (https://wakatime.com).
-                """.trimIndent())
-                url.set("https://www.hth.is/wakatime-client")
+                """.trimIndent()
+                    )
+                    url.set("https://www.hth.is/wakatime-client")
 
-                licenses {
-                    license {
-                        name.set("MIT License")
-                        url.set("https://opensource.org/licenses/MIT")
+                    licenses {
+                        license {
+                            name.set("MIT License")
+                            url.set("https://opensource.org/licenses/MIT")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("hrafnth")
+                            name.set("Hrafn Thorvaldsson")
+                            email.set("hrafn@hth.is")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:git://github.com/hrafnthor/wakatime-client.git")
+                        developerConnection.set("scm:git:ssh://github.com/hrafnthor/wakatime-client.git")
+                        url.set("https://github.com/hrafnthor/wakatime-client")
                     }
                 }
-                developers {
-                    developer {
-                        id.set("hrafnthor")
-                        name.set("Hrafn Thorvaldsson")
-                        email.set("hrafn@hth.is")
-                    }
-                }
-                scm {
-                    connection.set("scm:git:git://github.com/hrafnthor/wakatime-client.git")
-                    developerConnection.set("scm:git:ssh://github.com/hrafnthor/wakatime-client.git")
-                    url.set("https://github.com/hrafnthor/wakatime-client")
-                }
-            }
 
-            // Components are only generated after the evaluation phase
-            // see: https://developer.android.com/studio/build/maven-publish-plugin
-            afterEvaluate {
                 from(components["release"])
                 artifact(tasks.getByName("androidHtmlDocJar"))
                 artifact(tasks.getByPath("androidSourceJar"))
@@ -157,3 +157,16 @@ publishing {
         }
     }
 }
+
+// Set the variables that the signing plugin
+// expects to find for its signature step below
+extra.apply {
+    set("signing.keyId", rootProject.extra["signing.keyId"])
+    set("signing.password", rootProject.extra["signing.password"])
+    set("signing.secretKeyRingFile", rootProject.extra["signing.secretKeyRingFile"])
+}
+
+signing {
+    sign(publishing.publications)
+}
+//#endregion
