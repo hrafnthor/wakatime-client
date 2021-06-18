@@ -1,10 +1,20 @@
 # wakatime-client
 [![wakatime](https://wakatime.com/badge/github/hrafnthor/wakatime-client.svg)](https://wakatime.com/badge/github/hrafnthor/wakatime-client)
+[![Maven Central](https://img.shields.io/maven-central/v/is.hth/wakatimeclient.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22is.hth%22%20AND%20a:%22wakatimeclient%22)
 [![CircleCI](https://circleci.com/gh/hrafnthor/wakatime-client/tree/develop.svg?style=svg)](https://circleci.com/gh/hrafnthor/wakatime-client/tree/develop)
 
 A native Android library facilitating authentication and interaction with the restful API supplied by the code activity tracker [Wakatime](https://www.wakatime.com).
 
-## Setup
+## Depdency setup
+
+The first step is to include WakatimeClient into your project, for example, as a Gradle compile dependency:
+
+```kotlin
+implementation("is.hth:wakatimeclient:X.Y.Z")
+```
+Replace X.Y.Z with the latest published version [![Maven Central](https://img.shields.io/maven-central/v/is.hth/wakatimeclient.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22is.hth%22%20AND%20a:%22wakatimeclient%22)
+
+## Configuration
 
 ### Authentication
 
