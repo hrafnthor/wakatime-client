@@ -16,7 +16,6 @@ import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeRemoteDataSourceImpl
 import android.content.Context
 import android.net.Uri
 import kotlinx.serialization.ExperimentalSerializationApi
-import timber.log.Timber
 
 @Suppress("unused")
 public class WakatimeClient private constructor(
@@ -36,14 +35,6 @@ public class WakatimeClient private constructor(
         redirectUri: Uri = Uri.parse(""),
         method: Method
     ) {
-
-        init {
-            if (BuildConfig.DEBUG) {
-                Timber.plant(Timber.DebugTree())
-            } else {
-                Timber.plant(Timber.asTree())
-            }
-        }
 
         /**
          * The client will be configured to use basic authentication with

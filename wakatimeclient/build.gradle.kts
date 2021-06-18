@@ -4,6 +4,9 @@ plugins {
     id("kotlin-kapt")
     id("kotlinx-serialization")
     id("de.mannodermaus.android-junit5")
+    id("maven-publish")
+    id("org.jetbrains.dokka") version "1.4.32"
+    signing
 }
 
 android {
@@ -13,7 +16,8 @@ android {
         minSdk = 16
         targetSdk = 30
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        testInstrumentationRunnerArguments["runnerBuilder"] = "de.mannodermaus.junit5.AndroidJUnit5Builder"
+        testInstrumentationRunnerArguments["runnerBuilder"] =
+            "de.mannodermaus.junit5.AndroidJUnit5Builder"
 
         // Default values given for the benefit of AppAuth to shut
         // up the manifest merger during tests
@@ -21,26 +25,25 @@ android {
         manifestPlaceholders["appAuthRedirectHost"] = ""
 
     }
-    buildTypes {
-        getByName("debug") {
 
-        }
+    buildTypes {
         getByName("release") {
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
+        // Turn on strict compiler flags to force a stance on library visibility
         freeCompilerArgs = freeCompilerArgs + "-Xexplicit-api=strict"
-    }
-    packagingOptions {
-        exclude("META-INF/LICENSE*")
     }
 }
 
@@ -88,3 +91,80 @@ dependencies {
     androidTestRuntimeOnly(catalog.mannodermaus.junit5.android.runner)
     //#endregion
 }
+
+//#region publishing
+tasks {
+    val htmlDocPath = "$buildDir/docs/html"
+    dokkaHtml.configure {
+        outputDirectory.set(File(htmlDocPath))
+    }
+    register("androidHtmlDocJar", Jar::class) {
+        archiveClassifier.set("html")
+        from(htmlDocPath)
+        dependsOn(dokkaHtml)
+    }
+
+    register("androidSourceJar", Jar::class) {
+        archiveClassifier.set("sources")
+        from(android.sourceSets.getByName("main").java.srcDirs)
+    }
+}
+// Components are only generated after the evaluation phase
+// see: https://developer.android.com/studio/build/maven-publish-plugin
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                groupId = "is.hth"
+                artifactId = "wakatimeclient"
+                version = "0.0.7"
+
+                pom {
+                    name.set("WakatimeClient")
+                    description.set("""
+                        A native Android library facilitating authentication and interaction with
+                        the restful API supplied by the code activity tracker Wakatime
+                        (https://wakatime.com).
+                    """.trimIndent())
+                    url.set("https://www.hth.is/wakatime-client")
+
+                    licenses {
+                        license {
+                            name.set("MIT License")
+                            url.set("https://opensource.org/licenses/MIT")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("hrafnth")
+                            name.set("Hrafn Thorvaldsson")
+                            email.set("hrafn@hth.is")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:git://github.com/hrafnthor/wakatime-client.git")
+                        developerConnection.set("scm:git:ssh://github.com/hrafnthor/wakatime-client.git")
+                        url.set("https://github.com/hrafnthor/wakatime-client")
+                    }
+                }
+
+                from(components["release"])
+                artifact(tasks.getByName("androidHtmlDocJar"))
+                artifact(tasks.getByPath("androidSourceJar"))
+            }
+        }
+    }
+}
+
+// Set the variables that the signing plugin
+// expects to find for its signature step below
+extra.apply {
+    set("signing.keyId", rootProject.extra["signing.keyId"])
+    set("signing.password", rootProject.extra["signing.password"])
+    set("signing.secretKeyRingFile", rootProject.extra["signing.secretKeyRingFile"])
+}
+
+signing {
+    sign(publishing.publications)
+}
+//#endregion

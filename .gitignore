@@ -25,3 +25,4 @@ reports
 
 # OS related
 .DS_Store
+/.gpg-keys/

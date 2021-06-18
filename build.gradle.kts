@@ -1,5 +1,25 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
+fun isUnstable(version: String): Boolean {
+    val hasUnstableKeywords = listOf("beta", "alpha", "rc").any {
+        version.toLowerCase().contains(it)
+    }
+    // Capture formats where {number} is repeated with {dot} in between
+    val regex = "^(?:[0-9]+\\.)+[0-9]+$".toRegex()
+    return hasUnstableKeywords || regex.matches(version).not()
+}
+
+val localProps = project.rootProject.file("local.properties")
+if (localProps.exists()) {
+    val props = java.util.Properties()
+    java.io.FileInputStream(localProps).bufferedReader().use {
+        props.load(it)
+    }
+    props.forEach { key, value ->
+        extra.set(key as String, value)
+    }
+}
+
 buildscript {
     repositories {
         google()
@@ -17,6 +37,10 @@ plugins {
     id("com.github.ben-manes.versions") version "0.38.0"
     // Native Kotlin Serialization
     kotlin("plugin.serialization") version "1.5.0"
+    // static code analysis for Kotlin
+    id("io.gitlab.arturbosch.detekt").version("1.17.1")
+    // used for publishing into nexus repositories
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
 allprojects {
@@ -26,10 +50,13 @@ allprojects {
     }
 }
 
+detekt {
+    input = files(rootDir)
+    config = files("detekt.yml")
+}
+
+
 tasks {
-    val clean by registering(Delete::class) {
-        delete(buildDir)
-    }
     withType<Test> {
         // For kotest Junit5 compatibility
         useJUnitPlatform()
@@ -37,7 +64,7 @@ tasks {
 
     // Set dependency update task configuration to filter unstable updates.
     // see https://github.com/ben-manes/gradle-versions-plugin for details
-    named<DependencyUpdatesTask>("dependencyUpdates") {
+    register("dependencyUpdated", DependencyUpdatesTask::class) {
         checkConstraints = true
         checkForGradleUpdate = true
         rejectVersionIf {
@@ -47,11 +74,17 @@ tasks {
     }
 }
 
-fun isUnstable(version: String): Boolean {
-    val hasUnstableKeywords = listOf("beta", "alpha", "rc").any {
-        version.toLowerCase().contains(it)
+nexusPublishing {
+    repositories {
+        sonatype {
+            // Values previously read from local.properties
+            stagingProfileId.set(extra["sonartypeStagingProfileId"] as String)
+            username.set(extra["ossrhUsername"] as String)
+            password.set(extra["ossrhPassword"] as String)
+
+            // Different nexus url requirements for signups made post 24th of february
+            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+        }
     }
-    // Capture formats where {number} is repeated with {dot} in between
-    val regex = "^(?:[0-9]+\\.)+[0-9]+$".toRegex()
-    return hasUnstableKeywords || regex.matches(version).not()
 }
