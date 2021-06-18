@@ -9,6 +9,10 @@ fun isUnstable(version: String): Boolean {
     return hasUnstableKeywords || regex.matches(version).not()
 }
 
+fun ExtraPropertiesExtension.copy(key: String, map: MutableMap<String, String>){
+    set(key, map.getOrDefault(key, ""))
+}
+
 val localProps = project.rootProject.file("local.properties")
 if (localProps.exists()) {
     val props = java.util.Properties()
@@ -17,6 +21,16 @@ if (localProps.exists()) {
     }
     props.forEach { key, value ->
         extra.set(key as String, value)
+    }
+} else {
+    extra.apply {
+        val env = System.getenv()
+        copy("sonartypeStagingProfileId", env)
+        copy("ossrhUsername", env)
+        copy("ossrhPassword", env)
+        copy("signing.keyId", env)
+        copy("signing.password", env)
+        copy("signing.secretKeyRingFile", env)
     }
 }
 
