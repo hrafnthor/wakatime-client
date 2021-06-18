@@ -8,7 +8,6 @@ jobs:
   run-jvm-tests:
     executor:
       name: android/android-machine
-      resources-class: medium
 
     steps:
       - checkout
@@ -16,7 +15,7 @@ jobs:
       - android/run-tests:
           test-command: ./gradlew lint testDebug --continue
           
-  build-and-test:  
+  build-and-run-unit-test:  
     executor:
       name: android/android-machine
 
@@ -39,7 +38,7 @@ workflows:
             branches:
               only:
                 - pipeline
-      - build-and-run-test:
+      - build-and-run-unit-test:
           filters:
             branches:
               only:
