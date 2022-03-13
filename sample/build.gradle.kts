@@ -27,13 +27,21 @@ android {
     buildTypes {
         getByName("debug") {
             // The defined OAuth redirect scheme as defined inside Wakatime's app dashboard
-            val redirectScheme = "<Your redirect scheme>"
-            val redirectHost = "<Your redirect host>"
-            manifestPlaceholders["appAuthRedirectScheme"] = redirectScheme
-            manifestPlaceholders["appAuthRedirectHost"] = redirectHost
-            setBuildConfigField("APPID", "<Your Wakatime generated app id")
-            setBuildConfigField("SECRET", "<Your Wakatime generated secret>")
-            setBuildConfigField("REDIRECT_URI", "$redirectScheme://$redirectHost")
+            // These values should be placed in the projects local.properties file
+            val wakatimeRedirectScheme: String by rootProject.extra
+            val wakatimeRedirectHost: String by rootProject.extra
+            manifestPlaceholders["appAuthRedirectScheme"] = wakatimeRedirectScheme
+            manifestPlaceholders["appAuthRedirectHost"] = wakatimeRedirectHost
+
+            // This is not a recommended way to handle sensitive information, and is only
+            // done like this here for sample purposes! Deliver sensitive values to the client
+            // via a secure backend or Firebase using for instance SafetyNet to verify the client
+            // and environment.
+            val wakatimeAppId: String by rootProject.extra
+            val wakatimeAppSecret: String by rootProject.extra
+            setBuildConfigField("APPID", wakatimeAppId)
+            setBuildConfigField("SECRET", wakatimeAppSecret)
+            setBuildConfigField("REDIRECT_URI", "$wakatimeRedirectScheme://$wakatimeRedirectHost")
         }
     }
     compileOptions {
