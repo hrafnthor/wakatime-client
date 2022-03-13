@@ -41,16 +41,16 @@ buildscript {
     }
     dependencies {
         classpath("com.android.tools.build:gradle:7.1.2")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.0")
-        classpath("de.mannodermaus.gradle.plugins:android-junit5:1.7.1.1")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10")
+        classpath("de.mannodermaus.gradle.plugins:android-junit5:1.8.2.0")
     }
 }
 
 plugins {
     // Used for dependency update checking
-    id("com.github.ben-manes.versions") version "0.38.0"
+    id("com.github.ben-manes.versions") version "0.42.0"
     // Native Kotlin Serialization
-    kotlin("plugin.serialization") version "1.5.0"
+    kotlin("plugin.serialization") version "1.6.10"
     // static code analysis for Kotlin
     id("io.gitlab.arturbosch.detekt").version("1.17.1")
     // used for publishing into nexus repositories
@@ -85,6 +85,23 @@ tasks {
             // reject all unstable dependency versions
             isUnstable(candidate.version)
         }
+    }
+}
+
+nexusPublishing {
+    repositories {
+        sonatype {
+            // Values previously read from local.properties
+            stagingProfileId.set(extra["sonartypeStagingProfileId"] as String)
+            username.set(extra["ossrhUsername"] as String)
+            password.set(extra["ossrhPassword"] as String)
+
+        copy("sonartypeStagingProfileId", env)
+        copy("ossrhUsername", env)
+        copy("ossrhPassword", env)
+        copy("signing.keyId", env)
+        copy("signing.password", env)
+        copy("signing.secretKeyRingFile", env)
     }
 }
 
