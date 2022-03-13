@@ -278,6 +278,14 @@ public sealed class Error(
                     public const val CODE: Int = Internal.CODE + 6
                 }
             }
+
+            /**
+             * No response was received when it was expected
+             */
+            public object EmptyResponse: Network(CODE, "No response received!") {
+
+                public const val CODE: Int = Internal.CODE + 7
+            }
         }
 
         /**

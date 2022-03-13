@@ -1,8 +1,7 @@
 package com.example.wakatimeclient.sample
 
 import `is`.hth.wakatimeclient.WakatimeClient
-import `is`.hth.wakatimeclient.core.data.Error
-import `is`.hth.wakatimeclient.core.data.Results
+import `is`.hth.wakatimeclient.core.data.*
 import `is`.hth.wakatimeclient.core.data.auth.AuthStorage
 import `is`.hth.wakatimeclient.core.data.auth.Scope
 import `is`.hth.wakatimeclient.wakatime.data.model.CurrentUser
@@ -78,7 +77,7 @@ class SampleActivity : AppCompatActivity(),
         }
 
         model.authentication.observe(this, Observer { authenticated ->
-            if (authenticated is Results.Success.Value && authenticated.value) {
+            if (authenticated is Success && authenticated.value) {
                 onRefresh()
             } else {
                 Toast.makeText(this, "Not authenticated!", Toast.LENGTH_LONG).show()
@@ -122,8 +121,8 @@ class SampleActivity : AppCompatActivity(),
 
     override fun onAuthentication(): LiveData<Boolean> = Transformations.map(model.authentication) {
         when (it) {
-            is Results.Success.Value -> it.value
-            else -> false
+            is Success -> it.value
+            is Failure -> false
         }
     }
 
@@ -155,7 +154,7 @@ class SampleViewModel(
         get() = Dispatchers.IO + job
 
     init {
-        _authenticated.postValue(Results.Success.Value(client.session().isAuthorized()))
+        _authenticated.postValue(Success(client.session().isAuthorized()))
     }
 
     override fun onCleared() {
@@ -176,8 +175,8 @@ class SampleViewModel(
     fun logout() {
         launch(context = coroutineContext) {
             when (val results = client.logout(false)) {
-                is Results.Success -> _authenticated.postValue(Results.Success.Value(false))
-                is Results.Failure -> _error.postValue(results.error)
+                is Success -> _authenticated.postValue(Success(false))
+                is Failure -> _error.postValue(results.error)
             }
         }
     }
@@ -185,8 +184,8 @@ class SampleViewModel(
     fun loadCurrentUser() {
         launch(context = coroutineContext) {
             when (val results = client.getCurrentUser()) {
-                is Results.Success.Value -> _currentUser.postValue(results.value)
-                is Results.Failure -> _error.postValue(results.error)
+                is Success -> _currentUser.postValue(results.value)
+                is Failure -> _error.postValue(results.error)
             }
         }
     }

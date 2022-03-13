@@ -1,6 +1,6 @@
 package `is`.hth.wakatimeclient.core.data.net
 
-import `is`.hth.wakatimeclient.core.data.Results
+import `is`.hth.wakatimeclient.core.data.*
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.safeOperation
 import retrofit2.Response
@@ -40,9 +40,9 @@ internal open class RemoteDataSource(
             with(networkCall()) {
                 val body: T? = body()
                 when {
-                    isSuccessful && body != null -> Results.Success.Value(transform(body))
-                    isSuccessful -> Results.Success.Empty
-                    else -> Results.Failure(errorBody()?.charStream().use {
+                    isSuccessful && body != null -> Success(transform(body))
+                    isSuccessful -> Failure(Error.Network.Internal.EmptyResponse)
+                    else -> Failure(errorBody()?.charStream().use {
                         processor.onNetworkError(
                             code = code(),
                             error = it?.readText() ?: message() ?: "No error message nor payload received"
@@ -55,8 +55,8 @@ internal open class RemoteDataSource(
 
     private suspend fun <R> checkPreconditions(passed: suspend () -> Results<R>): Results<R> {
         return when (val results = session.update(false)) {
-            is Results.Success -> passed.invoke()
-            is Results.Failure -> results
+            is Success -> passed.invoke()
+            is Failure -> results
         }
     }
 }
