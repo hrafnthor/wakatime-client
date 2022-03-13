@@ -9,29 +9,8 @@ fun isUnstable(version: String): Boolean {
     return hasUnstableKeywords || regex.matches(version).not()
 }
 
-fun ExtraPropertiesExtension.copy(key: String, map: MutableMap<String, String>){
+fun ExtraPropertiesExtension.copy(key: String, map: MutableMap<String, String>) {
     set(key, map.getOrDefault(key, ""))
-}
-
-val localProps = project.rootProject.file("local.properties")
-if (localProps.exists()) {
-    val props = java.util.Properties()
-    java.io.FileInputStream(localProps).bufferedReader().use {
-        props.load(it)
-    }
-    props.forEach { key, value ->
-        extra.set(key as String, value)
-    }
-} else {
-    extra.apply {
-        val env = System.getenv()
-        copy("sonartypeStagingProfileId", env)
-        copy("ossrhUsername", env)
-        copy("ossrhPassword", env)
-        copy("signing.keyId", env)
-        copy("signing.password", env)
-        copy("signing.secretKeyRingFile", env)
-    }
 }
 
 buildscript {
@@ -88,13 +67,21 @@ tasks {
     }
 }
 
-nexusPublishing {
-    repositories {
-        sonatype {
-            // Values previously read from local.properties
-            stagingProfileId.set(extra["sonartypeStagingProfileId"] as String)
-            username.set(extra["ossrhUsername"] as String)
-            password.set(extra["ossrhPassword"] as String)
+val localProps = project.rootProject.file("local.properties")
+if (localProps.exists()) {
+    // Auto import all of local.properties file as project wide properties
+    val props = java.util.Properties()
+    java.io.FileInputStream(localProps).bufferedReader().use {
+        props.load(it)
+    }
+    props.forEach { key, value ->
+        extra.set(key as String, value)
+    }
+} else {
+    // Attempt to find the requested keys from the system environment, such as on a CI server,
+    // and set them as project wide properties
+    extra.apply {
+        val env = System.getenv()
 
         copy("sonartypeStagingProfileId", env)
         copy("ossrhUsername", env)
