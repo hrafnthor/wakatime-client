@@ -160,10 +160,6 @@ dependencyResolutionManagement {
                 .to("de.mannodermaus.junit5", "android-test-runner")
                 .versionRef(mannodermausJunit5)
 
-            val mannodermausPluginVersion: String by settings
-            alias("mannodermaus-plugin")
-                .to("de.mannodermaus.gradle.plugins", "android-junit5")
-                .version(mannodermausPluginVersion)
             //#endregion
 
             //#region AndroidX Test
@@ -182,6 +178,8 @@ dependencyResolutionManagement {
             alias("android-gradle")
                 .to("com.android.tools.build", "gradle")
                 .versionRef(androidGradle)
+
+            //#endregion
         }
     }
 }
