@@ -1,7 +1,6 @@
 package `is`.hth.wakatimeclient.core.data.auth
 
-import `is`.hth.wakatimeclient.core.data.Error
-import `is`.hth.wakatimeclient.core.data.Results
+import `is`.hth.wakatimeclient.core.data.*
 import android.content.Context
 import android.content.Intent
 import net.openid.appauth.*
@@ -116,14 +115,14 @@ internal class AuthClientImpl internal constructor(
                 response == null && exception != null -> {
                     val code = exception.code
                     val message = exception.message ?: "No exception message given!"
-                    continuation.resume(Results.Failure(Error.Authentication.Authorization(code, message)))
+                    continuation.resume(Failure(Error.Authentication.Authorization(code, message)))
                 }
                 response != null -> fetchAuthorizationToken(config, response) {
                     continuation.resume(it)
                 }
                 else -> {
                     val message = "Authentication flow resulted in neither actionable response nor exception!"
-                    continuation.resume(Results.Failure(Error.Authentication.Unknown(-1, message)))
+                    continuation.resume(Failure(Error.Authentication.Unknown(-1, message)))
                 }
             }
         }
@@ -146,16 +145,14 @@ internal class AuthClientImpl internal constructor(
                 it.update(result, exception)
             }
             val results = when {
-                state.isAuthorized && exception == null -> {
-                    Results.Success.Value(true)
-                }
+                state.isAuthorized && exception == null -> Success(true)
                 exception != null -> {
                     val message = exception.message ?: "No exception message given!"
-                    Results.Failure(Error.Authentication.TokenFetch(exception.code, message))
+                    Failure(Error.Authentication.TokenFetch(exception.code, message))
                 }
                 else -> {
                     val message = "Token fetch operation resulted in neither success nor failure!"
-                    Results.Failure(Error.Authentication.Unknown(-1, message))
+                    Failure(Error.Authentication.Unknown(-1, message))
                 }
             }
             receiver(results)
@@ -201,25 +198,25 @@ internal class AuthClientImpl internal constructor(
                     state.needsTokenRefresh -> {
                         state.performActionWithFreshTokens(service) { _, _, exception ->
                             val results = if (exception == null) {
-                                Results.Success.Empty
+                                Success(Unit)
                             } else {
                                 val message: String = exception.message ?: "Token refresh operation failed"
                                 val error = Error.Authentication.TokenRefresh(exception.code, message)
-                                Results.Failure(error)
+                                Failure(error)
                             }
                             continuation.resumeWith(Result.success(results))
                         }
                     }
                     state.isAuthorized -> {
-                        continuation.resumeWith(Result.success(Results.Success.Empty))
+                        continuation.resumeWith(Result.success(Success(Unit)))
                     }
                     else -> {
                         val msg = "No authentication found! Halting token refresh operation"
-                        val result = Results.Failure(Error.Authentication.Unauthorized(msg))
+                        val result = Failure(Error.Authentication.Unauthorized(msg))
                         continuation.resumeWith(Result.success(result))
                     }
                 }
-            } else continuation.resumeWith(Result.success(Results.Success.Empty))
+            } else continuation.resumeWith(Result.success(Success(Unit)))
         }
 
         override fun authenticationMethod(): Method? = storage.getMethod()
