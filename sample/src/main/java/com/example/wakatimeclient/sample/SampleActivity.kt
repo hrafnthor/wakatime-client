@@ -6,8 +6,6 @@ import `is`.hth.wakatimeclient.core.data.Results
 import `is`.hth.wakatimeclient.core.data.auth.AuthStorage
 import `is`.hth.wakatimeclient.core.data.auth.Scope
 import `is`.hth.wakatimeclient.wakatime.data.model.CurrentUser
-import `is`.hth.wakatimeclient.wakatime.data.model.HumanRange
-import `is`.hth.wakatimeclient.wakatime.data.model.Stats
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -99,7 +97,6 @@ class SampleActivity : AppCompatActivity(),
     override fun onRefresh() {
         binding.refreshLayout.isRefreshing = false
         loadCurrentUser()
-        model.test()
     }
 
     //
@@ -193,17 +190,6 @@ class SampleViewModel(
             }
         }
     }
-
-    fun test(){
-        launch(coroutineContext) {
-            when(val result = client.getStats(Stats.request(HumanRange.WEEK))) {
-                is Results.Failure -> _error.postValue(result.error)
-                is Results.Success -> {
-
-                }
-            }
-        }
-    }
 }
 
 class SampleViewModelFactory(
@@ -211,7 +197,7 @@ class SampleViewModelFactory(
 ) : ViewModelProvider.NewInstanceFactory() {
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return SampleViewModel(client) as T
     }
 }

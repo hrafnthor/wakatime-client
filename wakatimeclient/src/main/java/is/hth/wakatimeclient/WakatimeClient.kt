@@ -15,7 +15,6 @@ import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeRemoteDataSource
 import `is`.hth.wakatimeclient.wakatime.data.api.WakatimeRemoteDataSourceImpl
 import android.content.Context
 import android.net.Uri
-import kotlinx.serialization.ExperimentalSerializationApi
 
 @Suppress("unused")
 public class WakatimeClient private constructor(
@@ -83,7 +82,6 @@ public class WakatimeClient private constructor(
         /**
          * Constructs a [WakatimeClient] based on the current configuration
          */
-        @ExperimentalSerializationApi
         public fun build(context: Context, storage: AuthStorage): WakatimeClient {
             val json = WakatimeJsonFactory.json
 

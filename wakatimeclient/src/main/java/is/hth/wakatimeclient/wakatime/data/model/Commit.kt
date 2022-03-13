@@ -144,6 +144,7 @@ public data class Commit internal constructor(
  * Performs a transformation on the incoming JSON payload to correlate author and
  * committer values each in their own custom objects.
  */
+@OptIn(ExperimentalSerializationApi::class)
 internal object CommitTransformingSerializer :
     JsonTransformingSerializer<Commit>(CommitSerializer) {
 
@@ -167,10 +168,8 @@ internal object CommitTransformingSerializer :
         Pair("committer_username", Entity.USERNAME)
     )
 
-    @ExperimentalSerializationApi
     private val otherFieldSet: Set<String> = descriptor.elementNames.toHashSet()
 
-    @ExperimentalSerializationApi
     override fun transformDeserialize(element: JsonElement): JsonElement {
         return if (element is JsonObject && element.size >= 30) {
             // Json element is of correct type and sufficient length to indicate
@@ -211,6 +210,7 @@ internal object CommitTransformingSerializer :
  * Due to receiving custom JSON from the [CommitTransformingSerializer], the ordering can be
  * trusted not to change for the custom serialization that takes place in it.
  */
+@OptIn(ExperimentalSerializationApi::class)
 internal object CommitSerializer : KSerializer<Commit> {
 
     override val descriptor: SerialDescriptor
@@ -237,7 +237,6 @@ internal object CommitSerializer : KSerializer<Commit> {
             element<Entity>(elementName = Commit.COMMITTER)
         }
 
-    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: Commit) {
         encoder.encodeStructure(descriptor) {
             encodeStringElement(descriptor, descriptor.getElementIndex(Commit.ID), value.id)
@@ -325,7 +324,6 @@ internal object CommitSerializer : KSerializer<Commit> {
         }
     }
 
-    @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): Commit {
         return decoder.decodeStructure(descriptor) {
             val id = decodeNullableString(Commit.ID, this)
@@ -379,7 +377,6 @@ internal object CommitSerializer : KSerializer<Commit> {
         }
     }
 
-    @ExperimentalSerializationApi
     private fun decodeNullableString(key: String, decoder: CompositeDecoder): String {
         return decoder.decodeNullableSerializableElement(
             descriptor,
@@ -388,7 +385,6 @@ internal object CommitSerializer : KSerializer<Commit> {
         ) ?: ""
     }
 
-    @ExperimentalSerializationApi
     private fun getIndex(key: String): Int = descriptor.getElementIndex(key)
 }
 

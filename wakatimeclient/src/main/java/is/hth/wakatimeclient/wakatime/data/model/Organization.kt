@@ -326,6 +326,7 @@ public data class Member internal constructor(
  * Transforms the incoming JSON payload to simplify the resulting structure and reuse
  * [User] objects for portion of the payload
  */
+
 internal object MemberTransformSerializer : JsonTransformingSerializer<Member>(MemberSerializer) {
 
     override fun transformDeserialize(element: JsonElement): JsonElement {
@@ -370,6 +371,8 @@ internal object MemberTransformSerializer : JsonTransformingSerializer<Member>(M
  * Handles the custom deserialization of the [Member] payload after having been pre processed
  * in the [MemberTransformSerializer]. Ordering can thus be relied upon.
  */
+
+@OptIn(ExperimentalSerializationApi::class)
 internal object MemberSerializer : KSerializer<Member> {
 
     override val descriptor: SerialDescriptor
@@ -379,7 +382,6 @@ internal object MemberSerializer : KSerializer<Member> {
             element<User>(elementName = Member.USER)
         }
 
-    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: Member) {
         return encoder.encodeStructure(descriptor) {
             encodeBooleanElement(
@@ -401,7 +403,6 @@ internal object MemberSerializer : KSerializer<Member> {
         }
     }
 
-    @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): Member {
         return decoder.decodeStructure(descriptor) {
             val canView = decodeBooleanElement(
@@ -425,6 +426,5 @@ internal object MemberSerializer : KSerializer<Member> {
         }
     }
 
-    @ExperimentalSerializationApi
     private fun getIndex(key: String): Int = descriptor.getElementIndex(key)
 }

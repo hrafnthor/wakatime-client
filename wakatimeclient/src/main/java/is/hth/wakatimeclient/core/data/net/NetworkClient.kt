@@ -72,6 +72,7 @@ internal class NetworkClientImpl private constructor(
         client.cache()?.delete()
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     internal class Builder(
         private val host: String
     ) : NetworkClient.Builder {
@@ -105,7 +106,6 @@ internal class NetworkClientImpl private constructor(
             if (!this::authenticator.isInitialized) setAuthenticator(authenticator)
         }
 
-        @ExperimentalSerializationApi
         internal fun build(json: Json): NetworkClient {
             val factory: Converter.Factory = json
                 .asConverterFactory(MediaType.get(Mime.ApplicationJson.toString()))

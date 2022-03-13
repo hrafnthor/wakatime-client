@@ -5,16 +5,16 @@ plugins {
     id("kotlinx-serialization")
     id("de.mannodermaus.android-junit5")
     id("maven-publish")
-    id("org.jetbrains.dokka") version "1.4.32"
+    id("org.jetbrains.dokka") version "1.6.10"
     signing
 }
 
 android {
-    compileSdk = 30
+    compileSdk = 31
     buildToolsVersion = "30.0.3"
     defaultConfig {
         minSdk = 16
-        targetSdk = 30
+        targetSdk = 31
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testInstrumentationRunnerArguments["runnerBuilder"] =
             "de.mannodermaus.junit5.AndroidJUnit5Builder"
@@ -55,12 +55,6 @@ dependencies {
     implementation(catalog.kotlinx.serialization.core)
     //#endregion
 
-    //#region Androidx
-    implementation(catalog.androidx.core.ktx)
-    implementation(catalog.androidx.appcompat)
-    implementation(catalog.androidx.lifecycle.runtime.ktx)
-    //#endregion
-
     api(catalog.appauth)
 
     implementation(catalog.square.retrofit2)
@@ -92,7 +86,6 @@ dependencies {
     //#endregion
 }
 
-//#region publishing
 tasks {
     val htmlDocPath = "$buildDir/docs/html"
     dokkaHtml.configure {
@@ -107,6 +100,12 @@ tasks {
     register("androidSourceJar", Jar::class) {
         archiveClassifier.set("sources")
         from(android.sourceSets.getByName("main").java.srcDirs)
+    }
+
+    withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).configureEach {
+
+        // OptIn compiler requirement flag for using experiment apis on kotlinx serialization
+        kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
     }
 }
 // Components are only generated after the evaluation phase
@@ -167,4 +166,3 @@ extra.apply {
 signing {
     sign(publishing.publications)
 }
-//#endregion

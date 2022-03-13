@@ -262,6 +262,7 @@ internal object CurrentUserJsonTransformer : JsonTransformingSerializer<CurrentU
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 internal object CurrentUserSerializer : KSerializer<CurrentUser> {
 
     private val userSerializer: KSerializer<User> = User.serializer()
@@ -282,7 +283,6 @@ internal object CurrentUserSerializer : KSerializer<CurrentUser> {
             element(CurrentUser.CONFIG, configSerializer.descriptor)
         }
 
-    @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): CurrentUser {
         return decoder.decodeStructure(descriptor) {
             val onboardingFinished = decodeBooleanElement(
@@ -347,7 +347,6 @@ internal object CurrentUserSerializer : KSerializer<CurrentUser> {
         }
     }
 
-    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: CurrentUser) {
         encoder.encodeStructure(descriptor) {
             encodeBooleanElement(

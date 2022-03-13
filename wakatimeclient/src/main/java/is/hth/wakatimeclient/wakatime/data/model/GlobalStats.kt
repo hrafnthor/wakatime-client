@@ -129,6 +129,7 @@ internal object AggregationJsonTransformer : JsonTransformingSerializer<Aggregat
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 internal object AggregationSerializer : KSerializer<Aggregation> {
 
     private val amountSerializer = Amount.serializer()
@@ -144,7 +145,6 @@ internal object AggregationSerializer : KSerializer<Aggregation> {
             element(Aggregation.SUM, amountSerializer.descriptor)
         }
 
-    @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): Aggregation {
         return decoder.decodeStructure(descriptor) {
             val name = decodeStringElement(
@@ -191,7 +191,6 @@ internal object AggregationSerializer : KSerializer<Aggregation> {
         }
     }
 
-    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: Aggregation) {
         encoder.encodeStructure(descriptor) {
             encodeStringElement(
@@ -366,6 +365,7 @@ internal object GlobalStatsJsonTransformer : JsonTransformingSerializer<GlobalSt
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 internal object GlobalStatsSerializer : KSerializer<GlobalStats> {
 
     private val aggregationSerializer = Aggregation.serializer()
@@ -385,7 +385,6 @@ internal object GlobalStatsSerializer : KSerializer<GlobalStats> {
             element<Boolean>(GlobalStats.WRITES_ONLY)
         }
 
-    @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): GlobalStats {
         return decoder.decodeStructure(descriptor) {
             val total = decodeSerializableElement(
@@ -445,7 +444,6 @@ internal object GlobalStatsSerializer : KSerializer<GlobalStats> {
         }
     }
 
-    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: GlobalStats) {
         encoder.encodeStructure(descriptor) {
             encodeSerializableElement(
