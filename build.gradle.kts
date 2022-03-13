@@ -79,7 +79,7 @@ if (localProps.exists()) {
     }
 } else {
     // Attempt to find the requested keys from the system environment, such as on a CI server,
-    // and set them as project wide properties
+    // and set them as project wide properties.
     extra.apply {
         val env = System.getenv()
 
@@ -89,6 +89,10 @@ if (localProps.exists()) {
         copy("signing.keyId", env)
         copy("signing.password", env)
         copy("signing.secretKeyRingFile", env)
+        copy("wakatimeRedirectScheme", env)
+        copy("wakatimeRedirectHost", env)
+        copy("wakatimeAppId", env)
+        copy("wakatimeAppSecret", env)
     }
 }
 
