@@ -5,7 +5,7 @@ plugins {
     id("kotlinx-serialization")
     id("de.mannodermaus.android-junit5")
     id("maven-publish")
-    id("org.jetbrains.dokka") version "1.4.32"
+    id("org.jetbrains.dokka") version "1.6.10"
     signing
 }
 
