@@ -145,6 +145,7 @@ internal object MachineSummaryJsonTransformer : JsonTransformingSerializer<Machi
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 internal object MachineSummarySerializer : KSerializer<MachineSummary> {
 
     private val summarySerializer: KSerializer<Summary> = Summary.serializer()
@@ -155,7 +156,7 @@ internal object MachineSummarySerializer : KSerializer<MachineSummary> {
             element<String>(MachineSummary.FIELD_MACHINE_NAME_ID)
         }
 
-    @ExperimentalSerializationApi
+
     override fun deserialize(decoder: Decoder): MachineSummary {
         return decoder.decodeStructure(descriptor) {
             val summary = decodeSerializableElement(
@@ -174,7 +175,6 @@ internal object MachineSummarySerializer : KSerializer<MachineSummary> {
         }
     }
 
-    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: MachineSummary) {
         encoder.encodeStructure(descriptor) {
             encodeSerializableElement(
@@ -457,6 +457,7 @@ internal object SummariesJsonTransformer : JsonTransformingSerializer<Summaries>
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 internal object SummariesSerializer : KSerializer<Summaries> {
 
     private val rangeSerializer = Range.serializer()
@@ -471,7 +472,6 @@ internal object SummariesSerializer : KSerializer<Summaries> {
             element(Summaries.RANGE, rangeSerializer.descriptor)
         }
 
-    @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): Summaries {
         return decoder.decodeStructure(descriptor) {
             val available = decodeSerializableElement(
@@ -503,7 +503,6 @@ internal object SummariesSerializer : KSerializer<Summaries> {
         }
     }
 
-    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: Summaries) {
         encoder.encodeStructure(descriptor) {
             encodeSerializableElement(

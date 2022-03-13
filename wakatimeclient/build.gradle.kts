@@ -86,7 +86,6 @@ dependencies {
     //#endregion
 }
 
-//#region publishing
 tasks {
     val htmlDocPath = "$buildDir/docs/html"
     dokkaHtml.configure {
@@ -101,6 +100,12 @@ tasks {
     register("androidSourceJar", Jar::class) {
         archiveClassifier.set("sources")
         from(android.sourceSets.getByName("main").java.srcDirs)
+    }
+
+    withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile::class).configureEach {
+
+        // OptIn compiler requirement flag for using experiment apis on kotlinx serialization
+        kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
     }
 }
 // Components are only generated after the evaluation phase
@@ -161,4 +166,3 @@ extra.apply {
 signing {
     sign(publishing.publications)
 }
-//#endregion

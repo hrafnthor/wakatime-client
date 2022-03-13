@@ -74,6 +74,8 @@ internal object RangeJsonTransformer : JsonTransformingSerializer<Range>(RangeSe
     }
 }
 
+
+@OptIn(ExperimentalSerializationApi::class)
 internal object RangeSerializer : KSerializer<Range> {
     override val descriptor: SerialDescriptor
         get() = buildClassSerialDescriptor("range") {
@@ -82,7 +84,6 @@ internal object RangeSerializer : KSerializer<Range> {
             element<String>(Range.TIMEZONE)
         }
 
-    @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): Range {
         return decoder.decodeStructure(descriptor) {
             val startDate = decodeStringElement(
@@ -106,7 +107,6 @@ internal object RangeSerializer : KSerializer<Range> {
         }
     }
 
-    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: Range) {
         encoder.encodeStructure(descriptor) {
             encodeStringElement(

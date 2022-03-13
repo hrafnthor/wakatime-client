@@ -181,6 +181,7 @@ internal class PagedResponseTransformer<T : Any>(
  * This serializer manually parses the structure of the PagedResponse payload
  * and modifies the structure in cases where that is needed
  */
+@OptIn(ExperimentalSerializationApi::class)
 internal class PagedResponseSerializer<T : Any>(
     dataSerializer: KSerializer<T>
 ) : KSerializer<PagedResponse<T>> {
@@ -199,7 +200,7 @@ internal class PagedResponseSerializer<T : Any>(
             element<Int>(PagedResponse.TOTAL_ITEMS)
         }
 
-    @ExperimentalSerializationApi
+
     override fun serialize(encoder: Encoder, value: PagedResponse<T>) {
         encoder.encodeStructure(descriptor) {
             encodeSerializableElement(
@@ -246,7 +247,6 @@ internal class PagedResponseSerializer<T : Any>(
         }
     }
 
-    @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): PagedResponse<T> {
         require(decoder is JsonDecoder)
         return decoder.decodeStructure(descriptor) {

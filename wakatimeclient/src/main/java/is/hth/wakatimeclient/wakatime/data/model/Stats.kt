@@ -475,6 +475,7 @@ internal object StatsTransformer : JsonTransformingSerializer<Stats>(StatsSerial
     }
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 internal object StatsSerializer : KSerializer<Stats> {
     override val descriptor: SerialDescriptor
         get() = buildClassSerialDescriptor("stats") {
@@ -482,7 +483,6 @@ internal object StatsSerializer : KSerializer<Stats> {
             element<Status>(Stats.STATUS)
         }
 
-    @ExperimentalSerializationApi
     override fun serialize(encoder: Encoder, value: Stats) {
         encoder.encodeStructure(descriptor) {
             encodeSerializableElement(
@@ -500,7 +500,6 @@ internal object StatsSerializer : KSerializer<Stats> {
         }
     }
 
-    @ExperimentalSerializationApi
     override fun deserialize(decoder: Decoder): Stats {
         return decoder.decodeStructure(descriptor) {
             Stats(
