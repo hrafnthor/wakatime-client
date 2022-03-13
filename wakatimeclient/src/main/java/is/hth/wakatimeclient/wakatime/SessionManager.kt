@@ -17,14 +17,14 @@ public interface SessionManager {
      * authentication tokens on the remote server.
      *
      * If the remote token revoke operation fails, then this
-     * operation fails, and returns a [Results.Failure]
+     * operation fails, and returns a [Failure]
      *
      * The operation can be forced to run to completion even though
      * the remote token revoke operation fails. Any errors that
      * occur will be delivered in the final report.
      *
      * If the operation runs to completion it will return a
-     * [Results.Success.Value] containing a [Report].
+     * [Success] containing a [Report].
      */
     public suspend fun logout(force: Boolean): Results<Report>
 }
