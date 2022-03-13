@@ -55,12 +55,6 @@ dependencies {
     implementation(catalog.kotlinx.serialization.core)
     //#endregion
 
-    //#region Androidx
-    implementation(catalog.androidx.core.ktx)
-    implementation(catalog.androidx.appcompat)
-    implementation(catalog.androidx.lifecycle.runtime.ktx)
-    //#endregion
-
     api(catalog.appauth)
 
     implementation(catalog.square.retrofit2)
