@@ -1,18 +1,5 @@
 import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 
-fun isUnstable(version: String): Boolean {
-    val hasUnstableKeywords = listOf("beta", "alpha", "rc").any {
-        version.toLowerCase().contains(it)
-    }
-    // Capture formats where {number} is repeated with {dot} in between
-    val regex = "^(?:[0-9]+\\.)+[0-9]+$".toRegex()
-    return hasUnstableKeywords || regex.matches(version).not()
-}
-
-fun ExtraPropertiesExtension.copy(key: String, map: MutableMap<String, String>) {
-    set(key, map.getOrDefault(key, ""))
-}
-
 buildscript {
     repositories {
         google()
@@ -48,6 +35,14 @@ detekt {
     config = files("detekt.yml")
 }
 
+fun isUnstable(version: String): Boolean {
+    val hasUnstableKeywords = listOf("beta", "alpha", "rc").any {
+        version.toLowerCase().contains(it)
+    }
+    // Capture formats where {number} is repeated with {dot} in between
+    val regex = "^(?:[0-9]+\\.)+[0-9]+$".toRegex()
+    return hasUnstableKeywords || regex.matches(version).not()
+}
 
 tasks {
     withType<Test> {
@@ -68,41 +63,49 @@ tasks {
 }
 
 val localProps = project.rootProject.file("local.properties")
-if (localProps.exists()) {
+val env: Map<String, String> = if (localProps.exists()) {
     // Auto import all of local.properties file as project wide properties
     val props = java.util.Properties()
     java.io.FileInputStream(localProps).bufferedReader().use {
         props.load(it)
     }
-    props.forEach { key, value ->
-        extra.set(key as String, value)
+    mutableMapOf<String, String>().also { map ->
+        props.forEach { entry ->
+            map[entry.key.toString()] = entry.value.toString()
+        }
     }
-} else {
-    // Attempt to find the requested keys from the system environment, such as on a CI server,
-    // and set them as project wide properties.
-    extra.apply {
-        val env = System.getenv()
+} else System.getenv()
 
-        copy("sonartypeStagingProfileId", env)
-        copy("ossrhUsername", env)
-        copy("ossrhPassword", env)
-        copy("signing.keyId", env)
-        copy("signing.password", env)
-        copy("signing.secretKeyRingFile", env)
-        copy("wakatimeRedirectScheme", env)
-        copy("wakatimeRedirectHost", env)
-        copy("wakatimeAppId", env)
-        copy("wakatimeAppSecret", env)
-    }
+
+fun ExtraPropertiesExtension.copy(key: String, map: Map<String, String>) {
+    set(key, map.getOrDefault(key, ""))
 }
+
+extra.apply {
+    copy("sonartypeStagingProfileId", env)
+    copy("ossrhUsername", env)
+    copy("ossrhPassword", env)
+    copy("signing.keyId", env)
+    copy("signing.password", env)
+    copy("signing.secretKeyRingFile", env)
+    copy("wakatimeRedirectScheme", env)
+    copy("wakatimeRedirectHost", env)
+    copy("wakatimeAppId", env)
+    copy("wakatimeAppSecret", env)
+}
+
 
 nexusPublishing {
     repositories {
         sonatype {
             // Values previously read from local.properties
-            stagingProfileId.set(extra["sonartypeStagingProfileId"] as String)
-            username.set(extra["ossrhUsername"] as String)
-            password.set(extra["ossrhPassword"] as String)
+            val sonartypeStagingProfileId: String by extra
+            val ossrhUsername: String by extra
+            val ossrhPassword: String by extra
+
+            stagingProfileId.set(sonartypeStagingProfileId)
+            username.set(ossrhUsername)
+            password.set(ossrhPassword)
 
             // Different nexus url requirements for signups made post 24th of february
             nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
