@@ -72,12 +72,14 @@ public class WakatimeClient private constructor(
         /**
          * Configure the [AuthClient] that will be used for authentication against Wakatime's API
          */
-        public fun authentication(action: (AuthClient.Builder.() -> Unit)): Builder = apply { action(authBuilder) }
+        public fun authentication(action: (AuthClient.Builder.() -> Unit)): Builder =
+            apply { action(authBuilder) }
 
         /**
          * Configure the [NetworkClient] that will be used for interacting against Wakatime's API
          */
-        public fun network(action: (NetworkClient.Builder.() -> Unit)): Builder = apply { action(netBuilder) }
+        public fun network(action: (NetworkClient.Builder.() -> Unit)): Builder =
+            apply { action(netBuilder) }
 
         /**
          * Constructs a [WakatimeClient] based on the current configuration
