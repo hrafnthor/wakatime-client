@@ -94,7 +94,6 @@ extra.apply {
     copy("wakatimeAppSecret", env)
 }
 
-
 nexusPublishing {
     repositories {
         sonatype {
