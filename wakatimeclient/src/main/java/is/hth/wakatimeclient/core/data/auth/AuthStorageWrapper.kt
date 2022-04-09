@@ -57,9 +57,10 @@ internal class AuthStorageWrapper(private val storage: AuthStorage) {
                 AuthState.jsonDeserialize(this)
             }.getOrElse {
                 Timber.e("AuthState deserialization failed!")
-                makeNewState()
+                Timber.i("Resetting stored AuthState")
+                setState(AuthState())
             }
-        } else makeNewState()
+        } else setState(AuthState())
     }
 
     /**
@@ -105,14 +106,4 @@ internal class AuthStorageWrapper(private val storage: AuthStorage) {
      * Resets the any stored OAuth information
      */
     fun clear(): Unit = storage.clear()
-
-    /**
-     * Creates and applies a new AuthState to the storage
-     */
-    private fun makeNewState(): AuthState {
-        return AuthState().also {
-            Timber.i("Resetting stored AuthState")
-            setState(it)
-        }
-    }
 }
