@@ -31,7 +31,7 @@ WakatimeClient.Builder(
     clientId = "Your client's id",
     clientSecret = "Your client's secret",
     redirectUri = Uri.parse("Your client's redirect uri")
-)....
+)
 ```
 Then register an `Activity` in the `AndroidManifest` which will receive the results from the OAuth flow and process them. If your redirectUri is 'myapplication://authentication-results' then configure the receiver as follows
 
@@ -63,7 +63,7 @@ It can then be supplied to the client as shown below
 ```kotlin
 WakatimeClient.Builder(
     base64EncodedApiKey = "Your personal API key"
-)....
+)
 ```
 **Make sure that you do not bundle the API key within the application, as it is your own private one!** Each user will have to supply their own.
 
@@ -79,7 +79,7 @@ builder.network {
 
     getOKHttpBuilder().apply {
         addInterceptor(interceptor)
-        callTimeout(<Your value>, TimeUnit)
+        callTimeout('<Your value>', TimeUnit)
         // Here you have full access to the OkHttpClient.Builder
     }
     
@@ -90,7 +90,7 @@ builder.network {
     // If network layer caching should be done by the client,
     // it can be configured by using the built in caching mechanism
     enableCache(context.cacheDir, cacheLifetimeInSeconds = 30)
-}...
+}
 ```
 
 #### Credential storage
@@ -98,7 +98,9 @@ builder.network {
 Lastly the client requires an implementation of `AuthStorage` for storing credentials and related information.
 
 ```kotlin
-builder.build(context, <Your implementation of AuthStorage>)
+builder.build(context, object:AuthStorage {
+    // Your implementation of the AuthStorage interface
+})
 ```
 The reason this is left to the implementer is that there are multiple ways of securing authentication data on Android, and the best practices are constantly evolving and changing. By leaving this implementation detail out, this project allows for unforseen future changes without having to react to them it self.
 
@@ -155,3 +157,13 @@ val results: Results<Summaries> = client.getSummaries(Summaries.request(start, e
     }
 })
 ```
+#### Sample App usage
+
+The library comes with a small sample application that shows basic usages of the library. It uses a
+OAuth flow for authentication and so requires the following values to be present in a
+local.properties file or as system environment variables 
+
+wakatimeRedirectScheme='Your redirect schema as defined on Wakatime's dashboard'
+wakatimeRedirectHost='Your redirect host as defined on Wakatime's dashboard
+wakatimeAppId='Your application id as defined on Wakatime's dashboard'
+wakatimeAppSecret='Your application secret as defined on Wakatime's dashboard'

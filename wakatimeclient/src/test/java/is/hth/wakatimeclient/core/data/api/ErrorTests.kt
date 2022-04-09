@@ -204,6 +204,5 @@ public class ErrorTests : DescribeSpec({
                 processed.extra.size shouldBe 0
             }
         }
-
     }
 })
