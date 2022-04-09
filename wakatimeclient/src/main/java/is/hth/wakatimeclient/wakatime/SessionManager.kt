@@ -1,6 +1,9 @@
 package `is`.hth.wakatimeclient.wakatime
 
-import `is`.hth.wakatimeclient.core.data.*
+import `is`.hth.wakatimeclient.core.data.Error
+import `is`.hth.wakatimeclient.core.data.Failure
+import `is`.hth.wakatimeclient.core.data.Results
+import `is`.hth.wakatimeclient.core.data.Success
 import `is`.hth.wakatimeclient.core.data.auth.AuthClient
 import `is`.hth.wakatimeclient.core.data.auth.AuthConfig
 import `is`.hth.wakatimeclient.core.data.auth.AuthStorageWrapper
@@ -81,15 +84,17 @@ internal class SessionManagerImpl(
 
     private suspend fun revoke(id: String, secret: String, token: String): Results<Unit> {
         return safeOperation(processor) {
-            with(oauthApi.revoke(id, secret, token)) {
-                when {
-                    isSuccessful -> Success(Unit)
-                    else -> Failure(errorBody()?.charStream().use {
+            val response = oauthApi.revoke(id, secret, token)
+            when {
+                response.isSuccessful -> Success(Unit)
+                else -> {
+                    val error =  response.errorBody()?.charStream()?.use { reader ->
                         processor.onNetworkError(
-                            code = code(),
-                            error = it?.readText() ?: message() ?: ""
+                            code = response.code(),
+                            error = reader.readText()
                         )
-                    })
+                    } ?: Error.Unknown(response.code(), "No error body received!")
+                    Failure(error)
                 }
             }
         }
