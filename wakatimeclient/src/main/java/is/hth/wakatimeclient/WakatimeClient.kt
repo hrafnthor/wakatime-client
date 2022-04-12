@@ -5,7 +5,6 @@ import `is`.hth.wakatimeclient.core.data.auth.AuthClientImpl
 import `is`.hth.wakatimeclient.core.data.auth.DefaultAuthenticator
 import `is`.hth.wakatimeclient.core.data.net.CacheControl
 import `is`.hth.wakatimeclient.core.data.net.NetworkClient
-import `is`.hth.wakatimeclient.core.data.net.NetworkClientImpl
 import `is`.hth.wakatimeclient.core.data.net.WakatimeJsonFactory
 import `is`.hth.wakatimeclient.wakatime.SessionManager
 import `is`.hth.wakatimeclient.wakatime.SessionManagerImpl
@@ -66,7 +65,7 @@ public class WakatimeClient private constructor(
             host = Uri.parse("https://wakatime.com"),
             method = method
         )
-        private val netBuilder = NetworkClientImpl.Builder("https://wakatime.com/")
+        private val netBuilder = NetworkClient.Builder("https://wakatime.com/")
         private val authBuilder = AuthClientImpl.Builder(apiKey, config)
 
         /**

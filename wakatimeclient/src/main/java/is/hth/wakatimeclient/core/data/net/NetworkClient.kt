@@ -19,63 +19,22 @@ public interface CacheControl {
     public fun clearCache()
 }
 
-public interface NetworkClient : CacheControl {
+public class NetworkClient private constructor(
+    private val client: OkHttpClient,
+    private val retrofit: Retrofit
+) : CacheControl {
 
     /**
      * Creates a network service interface through the use of a backing [Retrofit] client
      */
-    public fun <T> createService(clazz: Class<T>): T
-
-    public interface Builder {
-
-        /**
-         * Exposes the underlying [OkHttpClient.Builder] for configurations outside the scope of
-         * what this builder implements.
-         * Be advised that any [Authenticator] set though the resulting builder will be overwritten,
-         * so [Builder.setAuthenticator] should be used if a custom authenticator is needed.
-         */
-        public fun getOKHttpBuilder(): OkHttpClient.Builder
-
-        /**
-         * Exposes the underlying [Retrofit.Builder] for configurations outside of the scope
-         * of what this builder implements.
-         */
-        public fun getRetrofitBuilder(): Retrofit.Builder
-
-        /**
-         * Assign the [Authenticator] that will handle authentication for network requests.
-         * This is not required as the library sets an authenticator by default that works
-         * with the OAuth flow.
-         * In the case of using a API key, a custom [Authenticator] will be needed.
-         */
-        public fun setAuthenticator(authenticator: Authenticator): Builder
-
-        /**
-         * Assigns the global cache lifetime in seconds used to determine if new
-         * values should be fetched over the network. The default value is 5 minutes.
-         * @param cacheDir The location of where the cache will be stored, for instance Context.cacheDir
-         * @param cacheLifetimeInSeconds The lifetime of the cache in seconds
-         */
-        public fun enableCache(cacheDir: File, cacheLifetimeInSeconds: Int): Builder
-    }
-}
-
-@Suppress("unused")
-internal class NetworkClientImpl private constructor(
-    private val client: OkHttpClient,
-    private val retrofit: Retrofit
-) : NetworkClient {
-
-    override fun <T> createService(clazz: Class<T>): T = retrofit.create(clazz)
+    internal fun <T> createService(clazz: Class<T>): T = retrofit.create(clazz)
 
     override fun clearCache() {
         client.cache()?.delete()
     }
 
     @OptIn(ExperimentalSerializationApi::class)
-    internal class Builder(
-        private val host: String
-    ) : NetworkClient.Builder {
+    public class Builder internal constructor(private val host: String) {
 
         private val clientBuilder = OkHttpClient.Builder()
         private val retrofitBuilder = Retrofit.Builder()
@@ -84,15 +43,41 @@ internal class NetworkClientImpl private constructor(
         private var cacheLifetimeInSeconds: Int = 0
         private var cacheDir: File? = null
 
-        override fun getOKHttpBuilder(): OkHttpClient.Builder = clientBuilder
+        /**
+         * Exposes the underlying [OkHttpClient.Builder] for configurations outside the scope of
+         * what this builder implements.
+         * Be advised that any [Authenticator] set though the resulting builder will be overwritten,
+         * so [Builder.setAuthenticator] should be used if a custom authenticator is needed.
+         */
+        public fun configureOkHttpClient(
+            configure: OkHttpClient.Builder.() -> Unit
+        ): Builder = apply { configure.invoke(clientBuilder) }
 
-        override fun getRetrofitBuilder(): Retrofit.Builder = retrofitBuilder
+        /**
+         * Exposes the underlying [Retrofit.Builder] for configurations outside of the scope
+         * of what this builder implements.
+         */
+        public fun configureRetrofitClient(
+            configure: Retrofit.Builder.() -> Unit
+        ): Builder = apply { configure.invoke(retrofitBuilder) }
 
-        override fun setAuthenticator(
+        /**
+         * Assign the [Authenticator] that will handle authentication for network requests.
+         * This is not required as the library sets an authenticator by default that works
+         * with the OAuth flow.
+         * In the case of using a API key, a custom [Authenticator] will be needed.
+         */
+        public fun setAuthenticator(
             authenticator: Authenticator
-        ): NetworkClient.Builder = apply { this.authenticator = authenticator }
+        ): Builder = apply { this.authenticator = authenticator }
 
-        override fun enableCache(
+        /**
+         * Assigns the global cache lifetime in seconds used to determine if new
+         * values should be fetched over the network. The default value is 5 minutes.
+         * @param cacheDir The location of where the cache will be stored, for instance Context.cacheDir
+         * @param cacheLifetimeInSeconds The lifetime of the cache in seconds
+         */
+        public fun enableCache(
             cacheDir: File,
             cacheLifetimeInSeconds: Int
         ): Builder = apply {
@@ -130,7 +115,7 @@ internal class NetworkClientImpl private constructor(
                 .addConverterFactory(factory)
                 .build()
 
-            return NetworkClientImpl(
+            return NetworkClient(
                 client,
                 retrofit
             )
