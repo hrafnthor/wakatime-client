@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit
 /**
  * Forces cache reading onto any network request that goes through it.
  */
-@Suppress("unused")
 internal class ReadInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSeconds) {
 
     override fun intercept(chain: Interceptor.Chain): Response {
@@ -26,7 +25,6 @@ internal class ReadInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(max
  * headers received from the server in favor of a new one, set to the supplied max-age
  * value.
  */
-@Suppress("unused")
 internal class WriteInterceptor(maxAgeSeconds: Int) : CacheControlInterceptor(maxAgeSeconds) {
 
     override fun intercept(chain: Interceptor.Chain): Response {
