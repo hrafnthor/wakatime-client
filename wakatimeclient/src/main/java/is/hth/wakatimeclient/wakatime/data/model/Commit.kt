@@ -141,8 +141,8 @@ public data class Commit internal constructor(
 }
 
 /**
- * Performs a transformation on the incoming JSON payload to correlate author and
- * committer values each in their own custom objects.
+ * Performs a transformation on the incoming JSON payload to create separate author and
+ * committer objects from the single object that is received
  */
 @OptIn(ExperimentalSerializationApi::class)
 internal object CommitTransformingSerializer :

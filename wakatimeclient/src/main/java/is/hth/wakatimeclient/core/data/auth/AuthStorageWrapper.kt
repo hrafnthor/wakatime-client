@@ -1,7 +1,6 @@
 package `is`.hth.wakatimeclient.core.data.auth
 
 import net.openid.appauth.AuthState
-import org.json.JSONException
 import timber.log.Timber
 
 public interface AuthStorage {
@@ -52,18 +51,16 @@ internal class AuthStorageWrapper(private val storage: AuthStorage) {
      * Retrieves the current [AuthState], returning a new instance if none exists
      */
     fun getState(): AuthState {
-        return storage.getState()?.let {
-            try {
-                AuthState.jsonDeserialize(it)
-            } catch (e: JSONException) {
-                Timber.i("AuthState deserialization failed. Resetting auth storage")
-                null
+        val state: String = storage.getState() ?: ""
+        return if (state.isNotEmpty()) {
+            state.runCatching {
+                AuthState.jsonDeserialize(this)
+            }.getOrElse {
+                Timber.e("AuthState deserialization failed!")
+                Timber.i("Resetting stored AuthState")
+                setState(AuthState())
             }
-        } ?: run {
-            AuthState().also {
-                setState(it)
-            }
-        }
+        } else setState(AuthState())
     }
 
     /**
@@ -108,7 +105,5 @@ internal class AuthStorageWrapper(private val storage: AuthStorage) {
     /**
      * Resets the any stored OAuth information
      */
-    fun clear() {
-        storage.clear()
-    }
+    fun clear(): Unit = storage.clear()
 }

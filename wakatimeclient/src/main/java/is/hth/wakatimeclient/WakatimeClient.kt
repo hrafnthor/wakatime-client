@@ -5,7 +5,6 @@ import `is`.hth.wakatimeclient.core.data.auth.AuthClientImpl
 import `is`.hth.wakatimeclient.core.data.auth.DefaultAuthenticator
 import `is`.hth.wakatimeclient.core.data.net.CacheControl
 import `is`.hth.wakatimeclient.core.data.net.NetworkClient
-import `is`.hth.wakatimeclient.core.data.net.NetworkClientImpl
 import `is`.hth.wakatimeclient.core.data.net.WakatimeJsonFactory
 import `is`.hth.wakatimeclient.wakatime.SessionManager
 import `is`.hth.wakatimeclient.wakatime.SessionManagerImpl
@@ -66,18 +65,20 @@ public class WakatimeClient private constructor(
             host = Uri.parse("https://wakatime.com"),
             method = method
         )
-        private val netBuilder = NetworkClientImpl.Builder("https://wakatime.com/")
+        private val netBuilder = NetworkClient.Builder("https://wakatime.com/")
         private val authBuilder = AuthClientImpl.Builder(apiKey, config)
 
         /**
          * Configure the [AuthClient] that will be used for authentication against Wakatime's API
          */
-        public fun authentication(action: (AuthClient.Builder.() -> Unit)): Builder = apply { action(authBuilder) }
+        public fun authentication(action: (AuthClient.Builder.() -> Unit)): Builder =
+            apply { action(authBuilder) }
 
         /**
          * Configure the [NetworkClient] that will be used for interacting against Wakatime's API
          */
-        public fun network(action: (NetworkClient.Builder.() -> Unit)): Builder = apply { action(netBuilder) }
+        public fun network(action: (NetworkClient.Builder.() -> Unit)): Builder =
+            apply { action(netBuilder) }
 
         /**
          * Constructs a [WakatimeClient] based on the current configuration
@@ -96,14 +97,14 @@ public class WakatimeClient private constructor(
                 config = config,
                 storage = authClient.storage,
                 session = authClient.session(),
-                oauthApi = network.oauthApi(),
-                processor = network.processor(),
+                oauthApi = network.oauthApi,
+                processor = network.processor,
             )
 
             val remoteSource: WakatimeRemoteDataSource = WakatimeRemoteDataSourceImpl(
                 session = authClient.session(),
-                api = network.api(),
-                processor = network.processor(),
+                api = network.api,
+                processor = network.processor,
             )
 
             return WakatimeClient(

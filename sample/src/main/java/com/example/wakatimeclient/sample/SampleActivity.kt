@@ -1,7 +1,10 @@
 package com.example.wakatimeclient.sample
 
 import `is`.hth.wakatimeclient.WakatimeClient
-import `is`.hth.wakatimeclient.core.data.*
+import `is`.hth.wakatimeclient.core.data.Error
+import `is`.hth.wakatimeclient.core.data.Failure
+import `is`.hth.wakatimeclient.core.data.Results
+import `is`.hth.wakatimeclient.core.data.Success
 import `is`.hth.wakatimeclient.core.data.auth.AuthStorage
 import `is`.hth.wakatimeclient.core.data.auth.Scope
 import `is`.hth.wakatimeclient.wakatime.data.model.CurrentUser
@@ -223,7 +226,7 @@ object Injector {
                 setLevel(HttpLoggingInterceptor.Level.BODY)
             }
 
-            getOKHttpBuilder().apply {
+            configureOkHttpClient {
                 addInterceptor(interceptor)
                 callTimeout(15, TimeUnit.SECONDS)
             }

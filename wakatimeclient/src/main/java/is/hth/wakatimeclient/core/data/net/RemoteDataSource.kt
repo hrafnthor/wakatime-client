@@ -21,9 +21,7 @@ internal open class RemoteDataSource(
      */
     suspend fun <T : Any> makeCall(
         networkCall: suspend () -> Response<T>
-    ): Results<T> = makeCall(networkCall) {
-        it
-    }
+    ): Results<T> = makeCall(networkCall) { it }
 
     /**
      * Structured execution and result handling for network operations. Conducts authentication
@@ -35,19 +33,22 @@ internal open class RemoteDataSource(
     suspend fun <T : Any, R : Any> makeCall(
         networkCall: suspend () -> Response<T>,
         transform: (T) -> R,
-    ): Results<R> = safeOperation(processor) {
-        checkPreconditions {
-            with(networkCall()) {
-                val body: T? = body()
-                when {
-                    isSuccessful && body != null -> Success(transform(body))
-                    isSuccessful -> Failure(Error.Network.Internal.EmptyResponse)
-                    else -> Failure(errorBody()?.charStream().use {
-                        processor.onNetworkError(
-                            code = code(),
-                            error = it?.readText() ?: message() ?: "No error message nor payload received"
-                        )
-                    })
+    ): Results<R> {
+        return safeOperation(processor) {
+            checkPreconditions {
+                with(networkCall()) {
+                    val body: T? = body()
+                    when {
+                        isSuccessful && body != null -> Success(transform(body))
+                        isSuccessful -> Failure(Error.Network.Internal.EmptyResponse)
+                        else -> Failure(errorBody()?.charStream().use {
+                            processor.onNetworkError(
+                                code = code(),
+                                error = it?.readText() ?: message()
+                                ?: "No error message nor payload received"
+                            )
+                        })
+                    }
                 }
             }
         }

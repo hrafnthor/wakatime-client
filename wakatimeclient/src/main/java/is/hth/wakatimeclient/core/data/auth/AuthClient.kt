@@ -103,8 +103,8 @@ internal class AuthClientImpl internal constructor(
         return authService.getAuthorizationRequestIntent(request, intent)
     }
 
-    override suspend fun onAuthenticationResult(result: Intent): Results<Boolean> =
-        suspendCoroutine { continuation ->
+    override suspend fun onAuthenticationResult(result: Intent): Results<Boolean> {
+        return suspendCoroutine { continuation ->
             val response = AuthorizationResponse.fromIntent(result)
             val exception = AuthorizationException.fromIntent(result)
 
@@ -126,6 +126,7 @@ internal class AuthClientImpl internal constructor(
                 }
             }
         }
+    }
 
     override fun session(): AuthClient.Session = session
 
@@ -187,36 +188,38 @@ internal class AuthClientImpl internal constructor(
 
         override fun apiKey(): String = storage.getKey()
 
-        override suspend fun update(force: Boolean): Results<Unit> = suspendCoroutine { continuation ->
-            if (storage.getMethod() == Method.OAuth) {
-                val state = storage.getState()
+        override suspend fun update(force: Boolean): Results<Unit> {
+            return suspendCoroutine { continuation ->
+                if (storage.getMethod() == Method.OAuth) {
+                    val state = storage.getState()
 
-                // if forcing a token update mark it so
-                state.needsTokenRefresh = if (force) force else state.needsTokenRefresh
+                    // if forcing a token update mark it so
+                    state.needsTokenRefresh = if (force) force else state.needsTokenRefresh
 
-                when {
-                    state.needsTokenRefresh -> {
-                        state.performActionWithFreshTokens(service) { _, _, exception ->
-                            val results = if (exception == null) {
-                                Success(Unit)
-                            } else {
-                                val message: String = exception.message ?: "Token refresh operation failed"
-                                val error = Error.Authentication.TokenRefresh(exception.code, message)
-                                Failure(error)
+                    when {
+                        state.needsTokenRefresh -> {
+                            state.performActionWithFreshTokens(service) { _, _, exception ->
+                                val results = if (exception == null) {
+                                    Success(Unit)
+                                } else {
+                                    val message: String = exception.message ?: "Token refresh operation failed"
+                                    val error = Error.Authentication.TokenRefresh(exception.code, message)
+                                    Failure(error)
+                                }
+                                continuation.resumeWith(Result.success(results))
                             }
-                            continuation.resumeWith(Result.success(results))
+                        }
+                        state.isAuthorized -> {
+                            continuation.resumeWith(Result.success(Success(Unit)))
+                        }
+                        else -> {
+                            val msg = "No authentication found! Halting token refresh operation"
+                            val result = Failure(Error.Authentication.Unauthorized(msg))
+                            continuation.resumeWith(Result.success(result))
                         }
                     }
-                    state.isAuthorized -> {
-                        continuation.resumeWith(Result.success(Success(Unit)))
-                    }
-                    else -> {
-                        val msg = "No authentication found! Halting token refresh operation"
-                        val result = Failure(Error.Authentication.Unauthorized(msg))
-                        continuation.resumeWith(Result.success(result))
-                    }
-                }
-            } else continuation.resumeWith(Result.success(Success(Unit)))
+                } else continuation.resumeWith(Result.success(Success(Unit)))
+            }
         }
 
         override fun authenticationMethod(): Method? = storage.getMethod()
