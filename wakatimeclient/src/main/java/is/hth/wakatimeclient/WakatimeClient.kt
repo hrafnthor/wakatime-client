@@ -98,14 +98,14 @@ public class WakatimeClient private constructor(
                 config = config,
                 storage = authClient.storage,
                 session = authClient.session(),
-                oauthApi = network.oauthApi(),
-                processor = network.processor(),
+                oauthApi = network.oauthApi,
+                processor = network.processor,
             )
 
             val remoteSource: WakatimeRemoteDataSource = WakatimeRemoteDataSourceImpl(
                 session = authClient.session(),
-                api = network.api(),
-                processor = network.processor(),
+                api = network.api,
+                processor = network.processor,
             )
 
             return WakatimeClient(
