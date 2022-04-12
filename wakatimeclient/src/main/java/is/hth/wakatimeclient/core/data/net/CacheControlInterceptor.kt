@@ -49,3 +49,12 @@ internal abstract class CacheControlInterceptor internal constructor(
         .maxAge(maxAgeSeconds, TimeUnit.SECONDS)
         .build()
 }
+
+private sealed class Header(private val value: String) {
+
+    object CacheControl : Header("Cache-Control")
+
+    object Pragma : Header("Pragma")
+
+    override fun toString(): String = value
+}
